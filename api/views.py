@@ -51,7 +51,10 @@ def password_auth(request):
         if hash is None:
             return HttpResponseBadRequest("Не указан email") 
         
-        user = UserAuth.objects.filter(nickname = nickname).filter(passwordhash = hash).get()
+        try:
+            user = UserAuth.objects.filter(nickname = nickname).filter(passwordhash = hash).get()
+        except:
+            return HttpResponseBadRequest("Неверные учетные данные") 
         if user is None:
             return HttpResponseBadRequest("Неверные учетные данные") 
         
