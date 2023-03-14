@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+    title: Skatert
+    description: Проект БИП
+    version: 0.0.1
+servers:
+    - url: http://127.0.0.1/api
+      description: API-сервер
+tags:
+    - name: login
+      description: Двухфакторная аутентификация
+      externalDocs:
+          description: Find out more
+          url: http://swagger.io
+    - name: register
+      description: Регистрация новых пользователей
+paths:
+    /login/step1:
+        post:
+            tags: 
+                - login
+            summary: Аутентификация по хешу пароля
+            description: Принимает nickname и хеш пароля, возвращает ответ (ok or error)
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                nickname:
+                                    type: string
+                                hash:
+                                    type: string
+                        example:
+                            nickname: user1
+                            hash: 1e1e1e1e
+
+            responses:
+                "200": # status code
+                    description: "Сообщение error: ok"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                            example:
+                                error: ok
+
+                "400": # status code
+                    description: "Сообщение error: информация о ошибке"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                            example:
+                                error: Некорректные учетные данные
+    /login/step2:
+        post:
+            tags: 
+                - login
+            summary: Аутентификация по одноразовому коду
+            description: Принимает nickname и хеш пароля, возвращает ответ (ok or error)
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                nickname:
+                                    type: string
+                                code:
+                                    type: string
+
+            responses:
+                "200": # status code
+                    description: "Сообщение error: ok"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                    token:
+                                        type: string
+
+                "400": # status code
+                    description: "Сообщение error: информация о ошибке"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                    token:
+                                        type: string
+
+    /register/step1:
+        post:
+            tags: 
+                - register
+            summary: Регистрирация пользователя
+            description: Принимает nickname, email и хеш пароля, возвращает ответ (ok or error)
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                nickname:
+                                    type: string
+                                email:
+                                    type: string
+                                hash:
+                                    type: string
+
+            responses:
+                "200": # status code
+                    description: "Сообщение error: ok"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+
+                "400": # status code
+                    description: "Сообщение error: информация о ошибке"
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
