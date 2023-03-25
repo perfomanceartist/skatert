@@ -1,0 +1,22 @@
+{% extends "login_base.html" %}
+{% block content %}
+<h3>Форма входа</h3>
+<div class="mb-3">
+    <label for="loginControlInput" class="form-label">Адрес эл.почты</label>
+    <input type="email" class="form-control" id="loginControlInput" placeholder="name@example.com">
+  </div>
+  <div class="mb-3">
+    <label for="loginControlPassword" class="form-label">Пароль</label>
+    <input type="password" class="form-control" id="loginControlPassword">
+  </div>
+  <div class="mb-3 d-none">
+    <label for="loginControlCode" class="form-label">Код подтверждения из эл.почты</label>
+    <input type="text" class="form-control" id="loginControlCode">
+  </div>
+  <div class="mb-3">
+    <button class="btn btn-primary mb-3">Войти</button>
+    
+  <a href="/register" class="link-dark">Зарегистрироваться</a>
+  </div> 
+  
+{% endblock content %}
