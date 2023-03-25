@@ -17,8 +17,7 @@ class AuthTokens(models.Model):
 
 
 class User(models.Model):
-    id = models.IntegerField(primary_key=True, blank=False)
-    login = models.TextField(primary_key=False, blank=False)
+    user = models.ForeignKey(UserAuth, on_delete=models.CASCADE)
     favouriteMusic = ArrayField(models.IntegerField(), primary_key=False, blank=False)
     favouriteFilms = ArrayField(models.IntegerField(), primary_key=False, blank=False)
     favouriteBooks = ArrayField(models.IntegerField(), primary_key=False, blank=False)

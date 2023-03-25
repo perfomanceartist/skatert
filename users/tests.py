@@ -1,13 +1,19 @@
 from django.test import TestCase
-from users.models import Subscriptions, User, MusicPreferences, BooksPreferences, FilmsPreferences
+from users.models import UserAuth, Subscriptions, User, MusicPreferences, BooksPreferences, FilmsPreferences
 
 
 class UserTestCase(TestCase):
     def test_create_user(self):
+
+        userA = UserAuth.objects.create(
+            nickname='testuser',
+            passwordhash='1234',
+            email='test@email.com'
+        )
+
         # Создаем нового пользователя
         user = User.objects.create(
-            id=1,
-            login='myusername',
+            user=userA,
             favouriteMusic=[1, 2, 3],
             favouriteFilms=[4, 5, 6],
             favouriteBooks=[7, 8, 9],
@@ -15,8 +21,7 @@ class UserTestCase(TestCase):
 
         # Проверяем, что пользователь был успешно создан
         self.assertIsNotNone(user.pk)
-        self.assertEqual(user.id, 1)
-        self.assertEqual(user.login, 'myusername')
+        self.assertEqual(user.user, userA)
         self.assertListEqual(user.favouriteMusic, [1, 2, 3])
         self.assertListEqual(user.favouriteFilms, [4, 5, 6])
         self.assertListEqual(user.favouriteBooks, [7, 8, 9])
@@ -25,9 +30,15 @@ class UserTestCase(TestCase):
 class SubscriptionsTestCase(TestCase):
     def test_create_subscription(self):
         # Создаем новую подписку
+        userA = UserAuth.objects.create(
+            nickname='testuser',
+            passwordhash='1234',
+            email='test@email.com'
+        )
+
+        # Создаем нового пользователя
         user = User.objects.create(
-            id=1,
-            login='myusername',
+            user=userA,
             favouriteMusic=[1, 2, 3],
             favouriteFilms=[4, 5, 6],
             favouriteBooks=[7, 8, 9],
