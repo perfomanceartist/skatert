@@ -49,8 +49,8 @@ def register(request):
     return render(request, 'register_page.html')
 
 def user(request, nickname):
-    #if check_cookie(request) is False:
-    #    return HttpResponseRedirect('/login')
+    if check_cookie(request) is False:
+        return HttpResponseRedirect('/login')
     data = {
         "user": {
             "nickname" : nickname

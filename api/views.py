@@ -1,5 +1,5 @@
 import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.http import HttpResponseBadRequest
 from django.conf import settings
 from django.core.mail import send_mail
@@ -107,7 +107,10 @@ def email_auth(request):
         token.type = "email" 
         token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
         token.save()
-        return HttpResponse("Last token:" + token.token)
+        response = JsonResponse({"token": str(token.token)})
+        response.set_cookie('token', str(token.token))
+        response.set_cookie('nickname', nickname)
+        return response
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
     

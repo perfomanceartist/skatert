@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'users',
+    'home',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Skatert',
         'USER': 'postgres',
-        'PASSWORD': 'hello',
+        'PASSWORD': '', # введите пароль для своего postgres-сервера
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -135,4 +136,4 @@ EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'skatertTeam@yandex.ru'
-EMAIL_HOST_PASSWORD = 'hcxfztfwgjrozwwy'  #password associated with above email-id
+EMAIL_HOST_PASSWORD = ''  #password associated with above email-id
