@@ -135,5 +135,5 @@ EMAIL_HOST = 'smtp.yandex.ru'
 #EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'skatertTeam@yandex.ru'
+EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''  #password associated with above email-id
