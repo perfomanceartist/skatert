@@ -1,0 +1,20 @@
+[flake8]
+max-line-length = 88
+max-complexity = 15
+
+extend-exclude =
+    .cache,
+    eraraid-tools,
+    raidix/migrate/utils.py
+
+ignore =
+    # black style
+    E203, W503,
+    # Line too long. Replaced by B950
+    E501,
+    # Bare Except. Replaced by B001
+    E722
+
+extend-select =
+    # Line too long
+    B950
