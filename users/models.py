@@ -1,6 +1,7 @@
 import datetime
-from django.db import models
+
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 
 class UserAuth(models.Model):
@@ -11,7 +12,7 @@ class UserAuth(models.Model):
 
 class AuthTokens(models.Model):
     user = models.ForeignKey(UserAuth, on_delete=models.CASCADE)
-    token = models.CharField(max_length=16, default = '')
+    token = models.CharField(max_length=16, default='')
     type = models.CharField(max_length=10, default='password')
     expiration_date = models.DateTimeField()
 
