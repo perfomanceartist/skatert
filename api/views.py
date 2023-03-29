@@ -18,17 +18,17 @@ def index(request):
 def register(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
         except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
-        nickname = data['nickname']
+        nickname = data["nickname"]
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        email = data['email']
+        email = data["email"]
         if email is None:
             return HttpResponseBadRequest("Не указан email")
 
-        hash = data['hash']
+        hash = data["hash"]
         if hash is None:
             return HttpResponseBadRequest("Не указан хеш пароля")
 
@@ -43,33 +43,46 @@ def register(request):
 def password_auth(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
         except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        nickname = data['nickname']
+        nickname = data["nickname"]
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        hash = data['hash']
+        hash = data["hash"]
         if hash is None:
             return HttpResponseBadRequest("Не указан email")
 
         try:
-            user = UserAuth.objects.filter(nickname=nickname).filter(passwordhash=hash).get()
+            user = (
+                UserAuth.objects.filter(nickname=nickname)
+                .filter(passwordhash=hash)
+                .get()
+            )
         except Exception:
             return HttpResponseBadRequest("Неверные учетные данные")
         if user is None:
             return HttpResponseBadRequest("Неверные учетные данные")
 
         token = str(randint(100000, 999999))
-        hashToken = AuthTokens(user=user, token=token, type='hash', expiration_date=datetime.datetime.now() + datetime.timedelta(minutes = 15))
+        hashToken = AuthTokens(
+            user=user,
+            token=token,
+            type="hash",
+            expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
+        )
         hashToken.save()
 
-        send_mail('Skatert. Код Подтверждения входа',  # subject
-                  f'Код подтверждения для входа в Skatert: {token}',  # message
-                  settings.EMAIL_HOST_USER,
-                  [user.email, ],
-                  fail_silently=False)
+        send_mail(
+            "Skatert. Код Подтверждения входа",  # subject
+            f"Код подтверждения для входа в Skatert: {token}",  # message
+            settings.EMAIL_HOST_USER,
+            [
+                user.email,
+            ],
+            fail_silently=False,
+        )
 
         return HttpResponse("Token: " + token)
     else:
@@ -80,14 +93,14 @@ def password_auth(request):
 def email_auth(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
         except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        nickname = data['nickname']
+        nickname = data["nickname"]
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        code = data['code']
+        code = data["code"]
         if code is None:
             return HttpResponseBadRequest("Не указан email")
 
@@ -103,7 +116,7 @@ def email_auth(request):
             return HttpResponseBadRequest("Токен не актуален. Попробуйте ещё раз.")
 
         token.token = hex(randint(100, 0xFFFFFFFF))
-        token.type = "email" 
+        token.type = "email"
         token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
         token.save()
         return HttpResponse("Last token:" + token.token)
@@ -112,11 +125,11 @@ def email_auth(request):
 
 
 def check_token(nickname, tokenVal):
-    user = UserAuth.objects.filter(nickname= nickname).get()
+    user = UserAuth.objects.filter(nickname=nickname).get()
     if user is None:
         return False
 
-    token = AuthTokens.objects.filter(user = user).filter(token = tokenVal).get() 
+    token = AuthTokens.objects.filter(user=user).filter(token=tokenVal).get()
     if token is None:
         return False
 

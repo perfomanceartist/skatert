@@ -12,8 +12,8 @@ class UserAuth(models.Model):
 
 class AuthTokens(models.Model):
     user = models.ForeignKey(UserAuth, on_delete=models.CASCADE)
-    token = models.CharField(max_length=16, default='')
-    type = models.CharField(max_length=10, default='password')
+    token = models.CharField(max_length=16, default="")
+    type = models.CharField(max_length=10, default="password")
     expiration_date = models.DateTimeField()
 
 
@@ -42,4 +42,3 @@ class FilmsPreferences(models.Model):
 class BooksPreferences(models.Model):
     genre = models.IntegerField(primary_key=True, blank=False)
     usersBitmask = ArrayField(models.BooleanField(), primary_key=False, blank=False)
-

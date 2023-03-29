@@ -13,7 +13,8 @@ ignore =
     # Line too long. Replaced by B950
     E501,
     # Bare Except. Replaced by B001
-    E722
+    E722,
+    F401
 
 extend-select =
     # Line too long
