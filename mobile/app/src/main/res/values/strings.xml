@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Skatert</string>
+
+    <string name="log_in">Log in</string>
+    <string name="sign_in">Sign in</string>
+
+    <string name="main_activity_text">This is the main window of our application.</string>
+    <string name="ok">Okay</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+
+    <string name="confirm">Confirm</string>
+</resources>
