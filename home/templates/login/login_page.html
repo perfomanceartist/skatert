@@ -1,4 +1,4 @@
-{% extends "login_base.html" %}
+{% extends "login/login_base.html" %}
 {% block js %} 
 <script type="text/javascript">
   var step = 1;
@@ -63,7 +63,7 @@
 
 </script>
 {% endblock js %} 
-{% block content %}
+{% block logincontent %}
 <h3>Форма входа</h3>
 <div class="mb-3">
     <label for="loginControlInputNick" class="form-label">Никнейм</label>
@@ -83,4 +83,4 @@
   <a href="/register" class="link-dark">Зарегистрироваться</a>
   </div> 
   
-{% endblock content %}
+{% endblock logincontent %}

@@ -1,4 +1,4 @@
-{% extends "login_base.html" %}
+{% extends "login/login_base.html" %}
 {% block js %} 
 <script type="text/javascript">
   async function register() {
@@ -28,7 +28,7 @@
 
 </script>
 {% endblock js %} 
-{% block content %}
+{% block logincontent %}
 <h3>Форма регистрации</h3>
 <div class="mb-3">
     <label for="loginControlInputNick" class="form-label">Никнейм</label>
@@ -49,4 +49,4 @@
   <div class="mb-3">
     <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Зарегистрироваться</button>    
   </div> 
-{% endblock content %}
+{% endblock logincontent %}
