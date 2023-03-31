@@ -41,22 +41,22 @@ def check_cookie(request):
 def skatert(request):
     # if check_cookie(request) is False:
     #    return HttpResponseRedirect('/login')
-    return render(request, "main_page.html")
+    return render(request, "home/main_page.html")
 
 
 def login(request):
-    return render(request, "login_page.html")
+    return render(request, "login/login_page.html")
 
 
 def register(request):
-    return render(request, "register_page.html")
+    return render(request, "login/register_page.html")
 
 
 def user(request, nickname):
     if check_cookie(request) is False:
         return HttpResponseRedirect("/login")
     data = {"user": {"nickname": nickname}}
-    return render(request, "user_page.html", context=data)
+    return render(request, "home/user_page.html", context=data)
 
 
 def mypage(request):
@@ -69,4 +69,4 @@ def mypage(request):
         return HttpResponseRedirect("/login")
 
     data = {"user": {"nickname": nickname}}
-    return render(request, "user_page.html", context=data)
+    return render(request, "home/user_page.html", context=data)
