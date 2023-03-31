@@ -1,20 +1,10 @@
 import datetime
-<<<<<<< HEAD
-from django.http import HttpResponse, JsonResponse
-from django.http import HttpResponseBadRequest
-from django.conf import settings
-from django.core.mail import send_mail
-from users.models import UserAuth, AuthTokens
-
-from django.views.decorators.csrf import csrf_exempt
-=======
->>>>>>> main
 import json
 from random import randint
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from users.models import AuthTokens, UserAuth
@@ -130,8 +120,8 @@ def email_auth(request):
         token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
         token.save()
         response = JsonResponse({"token": str(token.token)})
-        response.set_cookie('token', str(token.token))
-        response.set_cookie('nickname', nickname)
+        response.set_cookie("token", str(token.token))
+        response.set_cookie("nickname", nickname)
         return response
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
