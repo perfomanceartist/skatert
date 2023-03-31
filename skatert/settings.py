@@ -76,15 +76,6 @@ WSGI_APPLICATION = "skatert.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-<<<<<<< HEAD
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Skatert',
-        'USER': 'postgres',
-        'PASSWORD': '',  # введите пароль для своего postgres-сервера
-        'HOST': 'localhost',
-        'PORT': '',
-=======
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "Skatert",
@@ -92,7 +83,6 @@ DATABASES = {
         "PASSWORD": "",  # введите пароль для своего postgres-сервера
         "HOST": "localhost",
         "PORT": "",
->>>>>>> f607d0c795631194e15cc1eaf8e4534ac6fd9ff2
     }
 }
 
@@ -139,15 +129,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-<<<<<<< HEAD
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.ru'
-# EMAIL_USE_TLS = True
-EMAIL_USE_SSL = True
-EMAIL_PORT = 465
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''  # password associated with above email-id
-=======
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.yandex.ru"
 # EMAIL_USE_TLS = True
@@ -155,4 +136,3 @@ EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""  # password associated with above email-id
->>>>>>> f607d0c795631194e15cc1eaf8e4534ac6fd9ff2
