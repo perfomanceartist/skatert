@@ -38,10 +38,10 @@ def check_cookie(request):
     return check_token(nickname, token)
 
 
-def index(request):
+def skatert(request):
     # if check_cookie(request) is False:
     #    return HttpResponseRedirect('/login')
-    return render(request, "index.html")
+    return render(request, "main_page.html")
 
 
 def login(request):
