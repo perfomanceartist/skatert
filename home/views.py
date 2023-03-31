@@ -1,7 +1,9 @@
 import datetime
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from users.models import UserAuth, AuthTokens
+
+from users.models import AuthTokens, UserAuth
 
 
 def check_token(nickname, tokenVal):
@@ -38,38 +40,4 @@ def check_cookie(request):
 
 
 def index(request):
-    #if check_cookie(request) is False:
-    #    return HttpResponseRedirect('/login')
-    return render(request, 'index.html')
-
-def login(request):
-    return render(request, 'login_page.html')
-
-def register(request):
-    return render(request, 'register_page.html')
-
-def user(request, nickname):
-    if check_cookie(request) is False:
-        return HttpResponseRedirect('/login')
-    data = {
-        "user": {
-            "nickname" : nickname
-        }
-    }
-    return render(request, 'user_page.html', context=data)
-
-def mypage(request):
-    #if check_cookie(request) is False:
-    #    return HttpResponseRedirect('/login')
-
-    try:        
-        nickname = request.COOKIES['nickname']
-    except:
-        return HttpResponseRedirect('/login')
-
-    data = {
-        "user": {
-            "nickname" : nickname
-        }
-    }
-    return render(request, 'user_page.html', context=data)
+    return HttpResponse("Главная страница")
