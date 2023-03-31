@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Skatert',
         'USER': 'postgres',
-        'PASSWORD': '', # введите пароль для своего postgres-сервера
+        'PASSWORD': '',  # введите пароль для своего postgres-сервера
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -129,11 +129,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
-#EMAIL_USE_TLS = True
+# EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''  #password associated with above email-id
+EMAIL_HOST_PASSWORD = ''  # password associated with above email-id
