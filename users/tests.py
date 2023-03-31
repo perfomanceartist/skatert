@@ -1,14 +1,20 @@
 from django.test import TestCase
-from users.models import UserAuth, Subscriptions, User, MusicPreferences, BooksPreferences, FilmsPreferences
+
+from users.models import (
+    BooksPreferences,
+    FilmsPreferences,
+    MusicPreferences,
+    Subscriptions,
+    User,
+    UserAuth,
+)
 
 
 class UserTestCase(TestCase):
     def test_create_user(self):
 
         userA = UserAuth.objects.create(
-            nickname='testuser',
-            passwordhash='1234',
-            email='test@email.com'
+            nickname="testuser", passwordhash="1234", email="test@email.com"
         )
 
         # Создаем нового пользователя
@@ -31,9 +37,7 @@ class SubscriptionsTestCase(TestCase):
     def test_create_subscription(self):
         # Создаем новую подписку
         userA = UserAuth.objects.create(
-            nickname='testuser',
-            passwordhash='1234',
-            email='test@email.com'
+            nickname="testuser", passwordhash="1234", email="test@email.com"
         )
 
         # Создаем нового пользователя

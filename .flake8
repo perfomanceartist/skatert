@@ -1,0 +1,15 @@
+[flake8]
+
+ignore =
+    # black style
+    E203, W503,
+    # Line too long. Replaced by B950
+    E501,
+    # Bare Except. Replaced by B001
+    E722,
+    # Unused imports
+    F401
+
+extend-select =
+    # Line too long
+    B950
