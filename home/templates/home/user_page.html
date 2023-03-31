@@ -4,6 +4,20 @@
 {{user.nickname}} | Skatert
 {% endblock title %}
 
+{% block site_head %}
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="/mypage">Моя страница</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="#">Рекомендации</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="#">Настройки</a>
+    </li>
+</ul>
+{% endblock site_head %}
+
 {% block content %}
 <h1>Пользователь {{user.nickname}}</h1>
 {% endblock content %}
