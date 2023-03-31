@@ -1,9 +1,8 @@
-import datetime
 
+import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-
-from users.models import AuthTokens, UserAuth
+from users.models import UserAuth, AuthTokens
 
 
 def check_token(nickname, tokenVal):
@@ -60,12 +59,11 @@ def user(request, nickname):
     }
     return render(request, 'user_page.html', context=data)
 
-
 def mypage(request):
-    # if check_cookie(request) is False:
+    #if check_cookie(request) is False:
     #    return HttpResponseRedirect('/login')
 
-    try:
+    try:        
         nickname = request.COOKIES['nickname']
     except:
         return HttpResponseRedirect('/login')

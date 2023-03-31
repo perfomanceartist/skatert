@@ -76,10 +76,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Skatert',
-        'USER': 'postgres',
-        'PASSWORD': '',  # введите пароль для своего postgres-сервера
+        'USER': 'alexey',
+        'PASSWORD': 'There1sN0Spoon',  # введите пароль для своего postgres-сервера
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
