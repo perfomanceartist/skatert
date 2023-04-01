@@ -1,4 +1,16 @@
 {% extends "login/login_base.html" %}
+
+{% block style %}
+<style>
+  a.aright {
+    display: inline-block;
+    text-align: right;
+    width: 78%; 
+  }
+</style>
+{% endblock style %}
+
+
 {% block js %} 
 <script type="text/javascript">
   var step = 1;
@@ -64,7 +76,7 @@
 </script>
 {% endblock js %} 
 {% block logincontent %}
-<h3>Вход</h3>
+<h3 style="text-align: right;">Вход</h3>
 <div class="mb-3">
     <label for="loginControlInputNick" class="form-label">Никнейм</label>
     <input type="email" class="form-control" id="loginControlInputNick" placeholder="name@example.com">
@@ -80,7 +92,7 @@
   <div class="mb-3">
     <button class="btn btn-primary mb-3" onclick="auth()">Войти</button>
     
-  <a href="/register" class="link-dark">Зарегистрироваться</a>
+  <a href="/register" class="link-dark aright">Зарегистрироваться</a>
   </div> 
   
 {% endblock logincontent %}
