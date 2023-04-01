@@ -1,6 +1,11 @@
-import views
-from django.urls import path
+from django.urls import path, re_path
+
+from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path('user/<slug:nickname>', views.user, name='user'),
+    path('mypage', views.mypage, name='mypage'),
+    path('login', views.login, name='login'),
+    path('register', views.register, name='register'),
+    path('', views.skatert, name='skatert'),
 ]

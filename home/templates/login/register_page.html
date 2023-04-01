@@ -1,0 +1,52 @@
+{% extends "login/login_base.html" %}
+{% block js %} 
+<script type="text/javascript">
+  async function register() {
+            var nickname = document.getElementById('loginControlInputNick').value;
+            console.log(nickname);
+            var email = document.getElementById('loginControlInputEmail').value;
+            var password = document.getElementById('loginControlInputPassword').value;
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/api/register/step1", {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: JSON.stringify({
+                    nickname: nickname,
+                    email: email,
+                    hash: password
+                })
+            });
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                // получаем данные
+                alert('Registered!');
+                window.location.replace('/login');
+            }
+            else alert('error!');
+        }
+
+
+</script>
+{% endblock js %} 
+{% block logincontent %}
+<h3>Форма регистрации</h3>
+<div class="mb-3">
+    <label for="loginControlInputNick" class="form-label">Никнейм</label>
+    <input type="text" class="form-control" id="loginControlInputNick" >
+  </div>
+<div class="mb-3">
+    <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label>
+    <input type="email" class="form-control" id="loginControlInputEmail" placeholder="name@example.com">
+  </div>
+  <div class="mb-3">
+    <label for="loginControlInputPassword" class="form-label">Пароль</label>
+    <input type="password" class="form-control" id="loginControlInputPassword">
+  </div>
+  <div class="mb-3">
+    <label for="loginControlInputPasswordConfirm" class="form-label">Повторите пароль</label>
+    <input type="password" class="form-control" id="loginControlInputPasswordConfirm">
+  </div>
+  <div class="mb-3">
+    <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Зарегистрироваться</button>    
+  </div> 
+{% endblock logincontent %}

@@ -1,13 +1,7 @@
 from django.test import TestCase
 
-from users.models import (
-    BooksPreferences,
-    FilmsPreferences,
-    MusicPreferences,
-    Subscriptions,
-    User,
-    UserAuth,
-)
+from users.models import (BooksPreferences, FilmsPreferences, MusicPreferences,
+                          Subscriptions, User, UserAuth)
 
 
 class UserTestCase(TestCase):

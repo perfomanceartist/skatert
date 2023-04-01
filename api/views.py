@@ -4,7 +4,7 @@ from random import randint
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from users.models import AuthTokens, UserAuth
@@ -19,7 +19,7 @@ def register(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
-        except Exception:
+        except:
             return HttpResponseBadRequest("Некорректный формат данных")
         nickname = data["nickname"]
         if nickname is None:
@@ -44,7 +44,7 @@ def password_auth(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
-        except Exception:
+        except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data["nickname"]
@@ -60,7 +60,7 @@ def password_auth(request):
                 .filter(passwordhash=hash)
                 .get()
             )
-        except Exception:
+        except:
             return HttpResponseBadRequest("Неверные учетные данные")
         if user is None:
             return HttpResponseBadRequest("Неверные учетные данные")
@@ -94,7 +94,7 @@ def email_auth(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
-        except Exception:
+        except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data["nickname"]
@@ -119,25 +119,9 @@ def email_auth(request):
         token.type = "email"
         token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
         token.save()
-        return HttpResponse("Last token:" + token.token)
+        response = JsonResponse({"token": str(token.token)})
+        response.set_cookie("token", str(token.token))
+        response.set_cookie("nickname", nickname)
+        return response
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
-
-
-def check_token(nickname, tokenVal):
-    user = UserAuth.objects.filter(nickname=nickname).get()
-    if user is None:
-        return False
-
-    token = AuthTokens.objects.filter(user=user).filter(token=tokenVal).get()
-    if token is None:
-        return False
-
-    if token.type != "email":
-        return False
-
-    if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
-        token.delete()
-        return False
-
-    return True
