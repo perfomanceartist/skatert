@@ -19,16 +19,19 @@ def register(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode("utf-8"))
-        except:
+        except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
-        nickname = data["nickname"]
+
+        nickname = data.get("nickname")
+
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        email = data["email"]
+
+        email = data.get("email")
         if email is None:
             return HttpResponseBadRequest("Не указан email")
 
-        hash = data["hash"]
+        hash = data.get("hash")
         if hash is None:
             return HttpResponseBadRequest("Не указан хеш пароля")
 
@@ -47,10 +50,10 @@ def password_auth(request):
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        nickname = data["nickname"]
+        nickname = data.get("nickname")
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        hash = data["hash"]
+        hash = data.get("hash")
         if hash is None:
             return HttpResponseBadRequest("Не указан email")
 
@@ -97,10 +100,10 @@ def email_auth(request):
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        nickname = data["nickname"]
+        nickname = data.get("nickname")
         if nickname is None:
             return HttpResponseBadRequest("Не указан nickname")
-        code = data["code"]
+        code = data.get("code")
         if code is None:
             return HttpResponseBadRequest("Не указан email")
 
