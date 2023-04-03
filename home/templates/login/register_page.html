@@ -6,8 +6,19 @@
             console.log(nickname);
             var email = document.getElementById('loginControlInputEmail').value;
             var password = document.getElementById('loginControlInputPassword').value;
+            var passwordConfirm = document.getElementById('loginControlInputPasswordConfirm').value
+            document.getElementById('nickname_duplicate').classList.add('d-none');
+            document.getElementById('pass_mismatch').classList.add('d-none');
+            document.getElementById('empty_field').classList.add('d-none');
+            document.getElementById('incorrect_email').classList.add('d-none');
+
+            if (passwordConfirm !== password) {
+              document.getElementById('pass_mismatch').classList.remove('d-none');
+              document.getElementById('password').reset();
+              return;
+            }
             // отправляет запрос и получаем ответ
-            const response = await fetch("/api/register/step1", {
+            const response = await fetch("/api/register", {
                 method: "POST",
                 headers: { "Accept": "application/json" },
                 body: JSON.stringify({
@@ -16,10 +27,22 @@
                     hash: password
                 })
             });
-            // если запрос прошел нормально
+            if (response.status == 222) {  // nickname is not unique
+                document.getElementById('nickname_duplicate').classList.remove('d-none');
+                document.getElementById('nickname').reset();
+                return;
+            }
+            if (response.status == 223) {  // empty field(s)
+                document.getElementById('empty_field').classList.remove('d-none');
+                return;
+            }
+            if (response.status == 225) {  // empty field(s)
+                document.getElementById('incorrect_email').classList.remove('d-none');
+                document.getElementById('email').reset();
+                return;
+            }
+
             if (response.ok === true) {
-                // получаем данные
-                alert('Registered!');
                 window.location.replace('/login');
             }
             else alert('Registration error!');
@@ -28,14 +51,22 @@
 {% endblock js %} 
 {% block logincontent %}
 <h3 style="text-align: right;">Регистрация</h3>
-<div class="mb-3">
-    <label for="loginControlInputNick" class="form-label">Никнейм</label>
-    <input type="text" class="form-control" id="loginControlInputNick" >
+<form id="nickname">
+  <div class="mb-3">
+      <label for="loginControlInputNick" class="form-label">Никнейм</label>
+      <input type="text" class="form-control" id="loginControlInputNick" >
   </div>
-<div class="mb-3">
-    <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label>
-    <input type="email" class="form-control" id="loginControlInputEmail" placeholder="name@example.com">
+</form>
+<div class="mb-3 d-none" id="nickname_duplicate">
+  <p style="color: red; text-align: right;">User already exists</p>
+</div>
+<form id="email">
+  <div class="mb-3">
+      <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label>
+      <input type="email" class="form-control" id="loginControlInputEmail" placeholder="name@example.com">
   </div>
+</form>
+<form id="password">
   <div class="mb-3">
     <label for="loginControlInputPassword" class="form-label">Пароль</label>
     <input type="password" class="form-control" id="loginControlInputPassword">
@@ -44,7 +75,17 @@
     <label for="loginControlInputPasswordConfirm" class="form-label">Повторите пароль</label>
     <input type="password" class="form-control" id="loginControlInputPasswordConfirm">
   </div>
-  <div class="mb-3">
-    <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Зарегистрироваться</button>    
-  </div> 
+</form>
+<div class="mb-3 d-none" id="pass_mismatch">
+  <p style="color: red; text-align: right;">Password mismatch. Try Again</p>
+</div>
+<div class="mb-3 d-none" id="incorrect_email">
+  <p style="color: red; text-align: right;">Incorrect email format</p>
+</div>
+<div class="mb-3 d-none" id="empty_field">
+  <p style="color: red; text-align: right;">Fill all fields, please</p>
+</div>
+<div class="mb-3">
+  <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Зарегистрироваться</button>    
+</div> 
 {% endblock logincontent %}

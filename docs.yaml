@@ -103,7 +103,7 @@ paths:
                                     token:
                                         type: string
 
-    /register/step1:
+    /register:
         post:
             tags: 
                 - register
