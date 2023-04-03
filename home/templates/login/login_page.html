@@ -18,10 +18,9 @@
     async function authStep1() {
       console.log('auth/step1');
       var nickname = document.getElementById('loginControlInputNick').value;
-      
       var password = document.getElementById('loginControlPassword').value;
-      // отправляет запрос и получаем ответ
-      const response = await fetch("/api/login/step1", {
+      
+      const response = await fetch("/api/login_pass", {
         method: "POST",
         headers: { "Accept": "application/json" },
         body: JSON.stringify({
@@ -29,18 +28,29 @@
           hash: password
         })
       });
-      // если запрос прошел нормально
+      
+      if (response.status == 224) {  // unknown user
+        document.getElementById('unknown_user').classList.remove('d-none');
+        return false;
+      }
+      if (response.status == 223) {  // empty_field(s)
+        document.getElementById('empty_field').classList.remove('d-none');
+        return false;
+      }
       if (response.ok === true) {
-        // получаем данные
         userNickname = nickname;
         return true;
       }
-      else return false;
+      else {
+        document.getElementById('incorrect_pass').classList.remove('d-none');
+        document.getElementById('password').reset();
+        return false;
+      }
     }
     async function authStep2() {
       var code = document.getElementById('loginControlCode').value;
-      // отправляет запрос и получаем ответ
-      const response = await fetch("/api/login/step2", {
+      
+      const response = await fetch("/api/login_email", {
         method: "POST",
         headers: { "Accept": "application/json" },
         body: JSON.stringify({
@@ -48,25 +58,28 @@
           code: code
         })
       });
-      // если запрос прошел нормально
+      
       if (response.ok === true) {
-        // получаем данные
         var responseJson = await response.json();
-        alert('Successful!');
         document.cookie += `nickname=${userNickname}; token=${responseJson['token']}`;
         window.location.replace('/');
       }
-      else alert('error!');
+      else {
+        document.getElementById('incorrect_code').classList.remove('d-none');
+        document.getElementById('email_code').reset();
+      }
     }
     async function auth() {
+      document.getElementById('unknown_user').classList.add('d-none');
+      document.getElementById('empty_field').classList.add('d-none');
+      document.getElementById('incorrect_pass').classList.add('d-none');
+      document.getElementById('incorrect_code').classList.add('d-none');
       if (step == 1) {
         var result = await authStep1();
-        if (result) {
+        if (result === true) {
           step = 2;
-          var div = document.getElementById('div-email-code');
-          div.classList.remove('d-none');
+          document.getElementById('div-email-code').classList.remove('d-none');
         }
-        else alert("Error!");
       }
       else {
         await authStep2();
@@ -79,15 +92,31 @@
 <h3 style="text-align: right;">Вход</h3>
 <div class="mb-3">
     <label for="loginControlInputNick" class="form-label">Никнейм</label>
-    <input type="email" class="form-control" id="loginControlInputNick" placeholder="name@example.com">
+    <input type="email" class="form-control" id="loginControlInputNick" placeholder="Username">
   </div>
-  <div class="mb-3">
-    <label for="loginControlPassword" class="form-label">Пароль</label>
-    <input type="password" class="form-control" id="loginControlPassword">
+  <form id="password">
+    <div class="mb-3">
+      <label for="loginControlPassword" class="form-label">Пароль</label>
+      <input type="password" class="form-control" id="loginControlPassword">
+    </div>
+  </form>
+  <form id="email_code">
+    <div class="mb-3 d-none" id="div-email-code">
+      <label for="loginControlCode" class="form-label">Код подтверждения из эл.почты</label>
+      <input type="text" class="form-control" id="loginControlCode">
+    </div>
+  </form>
+  <div class="mb-3 d-none" id="unknown_user">
+    <p style="color: red; text-align: right;">Such user doesn't exist<br>Check name correctness or register</p>
   </div>
-  <div class="mb-3 d-none" id="div-email-code">
-    <label for="loginControlCode" class="form-label">Код подтверждения из эл.почты</label>
-    <input type="text" class="form-control" id="loginControlCode">
+  <div class="mb-3 d-none" id="empty_field">
+    <p style="color: red; text-align: right;">Fill all fields, please</p>
+  </div>
+  <div class="mb-3 d-none" id="incorrect_pass">
+    <p style="color: red; text-align: right;">Incorrect password</p>
+  </div>
+  <div class="mb-3 d-none" id="incorrect_code">
+    <p style="color: red; text-align: right;">Incorrect code</p>
   </div>
   <div class="mb-3">
     <button class="btn btn-primary mb-3" onclick="auth()">Войти</button>

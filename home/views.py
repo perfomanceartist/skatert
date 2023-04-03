@@ -26,21 +26,16 @@ def check_token(nickname, tokenVal):
 
 
 def check_cookie(request):
-    try:
-        nickname = request.COOKIES["nickname"]
-    except:
-        return False
-
-    try:
-        token = request.COOKIES["token"]
-    except:
+    nickname = request.COOKIES.get("nickname")
+    token = request.COOKIES.get("token")
+    if nickname is None or token is None:
         return False
     return check_token(nickname, token)
 
 
 def skatert(request):
-    # if check_cookie(request) is False:
-    #    return HttpResponseRedirect('/login')
+    if check_cookie(request) is False:
+       return HttpResponseRedirect('/login')
     return render(request, "home/main_page.html")
 
 
@@ -60,12 +55,11 @@ def user(request, nickname):
 
 
 def mypage(request):
-    # if check_cookie(request) is False:
-    #    return HttpResponseRedirect('/login')
+    if check_cookie(request) is False:
+       return HttpResponseRedirect('/login')
 
-    try:
-        nickname = request.COOKIES["nickname"]
-    except:
+    nickname = request.COOKIES.get("nickname")
+    if nickname is None:
         return HttpResponseRedirect("/login")
 
     data = {"user": {"nickname": nickname}}
