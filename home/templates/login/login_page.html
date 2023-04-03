@@ -18,7 +18,6 @@
     async function authStep1() {
       console.log('auth/step1');
       var nickname = document.getElementById('loginControlInputNick').value;
-      
       var password = document.getElementById('loginControlPassword').value;
       // отправляет запрос и получаем ответ
       const response = await fetch("/api/login/step1", {
@@ -56,12 +55,12 @@
         document.cookie += `nickname=${userNickname}; token=${responseJson['token']}`;
         window.location.replace('/');
       }
-      else alert('error!');
+      else alert('Error!');
     }
     async function auth() {
       if (step == 1) {
         var result = await authStep1();
-        if (result) {
+        if (result === true) {
           step = 2;
           var div = document.getElementById('div-email-code');
           div.classList.remove('d-none');
