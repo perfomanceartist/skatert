@@ -7,11 +7,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import json
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+CREDS_FILE = "creds.json"
+CREDS = {}
+with open(CREDS_FILE, "r") as read_file:
+    CREDS = json.load(read_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -30,6 +34,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "users",
     "home",
+    "music",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -77,7 +82,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "Skatert",
         "USER": "postgres",
-        "PASSWORD": "",  # введите пароль для своего postgres-сервера
+        "PASSWORD": CREDS["DBpassword"],  # введите пароль для своего postgres-сервера
         "HOST": "localhost",
         "PORT": "",
     }
@@ -131,5 +136,5 @@ EMAIL_HOST = "smtp.yandex.ru"
 # EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
-EMAIL_HOST_USER = ""
-EMAIL_HOST_PASSWORD = ""  # password associated with above email-id
+EMAIL_HOST_USER = CREDS["smtp"]["login"]
+EMAIL_HOST_PASSWORD = CREDS["smtp"]["password"]  # password associated with above email-id
