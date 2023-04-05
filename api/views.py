@@ -5,7 +5,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
-from users.models import AuthTokens, UserAuth
+from users.models import AuthTokens, Account, User
+from music.lastfm import LastFm
 import re
 
 
@@ -29,7 +30,7 @@ def register(request):
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data.get("nickname")
-        if UserAuth.objects.filter(nickname=nickname).exists():
+        if User.objects.filter(nickname=nickname).exists():
             return HttpResponse(status=222)
         if not nickname:
             return HttpResponse(status=223)
@@ -44,17 +45,20 @@ def register(request):
         if not hash:
             return HttpResponse(status=223)
 
-        user = UserAuth(nickname=nickname, email=email, passwordhash=hash)
+
+        user = User(nickname=nickname)
         user.save()
+        account = Account(user=user, email=email, passwordhash=hash)
+        account.save()
         return HttpResponse("Registered")
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
 
 
-def _email_request(user):
+def _email_request(account):
     token = str(randint(100000, 999999))
     hashToken = AuthTokens(
-        user=user,
+        account=account,
         token=token,
         type="hash",
         expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
@@ -66,7 +70,7 @@ def _email_request(user):
         f"Код подтверждения для входа в Skatert: {token}",  # message
         settings.EMAIL_HOST_USER,
         [
-            user.email,
+            account.email,
         ],
         fail_silently=False,
     )
@@ -82,7 +86,7 @@ def password_auth(request):
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data.get("nickname")
-        if not UserAuth.objects.filter(nickname=nickname).exists():
+        if not Account.objects.filter(user__nickname=nickname).exists():
             return HttpResponse(status=224)
         if not nickname:
             return HttpResponse(status=223)
@@ -91,17 +95,17 @@ def password_auth(request):
             return HttpResponse(status=223)
 
         try:
-            user = (
-                UserAuth.objects.filter(nickname=nickname)
+            account = (
+                Account.objects.filter(user__nickname=nickname)
                 .filter(passwordhash=hash)
                 .get()
             )
         except:
             return HttpResponseBadRequest("Неверные учетные данные")
-        if user is None:
+        if account is None:
             return HttpResponseBadRequest("Неверные учетные данные")
 
-        token = _email_request(user)
+        token = _email_request(account)
         return HttpResponse("Token: " + token)
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
@@ -122,11 +126,11 @@ def email_auth(request):
         if not code:
             return HttpResponseBadRequest("Не указан email")
 
-        user = UserAuth.objects.filter(nickname=nickname).get()
-        if not user:
+        account = Account.objects.filter(user__nickname=nickname).get()
+        if not account:
             return HttpResponseBadRequest("Некорректные данные")
 
-        token = AuthTokens.objects.filter(user=user).filter(token=code).get()
+        token = AuthTokens.objects.filter(account=account).filter(token=code).get()
         if not token:
             return HttpResponseBadRequest("Некорректный код")
         if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
@@ -151,3 +155,38 @@ def user_logout(request):
     response.delete_cookie('token')
     response.delete_cookie('nickname')
     return response
+
+
+@csrf_exempt
+def music_integration(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except:
+            return HttpResponseBadRequest("Некорректный формат данных")
+        
+        lastfm_nickname = data.get("lastfm")
+        if not lastfm_nickname:
+            return HttpResponse(status=223)
+        
+        nickname = request.COOKIES.get("nickname")
+        if not nickname:
+            return user_logout(request)
+        
+        user = User.objects.get(nickname=nickname)
+        user.lastfm = lastfm_nickname
+        user.save()
+        lastfm = LastFm()
+        if not lastfm.check_user(lastfm_nickname):
+            return HttpResponseBadRequest("Last fm user cannot be found")
+        
+
+
+        tracks = lastfm.download_from_user()
+        for track in tracks:
+            user.favouriteTracks.add(track)
+        user.save()
+
+        return HttpResponse("ok")
+
+

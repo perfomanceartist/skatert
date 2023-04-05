@@ -3,15 +3,15 @@ import datetime
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
-from users.models import AuthTokens, UserAuth
+from users.models import AuthTokens, Account
 
 
 def check_token(nickname, tokenVal):
-    user = UserAuth.objects.filter(nickname=nickname).get()
-    if user is None:
+    account = Account.objects.filter(user__nickname=nickname).get()
+    if account is None:
         return False
 
-    token = AuthTokens.objects.filter(user=user).filter(token=tokenVal).get()
+    token = AuthTokens.objects.filter(account=account).filter(token=tokenVal).get()
     if token is None:
         return False
 
