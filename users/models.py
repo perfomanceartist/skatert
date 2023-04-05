@@ -1,5 +1,5 @@
 import datetime
-
+from music.models import Track
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
@@ -19,19 +19,20 @@ class AuthTokens(models.Model):
 
 class User(models.Model):
     user = models.ForeignKey(UserAuth, on_delete=models.CASCADE)
-    favouriteMusic = ArrayField(models.IntegerField(), primary_key=False, blank=False)
-    favouriteFilms = ArrayField(models.IntegerField(), primary_key=False, blank=False)
-    favouriteBooks = ArrayField(models.IntegerField(), primary_key=False, blank=False)
+    lastfm = models.CharField(max_length=50, blank=True)
+    #favouriteMusic = ArrayField(models.IntegerField(), primary_key=False, blank=False)
+    #favouriteFilms = ArrayField(models.IntegerField(), primary_key=False, blank=False)
+    #favouriteBooks = ArrayField(models.IntegerField(), primary_key=False, blank=False)
+
+class FavouriteTracks(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE)
 
 
 class Subscriptions(models.Model):
     id = models.ForeignKey(User, primary_key=True, on_delete=models.CASCADE)
     subscriptions = ArrayField(models.IntegerField(), primary_key=False, blank=False)
 
-
-class MusicPreferences(models.Model):
-    genre = models.IntegerField(primary_key=True, blank=False)
-    usersBitmask = ArrayField(models.BooleanField(), primary_key=False, blank=False)
 
 
 class FilmsPreferences(models.Model):

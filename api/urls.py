@@ -7,5 +7,6 @@ urlpatterns = [
     path("login_pass", views.password_auth),
     path("login_email", views.email_auth),
     path("register", views.register),
-    path("logout", views.user_logout)
+    path("logout", views.user_logout),
+    path("integrate", views.music_integration)
 ]
