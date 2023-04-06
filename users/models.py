@@ -6,6 +6,7 @@ from django.db import models
 class User(models.Model):
     nickname = models.CharField(max_length=50, blank=False, unique=True)
     lastfm = models.CharField(max_length=50, blank=True)
+    favouriteTracks = models.ManyToManyField(Track)
     
 
 class FavouriteTracks(models.Model):

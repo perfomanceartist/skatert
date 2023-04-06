@@ -173,20 +173,24 @@ def music_integration(request):
         if not nickname:
             return user_logout(request)
         
-        user = User.objects.get(nickname=nickname)
-        user.lastfm = lastfm_nickname
-        user.save()
+        
         lastfm = LastFm()
         if not lastfm.check_user(lastfm_nickname):
             return HttpResponseBadRequest("Last fm user cannot be found")
         
-
-
-        tracks = lastfm.download_from_user()
-        for track in tracks:
-            user.favouriteTracks.add(track)
+        user = User.objects.get(nickname=nickname)
+        user.lastfm = lastfm_nickname
         user.save()
 
-        return HttpResponse("ok")
+        tracks = lastfm.download_from_user(lastfm_nickname)
+        for track in tracks:            
+            t = user.favouriteTracks.add(track)
+            if not t : # Если t - не none
+                track.rating +=1
+                track.save()
+
+        user.save()
+
+        return HttpResponse(str(len(tracks)))
 
 

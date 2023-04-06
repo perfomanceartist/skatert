@@ -39,6 +39,8 @@ class LastFm():
         }
         response = requests.get(self.url, params=params)
         if response.status_code != 200:
+            #print("ARTIST not 200 ERROR!")            
+            #print(artist)
             return False
         json_response = response.json()
         info = json_response["artist"]
@@ -58,9 +60,10 @@ class LastFm():
     def extract_album_info(self, album):
         name = album["title"]
         artist_name = album["artist"]
-        #try:
-        artist = Artist.objects.get(name=artist_name)
-        #except django.core.exceptions.ObjectDoesNotExist:
+        try:
+            artist = Artist.objects.get(name=artist_name)
+        except django.core.exceptions.ObjectDoesNotExist:
+            return None
         if Album.objects.filter(name=name,artist=artist).exists():
             return Album.objects.get(name=name,artist=artist)
                 
@@ -79,9 +82,6 @@ class LastFm():
         return new_album
 
     def extract_track_info(self, track):
-        print()
-        print(track)
-        print()
         name = track["name"]
         artist_name = track["artist"]["name"]
 
@@ -103,16 +103,23 @@ class LastFm():
         if response.status_code != 200:
             return False
         json_response = response.json()
-        print(json_response)
         info = json_response["track"]
         artist = self.extract_artist_info(info["artist"])
-        album = self.extract_album_info(info["album"])
+        alb = info.get("album", None)
+        if not alb is None:
+            album = self.extract_album_info(info["album"])
 
-        new_track = Track(
-            name=name,
-            album=album,
-            artist=artist
-        )
+        if not alb is None:
+            new_track = Track(
+                name=name,
+                album=album,
+                artist=artist
+            )
+        else:
+            new_track = Track(
+                name=name,
+                artist=artist
+            )
         new_track.save()
         return new_track
 
@@ -137,7 +144,6 @@ class LastFm():
         
         fav_tracks = []
         json_response = response.json()
-        print(json_response)
         total_pages = int(json_response["lovedtracks"]["@attr"]["totalPages"])
         for track in json_response["lovedtracks"]["track"]:
             fav_tracks.append(self.extract_track_info(track))
