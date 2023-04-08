@@ -11,6 +11,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class SignInActivity extends AppCompatActivity {
 
     EditText usernameEditText;
@@ -60,6 +63,18 @@ public class SignInActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, HomeActivity.class);
         startActivity(intent);
+    }
+
+    private static String prepareSignInData(String username, String email, String password) {
+        try {
+            JSONObject record = new JSONObject();
+            record.put("nickname", username);
+            record.put("email", email);
+            record.put("hash", Utility.makeHash(password));
+            return record.toString();
+        } catch (JSONException ignored) {}
+        return new String();
+
     }
 }
 
