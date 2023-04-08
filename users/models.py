@@ -9,10 +9,6 @@ class User(models.Model):
     favouriteTracks = models.ManyToManyField(Track)
     
 
-class FavouriteTracks(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
-
 
 class MusicPreferences(models.Model):
     genre = models.IntegerField(primary_key=True, blank=False)
