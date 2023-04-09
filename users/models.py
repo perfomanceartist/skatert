@@ -3,11 +3,11 @@ from music.models import Track
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
+
 class User(models.Model):
     nickname = models.CharField(max_length=50, blank=False, unique=True)
     lastfm = models.CharField(max_length=50, blank=True)
     favouriteTracks = models.ManyToManyField(Track)
-    
 
 
 class MusicPreferences(models.Model):
@@ -28,8 +28,6 @@ class BooksPreferences(models.Model):
 class Subscriptions(models.Model):
     id = models.ForeignKey(User, primary_key=True, on_delete=models.CASCADE)
     subscriptions = ArrayField(models.IntegerField(), primary_key=False, blank=False)
-
-
 
 
 class Account(models.Model):

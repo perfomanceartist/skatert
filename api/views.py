@@ -5,8 +5,9 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+
+import music.lastfm_api
 from users.models import AuthTokens, Account, User
-from music.lastfm import LastFm
 import re
 
 
@@ -44,7 +45,6 @@ def register(request):
         hash = data.get("hash")
         if not hash:
             return HttpResponse(status=223)
-
 
         user = User(nickname=nickname)
         user.save()
@@ -140,7 +140,7 @@ def email_auth(request):
         token.token = hex(randint(100, 0xFFFFFFFF))
         token.type = "email"
         token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
-        token.save()    
+        token.save()
         response = JsonResponse({"token": str(token.token)})
         response.set_cookie("token", str(token.token))
         response.set_cookie("nickname", nickname)
@@ -164,33 +164,31 @@ def music_integration(request):
             data = json.loads(request.body.decode("utf-8"))
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
-        
+
         lastfm_nickname = data.get("lastfm")
         if not lastfm_nickname:
             return HttpResponse(status=223)
-        
+
         nickname = request.COOKIES.get("nickname")
         if not nickname:
             return user_logout(request)
-        
-        
-        lastfm = LastFm()
-        if not lastfm.check_user(lastfm_nickname):
-            return HttpResponseBadRequest("Last fm user cannot be found")
-        
+
+        try:
+            music.lastfm_api.userGetInfo(lastfm_nickname)
+        except RuntimeError as error:
+            return HttpResponseBadRequest("Last fm user cannot be found: " + str(error))
+
         user = User.objects.get(nickname=nickname)
         user.lastfm = lastfm_nickname
         user.save()
 
-        tracks = lastfm.download_from_user(lastfm_nickname)
-        for track in tracks:            
-            t = user.favouriteTracks.add(track)
-            if not t : # Если t - не none
-                track.rating +=1
-                track.save()
+        # tracks = lastfm.download_from_user(lastfm_nickname)
+        # for track in tracks:
+        #     t = user.favouriteTracks.add(track)
+        #     if not t:  # Если t - не none
+        #         track.rating += 1
+        #         track.save()
 
         user.save()
 
-        return HttpResponse(str(len(tracks)))
-
-
+        return HttpResponse(str(0)) #len(tracks)))
