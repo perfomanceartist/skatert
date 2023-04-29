@@ -1,12 +1,10 @@
 import requests
+from backend.parameters import lastFmApiKey
 
 
 def makeGetRequest(params):
-    """ Completes parameters with our API key.
-    Shouldn't it be located in the configuration? """
-    params["api_key"] = "d1b2e56deb7da7dca45049f36c0c6b34"
+    params["api_key"] = lastFmApiKey
     url = "http://ws.audioscrobbler.com/2.0/"
-    # print("Using link: " + requests.get(url, params=params, timeout=3).url)
     return requests.get(url, params=params, timeout=3).json()
 
 
@@ -34,6 +32,19 @@ def userGetLovedTracks(username):
         raise RuntimeError("Failed to get user's favourite tracks: " + exception)
 
 
+def userGetTopTags(username, limit=10):
+    params = {
+        "method": "user.getTopTags",
+        "user": username,
+        "limit": limit,
+        "format": "json"
+    }
+    try:
+        return makeGetRequest(params)
+    except (TimeoutError, requests.exceptions.JSONDecodeError) as exception:
+        raise RuntimeError("Failed to get user favourite tags: " + exception)
+
+
 def artistGetInfo(artistName):
     params = {
         "method": "artist.getInfo",
@@ -53,7 +64,7 @@ def trackGetInfo(trackName, artistName):
         "track": trackName,
         "artist": artistName,
         "format": "json",
-        # "autocorrect": 1
+        "autocorrect": 1
     }
     try:
         return makeGetRequest(params)

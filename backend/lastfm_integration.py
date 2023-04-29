@@ -1,5 +1,7 @@
 from music.models import Artist, Album, Track
+from users.models import User, MusicPreferences
 import music.lastfm_api
+from backend.parameters import genreNames, genreIdx
 
 
 def prepareArtist(artistName):
@@ -46,11 +48,12 @@ def prepareAlbum(albumInfo):
         raise RuntimeError("Failed to create album.")
 
 
-def prepareTrack(trackInfo):
+def prepareTrack(trackInfo) -> (Track, set):
     try:
         name = trackInfo["name"]
         artist_name = trackInfo["artist"]["name"]
 
+        # Get or create artist object
         if Artist.objects.filter(name=artist_name).exists():
             artist = Artist.objects.get(name=artist_name)
             if Track.objects.filter(name=name, artist=artist).exists():
@@ -58,14 +61,23 @@ def prepareTrack(trackInfo):
         else:
             artist = prepareArtist(artist_name)
 
+        # Get extended track info
         extendedTrackInfo = music.lastfm_api.trackGetInfo(name, artist_name)["track"]
-        if "album" in extendedTrackInfo and extendedTrackInfo["album"]:
+
+        # Prepare track object
+        if "album" in extendedTrackInfo and extendedTrackInfo.get("album"):
             track = Track(name=name, album=prepareAlbum(extendedTrackInfo["album"]), artist=artist)
         else:
             track = Track(name=name, artist=artist)
-
         track.save()
-        return track
+
+        # Prepare genres. Set contains GENRE ID's = NUMBERS
+        genres = set()
+        for genre in extendedTrackInfo.get("toptags", {}).get("tag", []):
+            if genre["name"] in genreNames:
+                genres.add(genreIdx[genre["name"]])
+
+        return track, genres
     except KeyError:
         raise RuntimeError("Failed to prepare the track.")
 
@@ -76,12 +88,39 @@ def prepareUserTracks(user):
         if usersTrack["@attr"]["user"].lower() != user.lower():
             raise RuntimeError("Received tracks for different users: " + user + ", " + usersTrack["@attr"]["user"] + '.')
 
-        trackList = []
+        trackList, genresSet = [], set()
         for trackInfo in usersTrack["track"]:
-            trackList.append(prepareTrack(trackInfo))
-        return trackList
+            currentTrack, currentGenres = prepareTrack(trackInfo)
+            trackList.append(currentTrack)
+            genresSet = genresSet.union(currentGenres)
+
+        return trackList, genresSet
     except KeyError:
         raise RuntimeError("Failed to prepare user's loved track.")
+
+
+def loadUserLastFM(nickname, lastfmNickname):
+    user = User(nickname=nickname, lastfm=lastfmNickname)
+    user.save()
+
+    userTracks, userGenres = prepareUserTracks(lastfmNickname)
+    for track in userTracks:
+        user.favouriteTracks.add(track)
+    user.save()
+
+    userNumber = user.id
+    for genreNumber in genreIdx.values():
+        if MusicPreferences.objects.filter(genre=genreNumber).exists():
+            preferences = MusicPreferences.objects.get(genre=genreNumber)
+        else:
+            preferences = MusicPreferences(genre=genreNumber, usersBitmask=[False] * userNumber)
+            preferences.save()
+
+        preferences.usersBitmask.append(genreNumber in userGenres)
+        preferences.save()
+
+
+
 
 
 
