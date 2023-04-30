@@ -1,6 +1,6 @@
+from backend.parameters import GenreNames
 from music.models import Artist, Album, Track
 from users.models import User, MusicPreferences
-from backend.parameters import genreIndexToName
 
 
 ENUMERATION_PATTERN = "[{0:2}]"
@@ -58,7 +58,7 @@ def showUsers():
 
 def showMusicPreferences():
     for preference in MusicPreferences.objects.all():
-        print("Genre: ", genreIndexToName(preference.genre))
+        print("Genre: ", GenreNames[preference.genre])
         for i in range(len(preference.usersBitmask)):
             print("{}[{}]".format(preference.usersBitmask[i], i), end=", ")
         print()

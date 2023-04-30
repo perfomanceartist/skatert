@@ -5,7 +5,7 @@ from backend.parameters import lastFmApiKey
 def makeGetRequest(params):
     params["api_key"] = lastFmApiKey
     url = "http://ws.audioscrobbler.com/2.0/"
-    return requests.get(url, params=params, timeout=3).json()
+    return requests.get(url, params=params, timeout=5).json()
 
 
 def userGetInfo(username):
