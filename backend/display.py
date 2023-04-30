@@ -4,45 +4,47 @@ from backend.parameters import genreIndexToName
 
 
 ENUMERATION_PATTERN = "[{0:2}]"
-DISPLAY_TRACK_PATTERN = "{0:60}{1:25}{2:}"
-DISPLAY_ARTIST_PATTERN = "{0:25}{1:25}"
-DISPLAY_ALBUM_PATTERN = "{0:60}{1:25}:{2:5}"
+DISPLAY_TRACK_PATTERN = "{0:60}{1:25}{2:30}{3:10}{4:10}"
+DISPLAY_ARTIST_PATTERN = "{0:25}{1}"
+DISPLAY_ALBUM_PATTERN = "{0:60}{1:25}{2:5}"
+
 
 def showTrack(track):
     album = track.album.name if track.album is not None else ""
-    print(DISPLAY_TRACK_PATTERN.format(track.name, track.artist.name, album))
+    print(DISPLAY_TRACK_PATTERN.format(track.name, track.artist.name, album, track.lovers, track.recommended))
 
 
 def showMusicTracks():
+    print("{0:66}{1:25}{2:37}{3:7}{4:10}".format("Track name", "Artist", "Album", "Loves", "Recommended"))
     for i, track in enumerate(Track.objects.all()):
-        print(ENUMERATION_PATTERN.format(i), end=" ")
+        print(ENUMERATION_PATTERN.format(i), end="  ")
         showTrack(track)
     print()
 
 
 def showArtists():
+    print("{0:28}{1}".format("Artist name", "Rating"))
     for i, artist in enumerate(Artist.objects.all()):
-        print(ENUMERATION_PATTERN.format(i), ' ', DISPLAY_ARTIST_PATTERN.format(artist.name, artist.rating))
+        print(ENUMERATION_PATTERN.format(i), "", DISPLAY_ARTIST_PATTERN.format(artist.name, artist.listeners))
     print()
 
 
 def showAlbums():
+    print("{0:66}{1:25}{2}".format("Album name", "Artist name", "Album rating"))
     for i, album in enumerate(Album.objects.all()):
-        print(ENUMERATION_PATTERN.format(i), ' ', DISPLAY_ALBUM_PATTERN.format(album.name, album.artist.name, album.rating))
+        print(ENUMERATION_PATTERN.format(i), "", DISPLAY_ALBUM_PATTERN.format(album.name, album.artist.name, album.listeners))
     print()
 
 
 def showMusicDatabase():
-    print("Tracks:")
     showMusicTracks()
-    print("Artists:")
     showArtists()
-    print("Albums:")
     showAlbums()
 
 
 def showUsersFavouriteTracks(user):
     print("User: " + user.nickname + ", lastfm nickname: " + user.lastfm)
+    print("{0:66}{1:25}{2:37}{3:7}{4:10}".format("Track name", "Artist", "Album", "Loves", "Recommended"))
     for i, track in enumerate(user.favouriteTracks.all()):
         print(ENUMERATION_PATTERN.format(i), ' ', end="")
         showTrack(track)
@@ -58,5 +60,5 @@ def showMusicPreferences():
     for preference in MusicPreferences.objects.all():
         print("Genre: ", genreIndexToName(preference.genre))
         for i in range(len(preference.usersBitmask)):
-            print("(Id:", i, ". Loves: ", preference.usersBitmask[i], "),", end="")
+            print("{}[{}]".format(preference.usersBitmask[i], i), end=", ")
         print()

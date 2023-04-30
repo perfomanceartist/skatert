@@ -7,7 +7,7 @@ from backend.parameters import genreNames, genreIdx
 def prepareArtist(artistName):
     if Artist.objects.filter(name=artistName).exists():
         artist = Artist.objects.get(name=artistName)
-        artist.rating += 1
+        artist.listeners += 1
         return artist
 
     try:
@@ -31,7 +31,7 @@ def prepareArtist(artistName):
 def prepareAlbum(albumInfo):
     if Album.objects.filter(name=albumInfo["title"], artist=prepareArtist(albumInfo["artist"])).exists():
         album = Album.objects.get(name=albumInfo["title"], artist=prepareArtist(albumInfo["artist"]))
-        album.rating += 1
+        album.listeners += 1
         return album
 
     try:
@@ -57,7 +57,9 @@ def prepareTrack(trackInfo) -> (Track, set):
         if Artist.objects.filter(name=artist_name).exists():
             artist = Artist.objects.get(name=artist_name)
             if Track.objects.filter(name=name, artist=artist).exists():
-                return Track.objects.get(name=name, artist=artist)
+                track = Track.objects.get(name=name, artist=artist)
+                track.lovers += 1
+                return track
         else:
             artist = prepareArtist(artist_name)
 
