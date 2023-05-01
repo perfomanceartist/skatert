@@ -7,7 +7,7 @@ class User(models.Model):
     nickname = models.CharField(max_length=50, blank=False, unique=True)
     lastfm = models.CharField(max_length=50, blank=True)
     favouriteTracks = models.ManyToManyField(Track)
-    recommenders = ArrayField(models.IntegerField(), default=[], primary_key=False, blank=False)
+    recommenders = ArrayField(models.IntegerField(), default=list, primary_key=False, blank=False)
 
 
 class MusicPreferences(models.Model):

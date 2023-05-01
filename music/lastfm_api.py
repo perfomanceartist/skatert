@@ -3,9 +3,16 @@ from backend.parameters import lastFmApiKey
 
 
 def makeGetRequest(params):
+    attempts = 20
     params["api_key"] = lastFmApiKey
     url = "http://ws.audioscrobbler.com/2.0/"
-    return requests.get(url, params=params, timeout=5).json()
+
+    for i in range(attempts):
+        try:
+            return requests.get(url, params=params, timeout=10).json()
+        except (ConnectionError, requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as error:
+            print("Warning. Connection errors:", error)
+    raise RuntimeError("Connection failed.")
 
 
 def userGetInfo(username):
