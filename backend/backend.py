@@ -56,3 +56,10 @@ def getTrackInformation(track) -> dict:
     else:
         return {"name": track.name, "artist": track.artist.name, "genres": track.genres,
                 "listeners": track.lovers, "recommended": track.recommended}
+
+
+def prepareUserInfo(user) -> dict:
+    return {"nickname": user.nickname,
+            "lastFmNickname": user.lastfm,
+            "favouriteTracksAmount": len(user.favouriteTracks.all()),
+            "genres": dict(GenreList.fromUser(user).values)}

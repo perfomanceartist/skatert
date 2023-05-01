@@ -128,9 +128,8 @@ def loadUserLastFM(nickname, lastfmNickname):
                 userGenresCounts[i] += 1
     user.save()
 
-    chosenUserGenres = [count * len(GenreNames) >= len(userTracks) for count in userGenresCounts]
+    chosenUserGenres = [count * len(GenreNames) >= len(userGenresCounts) for count in userGenresCounts]
     GenreList(chosenUserGenres).setToUser(user)
-    showMusicPreferences()
 
 
 

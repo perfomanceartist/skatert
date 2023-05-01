@@ -15,10 +15,10 @@ class GenreList:
             self.values[GenreNames[i]] = booleanList[i]
 
     def setToUser(self, user):
-        records = MusicPreferences.objects.order_by('genre')
         for i in range(len(GenreNames)):
-            records[i].usersBitmask[user.id - 1] = self.values[GenreNames[i]]
-            records[i].save()
+            record = MusicPreferences.objects.get(genre=i)
+            record.usersBitmask[user.id - 1] = self.values[GenreNames[i]]
+            record.save()
 
     def setToTrack(self, track):
         if track.genres is None:
@@ -53,10 +53,9 @@ class GenreList:
     @staticmethod
     def fromUser(user):
         tValues = [False] * len(GenreNames)
-
-        records = MusicPreferences.objects.order_by('genre')
         for i in range(len(GenreNames)):
-            tValues[i] = records[i].usersBitmask[user.id - 1]
+            record = MusicPreferences.objects.get(genre=i)
+            tValues[i] = record.usersBitmask[user.id - 1]
 
         return GenreList(tValues)
 

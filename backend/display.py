@@ -57,7 +57,8 @@ def showUsers():
 
 
 def showMusicPreferences():
-    for preference in MusicPreferences.objects.order_by('genre'):
+    for i in range(len(GenreNames)):
+        preference = MusicPreferences.objects.get(genre=i)
         print("Genre: {0:11}".format(GenreNames[preference.genre]), end=" ")
         for value in preference.usersBitmask:
             print("{0:2}".format(value), end=", ")
