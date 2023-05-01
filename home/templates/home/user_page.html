@@ -4,32 +4,16 @@
 {{user.nickname}} | Skatert
 {% endblock title %}
 
-{% block style %}
-<style>
-    a.link {
-        cursor: pointer;
-    }
-</style>
-{% endblock style %}
+{% load static %}
+{% block js_adding %}
+<script type="text/JavaScript" src = "{% static 'home/js/user_page.js' %}"></script>
+{% endblock js_adding %}
 
-{% block js %}
-<script>
-    async function exit_account() {
-        const response = await fetch("/api/logout", {
-        method: "POST",
-        headers: { "Accept": "application/json" }
-      });
-      if (response.ok === true) {
-        window.location.replace('/login');
-      }
-      else alert("Error!")
-    }
-</script>
-{% endblock js %}
+
 
 {% block exit_account %}
 <li class="nav-item">
-    <a class="nav-link active link" onclick="exit_account()">Выход</a>
+    <a class="nav-link active link"  href="#" onclick="exit_account()">Выход</a>
 </li>
 {% endblock exit_account %}
 
