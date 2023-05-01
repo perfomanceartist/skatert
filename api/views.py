@@ -34,6 +34,10 @@ def register(request):
             return HttpResponse(status=222)
         if not nickname:
             return HttpResponse(status=223)
+        
+        lastfm_nickname = data.get("lastfm_nickname")
+        if not lastfm_nickname:
+            return HttpResponse(status=223)
 
         email = data.get("email")
         if not email:
@@ -45,8 +49,7 @@ def register(request):
         if not hash:
             return HttpResponse(status=223)
 
-
-        user = User(nickname=nickname)
+        user = User(nickname=nickname, lastfm = lastfm_nickname)
         user.save()
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()

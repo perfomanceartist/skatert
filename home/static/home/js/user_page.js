@@ -8,3 +8,19 @@ async function exit_account() {
   }
   else alert("Error!")
 }
+
+async function import_tracks(nickname) {
+  console.log(nickname)
+
+
+  // const response = await fetch("/api/integrate", {
+  //     method: "POST",
+  //     headers: { "Accept": "application/json" },
+  //     body: JSON.stringify({
+  //         nickname: nickname
+  //     })
+  // });
+
+  // console.log(response)
+
+}

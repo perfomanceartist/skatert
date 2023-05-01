@@ -7,15 +7,25 @@
 {% load static %}
 {% block js_adding %}
 <script type="text/JavaScript" src = "{% static 'home/js/user_page.js' %}"></script>
+
 {% endblock js_adding %}
 
 
 
-{% block exit_account %}
+{% block userpage %}
+<a class="nav-link">|</a>
+<li class="nav-item">
+    <a class="nav-link active" href="#">Рекомендации</a>
+</li>
+<a class="nav-link">|</a>
+<li class="nav-item">
+    <a class="nav-link active" href="" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
+</li>
+<a class="nav-link">|</a>
 <li class="nav-item">
     <a class="nav-link active link"  href="#" onclick="exit_account()">Выход</a>
 </li>
-{% endblock exit_account %}
+{% endblock userpage %}
 
 {% block content %}
 <h3>Пользователь {{user.nickname}}</h3>
