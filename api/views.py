@@ -51,7 +51,7 @@ def register(request):
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()
 
-        music_prefs = MusicPreferences.objects.get()
+        music_prefs = MusicPreferences.objects.all()
         for music_pref in music_prefs:
             music_pref.usersBitmask += [False]
             music_pref.save()
