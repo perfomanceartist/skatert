@@ -11,22 +11,38 @@ def getRecommendations(currentUser, amount=20) -> list:
 
     currentUserPreferences = GenreList.fromUser(currentUser)
 
+    recommendations = []
+    for recommender in currentUser.recommenders:
+        for track in User.objects.get(id=recommender).favouriteTracks.order_by('recommended'):
+            if track in currentUser.favouriteTracks.all():
+                continue
+
+            track.recommended += 1
+            track.save()
+
+            recommendations.append(track)
+            if len(recommendations) >= amount:
+                return recommendations
+
     # Key - amount of common genres, value - list of user ID's.
     usersWithGenreSimilarities = {i: [] for i in range(len(MusicPreferences.objects.all()) + 1)}
     for otherUser in User.objects.all():
         similarGenres = currentUserPreferences.countMatches(GenreList.fromUser(otherUser))
         usersWithGenreSimilarities[similarGenres].append(otherUser.id)
 
-    recommendations = []
     for genreSimilarities in range(len(MusicPreferences.objects.all()), 0, -1):
         for similarUser in usersWithGenreSimilarities[genreSimilarities]:
-            for track in User.objects.get(id=similarUser).favouriteTracks.all():
+            for track in User.objects.get(id=similarUser).favouriteTracks.order_by('recommended'):
                 # Skips common tracks.
                 if track in currentUser.favouriteTracks.all():
                     continue
 
                 track.recommended += 1
                 track.save()
+
+                if similarUser not in currentUser.recommenders:
+                    currentUser.recommenders.append(similarUser)
+                    currentUser.save()
 
                 recommendations.append(track)
                 if len(recommendations) >= amount:
@@ -62,4 +78,5 @@ def prepareUserInfo(user) -> dict:
     return {"nickname": user.nickname,
             "lastFmNickname": user.lastfm,
             "favouriteTracksAmount": len(user.favouriteTracks.all()),
-            "genres": dict(GenreList.fromUser(user).values)}
+            "genres": dict(GenreList.fromUser(user).values),
+            "recommenders": list(user.recommenders)}

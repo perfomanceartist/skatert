@@ -9,6 +9,7 @@ from backend.backend import getRecommendations, getUserByNickname, getTrackById,
 from backend.parameters import GenreNames, GenreList
 import json
 
+
 class MakeLastFmIntegration(View):
     def post(self, request, *args, **kwargs):
         try:
@@ -123,10 +124,10 @@ class GetRecommendations(View):
                 return HttpResponseNotFound("User '" + nickname + "' is not found.")
 
             answer = []
-            for track in getRecommendations(user, amount):
+            for track in getRecommendations(user, int(amount)):
                 answer.append(getTrackInformation(track))
             return JsonResponse(answer, safe=False)
-        except (RuntimeError, ValueError, KeyError) as error:
+        except (RuntimeError, ValueError, KeyError, TypeError) as error:
             return HttpResponseServerError(error)
 
 
