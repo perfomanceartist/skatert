@@ -1,0 +1,32 @@
+body {
+    background-image: url("/static/img/sktrt.png");
+    background-position: left;
+    background-color: #D5D7DB;
+}
+
+
+.navbar{
+    background-color: #CCCCCC;
+    border: 1px solid rgba(0, 0, 0, 0.88);
+}
+
+
+.navbar-brand{
+    position: relative;
+
+    font-weight: 700;
+    line-height: 150%;
+    letter-spacing: 0.1em;
+    text-align: center;
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px  #FF8E00;
+
+
+}
+
+.navbar-brand:hover, .navbar-brand:focus{
+
+    text-shadow: 0px 0px 15px #FF8E00;
+
+}

@@ -1,79 +1,47 @@
 {% extends "login/login_base.html" %}
-{% block js %} 
-<script type="text/javascript">
-  async function register() {
-            var nickname = document.getElementById('loginControlInputNick').value;
-            console.log(nickname);
-            var email = document.getElementById('loginControlInputEmail').value;
-            var password = document.getElementById('loginControlInputPassword').value;
-            var passwordConfirm = document.getElementById('loginControlInputPasswordConfirm').value
-            document.getElementById('nickname_duplicate').classList.add('d-none');
-            document.getElementById('pass_mismatch').classList.add('d-none');
-            document.getElementById('empty_field').classList.add('d-none');
-            document.getElementById('incorrect_email').classList.add('d-none');
 
-            if (passwordConfirm !== password) {
-              document.getElementById('pass_mismatch').classList.remove('d-none');
-              document.getElementById('password').reset();
-              return;
-            }
-            // отправляет запрос и получаем ответ
-            const response = await fetch("/api/register", {
-                method: "POST",
-                headers: { "Accept": "application/json" },
-                body: JSON.stringify({
-                    nickname: nickname,
-                    email: email,
-                    hash: password
-                })
-            });
-            if (response.status == 222) {  // nickname is not unique
-                document.getElementById('nickname_duplicate').classList.remove('d-none');
-                document.getElementById('nickname').reset();
-                return;
-            }
-            if (response.status == 223) {  // empty field(s)
-                document.getElementById('empty_field').classList.remove('d-none');
-                return;
-            }
-            if (response.status == 225) {  // empty field(s)
-                document.getElementById('incorrect_email').classList.remove('d-none');
-                document.getElementById('email').reset();
-                return;
-            }
+{% block title %}
+Регистрация
+{% endblock title %}
 
-            if (response.ok === true) {
-                window.location.replace('/login');
-            }
-            else alert('Registration error!');
-        }
-</script>
-{% endblock js %} 
+{% load static %}
+
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'login/css/login_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'login/css/login_base.css' %}">
+{% endblock css_adding %} 
+
+{% block js_adding %}
+<script type="text/JavaScript" src = "{% static 'login/js/register_page.js' %}"></script>
+{% endblock js_adding %}
+
+
+
 {% block logincontent %}
-<h3 style="text-align: right;">Регистрация</h3>
+<!-- <h3 style="text-align: right;">Регистрация</h3> -->
 <form id="nickname">
   <div class="mb-3">
-      <label for="loginControlInputNick" class="form-label">Никнейм</label>
-      <input type="text" class="form-control" id="loginControlInputNick" >
+      <!-- <label for="loginControlInputNick" class="form-label">Никнейм</label> -->
+      <input type="text" class="form-control" id="loginControlInputNick" placeholder="ПОЛЬЗОВАТЕЛЬ">
   </div>
 </form>
 <div class="mb-3 d-none" id="nickname_duplicate">
-  <p style="color: red; text-align: right;">User already exists</p>
+  <p style="color: red; text-align: right;">Пользователь с таким ником уже существует!</p>
 </div>
 <form id="email">
   <div class="mb-3">
-      <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label>
-      <input type="email" class="form-control" id="loginControlInputEmail" placeholder="name@example.com">
+      <!-- <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label> -->
+      <input type="email" class="form-control" id="loginControlInputEmail" placeholder="АДРЕС ЭЛЕКТРОННОЙ ПОЧТЫ">
   </div>
 </form>
 <form id="password">
   <div class="mb-3">
-    <label for="loginControlInputPassword" class="form-label">Пароль</label>
-    <input type="password" class="form-control" id="loginControlInputPassword">
+    <!-- <label for="loginControlInputPassword" class="form-label">Пароль</label> -->
+    <input type="password" class="form-control" id="loginControlInputPassword" placeholder="НОВЫЙ ПАРОЛЬ">
   </div>
   <div class="mb-3">
-    <label for="loginControlInputPasswordConfirm" class="form-label">Повторите пароль</label>
-    <input type="password" class="form-control" id="loginControlInputPasswordConfirm">
+    <!-- <label for="loginControlInputPasswordConfirm" class="form-label">Повторите пароль</label> -->
+    <input type="password" class="form-control" id="loginControlInputPasswordConfirm" placeholder="ПОВТОРИТЕ ПАРОЛЬ">
   </div>
 </form>
 <div class="mb-3 d-none" id="pass_mismatch">
@@ -86,6 +54,6 @@
   <p style="color: red; text-align: right;">Fill all fields, please</p>
 </div>
 <div class="mb-3">
-  <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Зарегистрироваться</button>    
+  <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Далее</button>    
 </div> 
 {% endblock logincontent %}

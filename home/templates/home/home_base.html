@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
+{% load static %}
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'home/css/home_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
+{% endblock css_adding %} 
+
 {% block site_head %}
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">

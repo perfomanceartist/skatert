@@ -1,21 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Login
+Авторизация
 {% endblock title %}
 
 {% block content %}
-<h1>Login page</h1>
-<div class="container">
-    <div class="row">
-      <div class="col">
-      </div>
-      <div class="col">
-      </div>
-      <div class="col">
-        {% block logincontent %}
-        {% endblock logincontent %}
-      </div>
+<div class = "content">
+  <h1>СКАТЕРТЬ</h1>
+  <div class="container">
+    {% block logincontent %}
+    {% endblock logincontent %}
     </div>
-  </div>
+</div>
 {% endblock content %}
