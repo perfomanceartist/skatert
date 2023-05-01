@@ -17,5 +17,3 @@ class UserTestCase(TestCase):
         tracks = getRecommendations(User.objects.get(nickname="Borya"), 5)
         for track in tracks:
             showTrack(track)
-
-

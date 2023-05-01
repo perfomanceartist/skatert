@@ -11,4 +11,3 @@ class UsersLovedTracks(TestCase):
         for user in testingUsers:
             backend.lastfm_integration.prepareUserTracks(user)
         backend.display.showMusicDatabase()
-
