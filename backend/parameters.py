@@ -5,14 +5,6 @@ lastFmApiKey = "d1b2e56deb7da7dca45049f36c0c6b34"
 GenreNames = ("hip hop", "rock", "rap", "pop", "alternative", "classic", "edm")
 
 
-def makeOrCheckMusicPreferences():
-    if len(MusicPreferences.objects.all()) != len(GenreNames):
-        MusicPreferences.objects.all().delete()
-        for i in range(len(GenreNames)):
-            MusicPreferences(genre=i, usersBitmask=[]).save()
-    return MusicPreferences.objects.all()
-
-
 class GenreList:
     values = {name: False for name in GenreNames}
 
@@ -21,13 +13,12 @@ class GenreList:
             raise ValueError("Incorrect boolean input sequence.")
         for i in range(len(booleanList)):
             self.values[GenreNames[i]] = booleanList[i]
-        makeOrCheckMusicPreferences()
 
     def setToUser(self, user):
-        records = MusicPreferences.objects.all()
+        records = MusicPreferences.objects.order_by('genre')
         for i in range(len(GenreNames)):
             records[i].usersBitmask[user.id - 1] = self.values[GenreNames[i]]
-        user.save()
+            records[i].save()
 
     def setToTrack(self, track):
         if track.genres is None:
@@ -48,6 +39,9 @@ class GenreList:
                 count += 1
         return count
 
+    def show(self):
+        print(*self.values.values(), sep=", ")
+
     @staticmethod
     def defaultList():
         return GenreList([False] * len(GenreNames))
@@ -58,13 +52,13 @@ class GenreList:
 
     @staticmethod
     def fromUser(user):
-        values = [False] * len(GenreNames)
+        tValues = [False] * len(GenreNames)
 
-        records = MusicPreferences.objects.all()
+        records = MusicPreferences.objects.order_by('genre')
         for i in range(len(GenreNames)):
-            values[i] = records[i].usersBitmask[user.id - 1]
+            tValues[i] = records[i].usersBitmask[user.id - 1]
 
-        return GenreList(values)
+        return GenreList(tValues)
 
     @staticmethod
     def fromGenreNames(genreNamesList):

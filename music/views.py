@@ -1,10 +1,11 @@
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseServerError
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, \
+    HttpResponseServerError
 from django.views import View
 
-import backend.backend
+import backend.display
 from users.models import User
 from backend.lastfm_integration import loadUserLastFM
-from backend.backend import getRecommendations
+from backend.backend import getRecommendations, getUserByNickname, getTrackById, getTrackInformation
 from backend.parameters import GenreNames, GenreList
 import json
 
@@ -21,20 +22,23 @@ class MakeLastFmIntegration(View):
             return HttpResponse('LastFM integration completed')
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest('Failed to decode json data.')
-        except RuntimeError as error:
+        except (RuntimeError, ValueError) as error:
             return HttpResponseServerError(error)
 
 
 class GetUserGenres(View):
     def get(self, request, *args, **kwargs):
+        backend.display.showMusicPreferences()
         nickname = request.GET.get('nickname')
         if nickname is None:
             return HttpResponseBadRequest('Skatert nickname should be specified for this type of request.')
 
-        user = backend.backend.getUserByNickname(nickname)
+        user = getUserByNickname(nickname)
         if user is None:
             return HttpResponseNotFound("User with nickname '" + nickname + "' is not found.")
-        return JsonResponse(GenreList.fromUser(User.objects.get(nickname=nickname)).values)
+
+        print("Nickname:", nickname, "id:", int(user.id))
+        return JsonResponse(GenreList.fromUser(user).values)
 
 
 class SetUserGenres(View):
@@ -42,7 +46,7 @@ class SetUserGenres(View):
         try:
             data = json.loads(request.body)
 
-            user = backend.backend.getUserByNickname(data["nickname"])
+            user = getUserByNickname(data["nickname"])
             if user is None:
                 return HttpResponseNotFound("User with nickname '" + data["nickname"] + "' is not found.")
 
@@ -68,15 +72,57 @@ class GetTrackById(View):
         if trackId is None:
             return HttpResponseBadRequest('Track id must be specified.')
 
-        track = backend.backend.getTrackById(trackId)
+        track = getTrackById(trackId)
         if track is None:
             return HttpResponseNotFound('Specified track is not found.')
+        return JsonResponse(getTrackInformation(track))
 
-        answer = { "name": track.name,
-                   "artist": track.artist,
-                   "album": track.album,
-                   "listens": track.lovers,
-                   "recommendations": track.recommended }
-        return JsonResponse(answer)
+
+class GetUserFavouriteTracks(View):
+    def get(self, request, *args, **kwargs):
+        nickname = request.GET.get('nickname')
+        if nickname is None:
+            return HttpResponseBadRequest('Nickname must be specified.')
+
+        user = getUserByNickname(nickname)
+        if user is None:
+            return HttpResponseNotFound("User '" + nickname + "' is not found.")
+
+        answer = []
+        for track in user.favouriteTracks.all():
+            answer.append(getTrackInformation(track))
+        return JsonResponse(answer, safe=False)
+
+
+class GetUsers(View):
+    def get(self, request, *args, **kwargs):
+        answer = []
+        for user in User.objects.all():
+            answer.append({"nickname": user.nickname,
+                           "lastFmNickname": user.lastfm,
+                           "favouriteTracksAmount": len(user.favouriteTracks.all()),
+                           "genres": dict(GenreList.fromUser(user).values)})
+        return JsonResponse(answer, safe=False)
+
+
+class GetRecommendations(View):
+    def get(self, request, *args, **kwargs):
+        nickname = request.GET.get('nickname')
+        if nickname is None:
+            return HttpResponseBadRequest("Nickname should be specified for this type of requests.")
+
+        amount = request.GET.get('amount')
+        if amount is None or int(amount) < 1:
+            return HttpResponseBadRequest("Incorrect amount of records.")
+
+        user = getUserByNickname(nickname)
+        if user is None:
+            return HttpResponseNotFound("User '" + nickname + "' is not found.")
+
+        answer = []
+        for track in getRecommendations(user, amount):
+            answer.append(getTrackInformation(track))
+        return JsonResponse(answer, safe=False)
+
 
 

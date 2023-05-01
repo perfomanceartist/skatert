@@ -3,13 +3,13 @@ from users.models import User, MusicPreferences
 from backend.parameters import GenreList
 
 
-def getRecommendations(user, amount=20) -> list:
+def getRecommendations(currentUser, amount=20) -> list:
     if amount > len(Track.objects.all()):
         raise ValueError("Not enough records in the database")
     if amount == len(Track.objects.all()):
         return Track.objects.all()
 
-    currentUserPreferences = GenreList.fromUser(user)
+    currentUserPreferences = GenreList.fromUser(currentUser)
 
     # Key - amount of common genres, value - list of user ID's.
     usersWithGenreSimilarities = {i: [] for i in range(len(MusicPreferences.objects.all()) + 1)}
@@ -21,6 +21,9 @@ def getRecommendations(user, amount=20) -> list:
     for genreSimilarities in range(len(MusicPreferences.objects.all()), 0, -1):
         for similarUser in usersWithGenreSimilarities[genreSimilarities]:
             for track in User.objects.get(id=similarUser).favouriteTracks.all():
+                # Skips common tracks.
+                if track in currentUser.favouriteTracks.all():
+                    continue
 
                 track.recommended += 1
                 track.save()
@@ -28,7 +31,10 @@ def getRecommendations(user, amount=20) -> list:
                 recommendations.append(track)
                 if len(recommendations) >= amount:
                     return recommendations
-    return recommendations
+
+    if len(recommendations) >= amount:
+        return recommendations
+    raise ValueError("Not enough records in the database")
 
 
 def getUserByNickname(nickname) -> User | None:
@@ -41,3 +47,12 @@ def getTrackById(trackId) -> Track | None:
     if Track.objects.filter(id=trackId).exists():
         return Track.objects.get(id=trackId)
     return None
+
+
+def getTrackInformation(track) -> dict:
+    if track.album is not None:
+        return {"name": track.name, "artist": track.artist.name, "album": track.album.name, "genres": track.genres,
+                "listeners": track.lovers, "recommended": track.recommended}
+    else:
+        return {"name": track.name, "artist": track.artist.name, "genres": track.genres,
+                "listeners": track.lovers, "recommended": track.recommended}

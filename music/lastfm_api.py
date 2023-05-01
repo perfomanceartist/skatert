@@ -24,7 +24,8 @@ def userGetLovedTracks(username):
     params = {
         "method": "user.getLovedTracks",
         "user": username,
-        "format": "json"
+        "format": "json",
+        "limit": 1000
     }
     try:
         return makeGetRequest(params)

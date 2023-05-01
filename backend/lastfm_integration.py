@@ -2,7 +2,7 @@ from backend.display import showMusicPreferences
 from music.models import Artist, Album, Track
 from users.models import User, MusicPreferences
 import music.lastfm_api
-from backend.parameters import GenreNames, GenreList, makeOrCheckMusicPreferences
+from backend.parameters import GenreNames, GenreList
 
 
 def prepareArtist(artistName):
@@ -65,25 +65,31 @@ def prepareTrack(trackInfo) -> Track:
             artist = prepareArtist(artist_name)
 
         # Get extended track info
-        extendedTrackInfo = music.lastfm_api.trackGetInfo(name, artist_name)["track"]
+        rawData = music.lastfm_api.trackGetInfo(name, artist_name)
 
-        # Prepare track object
-        if "album" in extendedTrackInfo and extendedTrackInfo.get("album"):
-            track = Track(name=name, album=prepareAlbum(extendedTrackInfo["album"]), artist=artist, genres=[False] * len(GenreNames))
+        if "track" in rawData:
+            extendedTrackInfo = rawData["track"]
+
+            # Prepare track object
+            if "album" in extendedTrackInfo and extendedTrackInfo.get("album"):
+                track = Track(name=name, album=prepareAlbum(extendedTrackInfo["album"]), artist=artist, genres=[False] * len(GenreNames))
+            else:
+                track = Track(name=name, artist=artist, genres=[False] * len(GenreNames))
+            track.save()
+
+            # Prepare genres. Set contains GENRE ID's = NUMBERS
+            favouriteGenresNames = list()
+            for genre in extendedTrackInfo.get("toptags", {}).get("tag", []):
+                if genre["name"] in GenreNames:
+                    favouriteGenresNames.append(genre["name"])
+            GenreList.fromGenreNames(favouriteGenresNames).setToTrack(track)
         else:
             track = Track(name=name, artist=artist, genres=[False] * len(GenreNames))
-        track.save()
-
-        # Prepare genres. Set contains GENRE ID's = NUMBERS
-        genres = list()
-        for genre in extendedTrackInfo.get("toptags", {}).get("tag", []):
-            if genre["name"] in GenreNames:
-                genres.append(genre["name"])
-        GenreList.fromGenreNames(genres).setToTrack(track)
+            track.save()
 
         return track
-    except KeyError:
-        raise RuntimeError("Failed to prepare the track.")
+    except KeyError as error:
+        raise RuntimeError("Failed to prepare the track: " + str(error))
 
 
 def prepareUserTracks(user):
@@ -96,8 +102,8 @@ def prepareUserTracks(user):
         for trackInfo in usersTrack["track"]:
             trackList.append(prepareTrack(trackInfo))
         return trackList
-    except KeyError:
-        raise RuntimeError("Failed to prepare user's loved track.")
+    except KeyError as error:
+        raise RuntimeError("Failed to prepare user's loved track: " + str(error))
 
 
 def loadUserLastFM(nickname, lastfmNickname):
@@ -107,22 +113,24 @@ def loadUserLastFM(nickname, lastfmNickname):
         user = User(nickname=nickname, lastfm=lastfmNickname)
         user.save()
 
-        for value in makeOrCheckMusicPreferences():
+        for value in MusicPreferences.objects.all():
             value.usersBitmask.append(False)
             value.save()
 
-        # print("User:", user.id)
-        # showMusicPreferences()
-
-    userGenres = GenreList.defaultList()
+    userGenresCounts = [0 for _ in range(len(GenreNames))]
 
     userTracks = prepareUserTracks(lastfmNickname)
     for track in userTracks:
         user.favouriteTracks.add(track)
-        userGenres.unite(GenreList.fromTrack(track))
+        currentGenres = GenreList.fromTrack(track).values
+        for i in range(len(GenreNames)):
+            if currentGenres[GenreNames[i]]:
+                userGenresCounts[i] += 1
     user.save()
 
-    userGenres.setToUser(user)
+    chosenUserGenres = [count * len(GenreNames) >= len(userTracks) for count in userGenresCounts]
+    GenreList(chosenUserGenres).setToUser(user)
+    showMusicPreferences()
 
 
 
