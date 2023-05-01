@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, Http
 from django.views.decorators.csrf import csrf_exempt
 
 import music.lastfm_api
-from users.models import AuthTokens, Account, User
+from users.models import AuthTokens, Account, User, MusicPreferences
 import re
 
 
@@ -50,6 +50,13 @@ def register(request):
         user.save()
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()
+
+        music_prefs = MusicPreferences.objects.get()
+        for music_pref in music_prefs:
+            music_pref.usersBitmask += [False]
+            music_pref.save()
+        
+
         return HttpResponse("Registered")
     else:
         return HttpResponseBadRequest("Некорректный метод запроса")
