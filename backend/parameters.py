@@ -42,6 +42,10 @@ class GenreList:
     def show(self):
         print(*self.values.values(), sep=", ")
 
+    def set(self, key, value):
+        if key in GenreNames:
+            self.values[key] = value
+
     @staticmethod
     def defaultList():
         return GenreList([False] * len(GenreNames))

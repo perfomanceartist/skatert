@@ -9,11 +9,6 @@ from backend.backend import getRecommendations, getUserByNickname, getTrackById,
 from backend.parameters import GenreNames, GenreList
 import json
 
-
-def index(request):
-    pass
-
-
 class MakeLastFmIntegration(View):
     def post(self, request, *args, **kwargs):
         try:
@@ -28,7 +23,6 @@ class MakeLastFmIntegration(View):
 
 class GetUserGenres(View):
     def get(self, request, *args, **kwargs):
-        backend.display.showMusicPreferences()
         nickname = request.GET.get('nickname')
         if nickname is None:
             return HttpResponseBadRequest('Skatert nickname should be specified for this type of request.')
@@ -48,13 +42,12 @@ class SetUserGenres(View):
             if user is None:
                 return HttpResponseNotFound("User with nickname '" + data["nickname"] + "' is not found.")
 
-            # specifiedValues = json.loads(json_string)
-            # values = {name: False for name in genreNames}
-            # for key in values:
-            #     if key in specifiedValues:
-            #         values[key] = specifiedValues[key]
-            #
-            # setUserGenres(user, (values[name] for name in genreNames))
+            genres = GenreList.defaultList()
+            for key in data["genres"]:
+                genres.set(key, data["genres"][key])
+            genres.setToUser(user)
+
+            return JsonResponse(prepareUserInfo(user))
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest('Failed to decode json data.')
         except (RuntimeError, ValueError) as error:

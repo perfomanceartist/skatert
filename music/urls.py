@@ -2,7 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
     path('lastFM-integration', views.MakeLastFmIntegration.as_view(), name="MakeLastFmIntegration"),
     path('getFavouriteGenres', views.GetUserGenres.as_view(), name="GetUserGenres"),
     path('setFavouriteGenres', views.SetUserGenres.as_view(), name="SetUserGenres"),
