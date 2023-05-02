@@ -1,5 +1,7 @@
 package com.example.skatert;
 
+import android.os.AsyncTask;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
@@ -13,26 +15,18 @@ import com.google.gson.reflect.TypeToken;
 
 public class ServerConnector {
     private static final String serverHostAddress = "http://10.0.0.2:8000/music/";
-    private static String output = null;
 
-    public interface OnTaskCompleted {
-        void onTaskCompleted(String result);
-    }
-
-    private static class HttpThread extends Thread {
-        private final OnTaskCompleted mListener;
-        private static final int attempts = 20;
-        private URL url = null;
-
-        public HttpThread(URL url, OnTaskCompleted listener) {
-            mListener = listener;
-            this.url = url;
-        }
+    private class MyAsyncTask extends AsyncTask<String, Void, String> {
 
         @Override
-        public void run() {
+        protected void onPreExecute() {}
+
+        @Override
+        protected String doInBackground(String... urls) {
+            int attempts = 20;
             for(int i = 0; i < attempts; ++i) {
                 try {
+                    URL url = new URL(urls[0]);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("Content-Type", "application/json");
@@ -45,7 +39,7 @@ public class ServerConnector {
                         while ((inputLine = in.readLine()) != null)
                             response.append(inputLine);
                         in.close();
-                        mListener.onTaskCompleted(response.toString());
+                        return response.toString();
                     } else {
                         connection.disconnect();
                         throw new RuntimeException("Response code is not OK.");
@@ -59,13 +53,6 @@ public class ServerConnector {
     }
 
     private static String makeGetRequest(URL url) throws InterruptedException {
-        new HttpThread(url, new OnTaskCompleted() {
-            @Override
-            public void onTaskCompleted(String result) {
-//                output = result;
-                System.out.println(result);
-            }
-        }).start();
         return "";
     }
 

@@ -12,7 +12,7 @@
     <string name="email">Email</string>
 
     <string name="confirm">Confirm</string>
-    <string name="favourite_tracks">Favourite Tracks:</string>
+    <string name="favourite_tracks">Skater music recommendations:</string>
     <string name="song_title">Track name</string>
     <string name="artist_name">Artist</string>
     <string name="album_name">Album</string>
