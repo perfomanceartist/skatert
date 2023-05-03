@@ -5,6 +5,10 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.views import APIView
+
 
 import music.lastfm_api
 from users.models import AuthTokens, Account, User, MusicPreferences
@@ -22,9 +26,27 @@ def _check_email(email: str):
     return False
 
 
-@csrf_exempt
-def register(request):
-    if request.method == "POST":
+class Register(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'email', 'hash'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'hash': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Register Skatert Account',
+        tags=['Users']
+    )
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):        
         try:
             data = json.loads(request.body.decode("utf-8"))
         except Exception:
@@ -54,12 +76,11 @@ def register(request):
         music_prefs = MusicPreferences.objects.all()
         for music_pref in music_prefs:
             music_pref.usersBitmask += [False]
-            music_pref.save()
-        
+            music_pref.save()       
 
         return HttpResponse("Registered")
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
+    
+
 
 
 def _email_request(account):
@@ -84,9 +105,27 @@ def _email_request(account):
     return token
 
 
-@csrf_exempt
-def password_auth(request):
-    if request.method == "POST":
+class PasswordAuth(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'hash'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'hash': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenicate Skatert Account by Password',
+        tags=['Users']
+    )
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
@@ -114,13 +153,30 @@ def password_auth(request):
 
         token = _email_request(account)
         return HttpResponse("Token: " + token)
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
 
 
-@csrf_exempt
-def email_auth(request):
-    if request.method == "POST":
+
+class EmailAuth(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'code'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'code': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenicate Skatert Account by Email',
+        tags=['Users']
+    )
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):        
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
@@ -152,8 +208,10 @@ def email_auth(request):
         response.set_cookie("token", str(token.token))
         response.set_cookie("nickname", nickname)
         return response
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
+        
+
+
+
 
 
 @csrf_exempt

@@ -51,6 +51,7 @@ class GetUserGenres(APIView):
                 type=openapi.TYPE_STRING
             )
         ],
+        tags=['Music'],
         responses={
             200: openapi.Response(
                 description='Genres successfully retrieved',
@@ -105,6 +106,7 @@ class SetUserGenres(APIView):
     @swagger_auto_schema(
         operation_summary='Set user genres',
         operation_description='Set genres of a user by their nickname',
+        tags=['Music'],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
@@ -115,11 +117,11 @@ class SetUserGenres(APIView):
                 'genres': openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     additional_properties=openapi.Schema(
-                        type=openapi.TYPE_INTEGER,
-                        description='The weight of the genre'
+                        type=openapi.TYPE_BOOLEAN,
+                        description='The weight of the genre (true/false)'
                     )
                 )
-            }
+            },
         ),
         responses={
             200: openapi.Response(
@@ -134,8 +136,8 @@ class SetUserGenres(APIView):
                         'genres': openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             additional_properties=openapi.Schema(
-                                type=openapi.TYPE_INTEGER,
-                                description='The weight of the genre'
+                                type=openapi.TYPE_BOOLEAN,
+                                description='The weight of the genre (true/false)'
                             )
                         )
                     }
@@ -189,6 +191,7 @@ class GetAppliedGenres(APIView):
     @swagger_auto_schema(
         operation_summary="Get applied genres",
         operation_description="Retrieve the list of all applied music genres.",
+        tags=['Music'],
         responses={
             200: "The list of all applied music genres."
         }
@@ -204,6 +207,7 @@ class GetTrackById(APIView):
     @swagger_auto_schema(
         operation_summary='Get track by id',
         operation_description='Retrieve information about a track by its id.',
+        tags=['Music'],
         manual_parameters=[
             openapi.Parameter('id', openapi.IN_QUERY, 'Track id', type=openapi.TYPE_STRING, required=True)]
     )
@@ -232,6 +236,7 @@ class GetUserFavouriteTracks(APIView):
                 description='The nickname of the user whose favourite tracks are to be returned'
             )
         ],
+        tags=['Music'],
         responses={
             200: openapi.Response(
                 description='OK',
@@ -278,6 +283,7 @@ class GetUsers(APIView):
     @swagger_auto_schema(
         operation_summary="Get a list of all users",
         operation_description="Retrieve a list of all users with their details",
+        tags=['Music'],
         responses={
             200: openapi.Response(
                 description="List of all users",
@@ -305,6 +311,7 @@ class GetRecommendations(APIView):
             openapi.Parameter('amount', openapi.IN_QUERY, description="Amount of recommended tracks",
                               type=openapi.TYPE_INTEGER),
         ],
+        tags=['Music'],
         responses={
             200: openapi.Response(description="Recommended tracks",),
             400: "Bad Request",
