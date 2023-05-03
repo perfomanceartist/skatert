@@ -46,6 +46,12 @@ def login(request):
 def register(request):
     return render(request, "login/register_page.html")
 
+def genres(request):
+    nickname = request.COOKIES.get("reg_nickname")
+    if nickname is None:
+        return HttpResponseRedirect("/login")
+    data = {"user": {"nickname": nickname}}
+    return render(request, "login/genres_page.html", context=data)
 
 def user(request, nickname):
     if check_cookie(request) is False:

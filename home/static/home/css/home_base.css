@@ -1,5 +1,6 @@
 .nav-item {
     -webkit-text-fill-color: black;
+    user-select : none;
 
 }
 

@@ -1,0 +1,38 @@
+{% extends 'login/login_base.html' %}
+{% load static %}
+
+{% block title %}
+Выбор жанров
+{% endblock title %}
+
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'login/css/genres_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'login/css/login_base.css' %}">
+{% endblock css_adding %} 
+
+
+{% block js_adding %}
+<script type="text/JavaScript" src = "{% static 'login/js/genres_page.js' %}"></script>
+{% endblock js_adding %}
+
+{% block logincontent %}
+<h2>{{user.nickname}}, выбери интересующие жанры</h2>
+<div class="row">
+    <div class="column">
+      <label class = "genre hiphop"><input id = "CB_hiphop" type="checkbox" ><span>ХИП-ХОП</span></label>
+      <label class = "genre rap"><input id = "CB_rap" type="checkbox"><span>РЭП</span></label>
+      <label class = "genre edm"><input id = "CB_edm" type="checkbox" ><span>EDM</span></label>
+      <label class = "genre rock"><input id = "CB_rock" type="checkbox" ><span>РОК</span></label>
+    </div>
+    <div class="column">
+      <label class = "genre classical"><input id = "CB_class" type="checkbox" ><span>КЛАССИКА</span></label>
+      <label class = "genre rnbsoul"><input id = "CB_rnb" type="checkbox" ><span>R&B и СОУЛ</span></label>
+      <label class = "genre pop"><input id = "CB_pop" type="checkbox" ><span>ПОП</span></label>
+      <label class = "genre alternative"><input id = "CB_alt"  type="checkbox" ><span>АЛЬТ</span></label>
+      
+    </div>
+</div> 
+<div>
+  <button class="buttons_elem btn-primary" onclick="choose_genres('{{user.nickname}}')">Готово</button>  
+</div>
+{% endblock logincontent %}

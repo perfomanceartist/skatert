@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-
 {% load static %}
+
 {% block css_adding %} 
   <link rel = "stylesheet" href = "{% static 'home/css/home_page.css' %}">
   <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
 {% endblock css_adding %} 
+
 
 {% block site_head %}
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -12,17 +13,19 @@
         <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/mypage">Моя страница</a>
         </li>
+        <!-- <a class="nav-link">|</a>
         <li class="nav-item">
             <a class="nav-link active" href="#">Рекомендации</a>
-        </li>
+        </li> -->
+        <!-- <a class="nav-link">|</a>
         <li class="nav-item">
-            <a class="nav-link active" href="#">Настройки</a>
-        </li>
-        {% block exit_account %}
-        {% endblock exit_account %}
+            <a class="nav-link active" href="#" onclick="import_tracks()">Импортировать</a>
+        </li> -->
+        {% block userpage %}
+        {% endblock userpage %}
     </ul>
     <form class="d-flex" role="search">
-      <input class="form-control me-2" type="search" placeholder="Искать пользователей" aria-label="search">
+      <input class="form-control me-2" type="search" placeholder="Искать треки" aria-label="search">
       <button class="btn btn-outline-success" type="submit">Искать</button>
     </form>
 </div>

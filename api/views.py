@@ -30,9 +30,10 @@ class Register(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['nickname', 'email', 'hash'],
+            required=['nickname', 'lastfm_nickname', 'email', 'hash'],
             properties={
                 'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'lastfm_nickname' : openapi.Schema(type=openapi.TYPE_STRING),
                 'email': openapi.Schema(type=openapi.TYPE_STRING),
                 'hash': openapi.Schema(type=openapi.TYPE_STRING),
             }
@@ -57,18 +58,21 @@ class Register(APIView):
             return HttpResponse(status=222)
         if not nickname:
             return HttpResponse(status=223)
+        
+        lastfm_nickname = data.get("lastfm_nickname")
+        if not lastfm_nickname:
+            return HttpResponse(status=223)
 
         email = data.get("email")
         if not email:
             return HttpResponse(status=223)
         if not _check_email(email):
             return HttpResponse(status=225)
-
         hash = data.get("hash")
         if not hash:
             return HttpResponse(status=223)
 
-        user = User(nickname=nickname)
+        user = User(nickname=nickname, lastfm = lastfm_nickname)
         user.save()
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()

@@ -18,40 +18,41 @@
 
 
 {% block logincontent %}
-<!-- <h3 style="text-align: right;">Регистрация</h3> -->
 <form id="nickname">
   <div class="mb-3">
-      <!-- <label for="loginControlInputNick" class="form-label">Никнейм</label> -->
       <input type="text" class="form-control" id="loginControlInputNick" placeholder="ПОЛЬЗОВАТЕЛЬ">
   </div>
 </form>
-<div class="mb-3 d-none" id="nickname_duplicate">
-  <p style="color: red; text-align: right;">Пользователь с таким ником уже существует!</p>
-</div>
+<form id="lastfm_nickname">
+  <div class="mb-3">
+      <input type="text" class="form-control" id="loginControlInputLastfmNick" placeholder="НИКНЕЙМ В LASTFM">
+  </div>
+</form>
 <form id="email">
   <div class="mb-3">
-      <!-- <label for="loginControlInputEmail" class="form-label">Адрес эл.почты</label> -->
       <input type="email" class="form-control" id="loginControlInputEmail" placeholder="АДРЕС ЭЛЕКТРОННОЙ ПОЧТЫ">
   </div>
 </form>
 <form id="password">
   <div class="mb-3">
-    <!-- <label for="loginControlInputPassword" class="form-label">Пароль</label> -->
     <input type="password" class="form-control" id="loginControlInputPassword" placeholder="НОВЫЙ ПАРОЛЬ">
   </div>
   <div class="mb-3">
-    <!-- <label for="loginControlInputPasswordConfirm" class="form-label">Повторите пароль</label> -->
     <input type="password" class="form-control" id="loginControlInputPasswordConfirm" placeholder="ПОВТОРИТЕ ПАРОЛЬ">
   </div>
 </form>
+
+<div class="mb-3 d-none" id="nickname_duplicate">
+  <p style="color:#FF8E00; text-align: right;">Пользователь с таким ником уже существует!</p>
+</div>
 <div class="mb-3 d-none" id="pass_mismatch">
-  <p style="color: red; text-align: right;">Password mismatch. Try Again</p>
+  <p style="color: #FF8E00; text-align: right;">Пароли не совпадают!</p>
 </div>
 <div class="mb-3 d-none" id="incorrect_email">
-  <p style="color: red; text-align: right;">Incorrect email format</p>
+  <p style="color:#FF8E00; text-align: right;">E-mail введен некорректно!</p>
 </div>
 <div class="mb-3 d-none" id="empty_field">
-  <p style="color: red; text-align: right;">Fill all fields, please</p>
+  <p style="color: #FF8E00; text-align: right;">Все поля должны быть заполнены!</p>
 </div>
 <div class="mb-3">
   <button class="btn btn-primary mb-3" name="registerButton" onclick="register()">Далее</button>    

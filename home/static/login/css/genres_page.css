@@ -1,0 +1,143 @@
+.row {
+    display: flex;
+  }
+  
+.column {
+    flex: 10%;
+  }
+
+
+h2 {
+    /* ЗНАЮ ЧТО ХРЕНОВО ВЫГЛЯДИТ */
+    font-family: 'Consolas';
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 4px;
+    text-align: center;
+    letter-spacing: 0.1em;
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.5px black;
+    /* border-radius: 10px; */
+
+
+}
+  
+.genre {
+    /* background-color: white; */
+    border-radius: 4px;
+    line-height: 8.0em;
+    width: 12.0em; 
+    margin: 10px;
+    border-radius: 10px;
+
+}
+
+.genre input {
+    display: none;
+    text-size-adjust:auto;
+}
+
+.genre input + span{
+    border-radius: 10px;
+
+    user-select: none;
+    text-align: center;
+    display: block;
+
+    font-size: 30px;
+
+    font-weight: 650;
+
+
+    -webkit-text-fill-color: #D5D7DB;
+    -webkit-text-stroke: 1.5px  black;
+    border: 4px solid black;
+
+    filter: saturate(0);
+}
+
+.genre input:checked + span {
+    border-radius: 10px;
+    -webkit-text-fill-color: white;
+    -webkit-text-stroke: 1.5px  #FF8E00;
+    border: 4px solid white;
+    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
+    filter: drop-shadow(0px 0px 25px #FF8E00);
+
+}
+
+
+.hiphop input + span{
+    background-image: url("/static/login/img/hiphop.jpg");
+    background-position: center;
+    background-size: 200%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+.rap input + span{
+    background-image: url("/static/login/img/rap.jpg");
+    background-position: center;
+    background-size: 150%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+.edm input + span{
+    background-image: url("/static/login/img/edm.jpg");
+    background-position: center;
+    background-size: 150%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+.rock input + span{
+    background-image: url("/static/login/img/rock.jpg");
+    background-position: center;
+    background-size: 100%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+.classical input + span{
+    background-image: url("/static/login/img/classical.jpg");
+    background-position: center;
+    background-size: 200%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+.rnbsoul input + span{
+    background-image: url("/static/login/img/rnbsoul.png");
+    background-position: center;
+    background-size: 150%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+
+.pop input + span{
+    background-image: url("/static/login/img/pop.jpg");
+    background-position: center;
+    background-size: 160%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
+
+
+.alternative input + span{
+    background-image: url("/static/login/img/alternative.png");
+    background-position: center;
+    background-size: 120%;
+
+    /* background-size: cover; Эта тема заполнит фотку альбома по краям*/
+
+}
