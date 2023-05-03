@@ -50,6 +50,8 @@ async function import_tracks(nickname) {
 
   // console.log(tracks)
 
+  document.getElementById("mylist").innerHTML = "";
+
   for (var obj in tracks) {
     console.log(tracks[obj]);
     var track = tracks[obj];
@@ -64,5 +66,35 @@ async function import_tracks(nickname) {
 
 
 
+}
+
+
+async function get_recomendations(nickname) {
+
+  
+
+  const response_recomendation = await fetch("/music/getRecommendations?" + new URLSearchParams({
+    nickname: nickname,
+    amount: 10,
+  }),
+  {
+    headers: { "Accept": "application/json" }
+  });
+
+
+  var tracks = await response_recomendation.json();
+
+  document.getElementById("mylist").innerHTML = "";
+
+  for (var obj in tracks) {
+    console.log(tracks[obj]);
+    var track = tracks[obj];
+    // var menu = main_category[i];
+
+    var li = document.createElement("li");
+    li.innerHTML = track["name"] + "---" + track["artist"] + "---" + track["album"];
+    // li.innerHTML = tracks[track]["name"];
+    document.getElementById("mylist").appendChild(li);
+  }
 }
  
