@@ -31,7 +31,9 @@ class MakeLastFmIntegration(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            loadUserLastFM(data["nickname"], data["lastFmNickname"])
+            result = loadUserLastFM(data["nickname"], data["lastFmNickname"])
+            if result is False:
+                return HttpResponseBadRequest("No such user")
             return JsonResponse(prepareUserInfo(User.objects.get(nickname=data['nickname'], lastfm=data['lastFmNickname'])))
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest('Failed to decode json data.')

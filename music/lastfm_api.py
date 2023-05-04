@@ -9,7 +9,8 @@ def makeGetRequest(params):
 
     for i in range(attempts):
         try:
-            return requests.get(url, params=params, timeout=10).json()
+            response = requests.get(url, params=params, timeout=10).json()
+            return response
         except (ConnectionError, requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as error:
             print("Warning. Connection errors:", error)
     raise RuntimeError("Connection failed.")
@@ -25,6 +26,20 @@ def userGetInfo(username):
         return makeGetRequest(params)
     except (TimeoutError, requests.exceptions.JSONDecodeError) as exception:
         raise RuntimeError("Failed to get user information: " + exception)
+
+
+
+def userGetLovedTracksAmount(username):
+    params = {
+        "method": "user.getLovedTracks",
+        "user": username,
+        "format": "json",
+        "limit": 1
+    }
+    try:
+        return int(makeGetRequest(params)["lovedtracks"]["@attr"]["total"])
+    except (TimeoutError, requests.exceptions.JSONDecodeError) as exception:
+        raise RuntimeError("Failed to get user's favourite tracks' amount: " + exception)
 
 
 def userGetLovedTracks(username):
