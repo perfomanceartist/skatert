@@ -29,7 +29,7 @@ async function choose_genres(nickname) {
 
   console.log(response)
   if (response.ok === true) {
-    document.cookie = ``
+    document.cookie = `reg_nickname=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
     window.location.replace('/login');
   }
   else alert('Genres error!');
