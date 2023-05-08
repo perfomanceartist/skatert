@@ -22,8 +22,14 @@ var userNickname = '';
       document.getElementById('empty_field').classList.remove('d-none');
       return false;
     }
+    if (response.status == 201) {
+      var responseJson = response.json();
+      document.cookie += `nickname=${userNickname}; token=${responseJson['token']}`;
+      window.location.replace('/');
+      return true;
+    }
     if (response.ok === true) {
-      userNickname = nickname;
+      userNickname = nickname; 
       return true;
     }
     else {

@@ -33,7 +33,8 @@ class Subscriptions(models.Model):
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     passwordhash = models.CharField(max_length=16)
-    email = models.EmailField()
+    email = models.EmailField()    
+    secondFactor = models.BooleanField(default=False, blank=False)
 
 
 class AuthTokens(models.Model):

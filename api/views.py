@@ -88,14 +88,7 @@ class Register(APIView):
 
 
 def _email_request(account):
-    token = str(randint(100000, 999999))
-    hashToken = AuthTokens(
-        account=account,
-        token=token,
-        type="hash",
-        expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
-    )
-    hashToken.save()
+    token = create_hash_token(account)
 
     send_mail(
         "Skatert. Код Подтверждения входа",  # subject
@@ -124,7 +117,7 @@ class PasswordAuth(APIView):
             400: openapi.Response(description='Bad request'),
             500: openapi.Response(description='Internal server error'),
         },
-        operation_description='Authenicate Skatert Account by Password',
+        operation_description='Authenticate Skatert Account by Password',
         tags=['Users']
     )
 
@@ -155,8 +148,21 @@ class PasswordAuth(APIView):
         if account is None:
             return HttpResponseBadRequest("Неверные учетные данные")
 
-        token = _email_request(account)
-        return HttpResponse("Token: " + token)
+        if account.secondFactor:
+            tokenInt = _email_request(account)
+            response = JsonResponse({
+                "token": "-"
+                })
+        else:
+            AuthToken = create_email_token(account)
+            response = JsonResponse({"token": str(AuthToken.token)})            
+            response.status_code = 201
+            response.set_cookie("token", str(AuthToken.token))
+            response.set_cookie("nickname", nickname)
+        
+        return response
+
+       
 
 
 
@@ -193,28 +199,58 @@ class EmailAuth(APIView):
         if not code:
             return HttpResponseBadRequest("Не указан email")
 
+
+        # Поиск аккаунта
         account = Account.objects.filter(user__nickname=nickname).get()
         if not account:
             return HttpResponseBadRequest("Некорректные данные")
 
-        token = AuthTokens.objects.filter(account=account).filter(token=code).get()
-        if not token:
+        # Поиск токена (тип - хеш-токен)
+        AuthToken = AuthTokens.objects.filter(account=account).filter(type="hash").filter(token=code).get()
+        if not AuthToken:
             return HttpResponseBadRequest("Некорректный код")
-        if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
-            token.delete()
+        # Проверка актуальности 
+        if datetime.datetime.now().timestamp() > AuthToken.expiration_date.timestamp():
+            AuthToken.delete()
             return HttpResponseBadRequest("Токен не актуален. Попробуйте ещё раз.")
 
-        token.token = hex(randint(100, 0xFFFFFFFF))
-        token.type = "email"
-        token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
-        token.save()
-        response = JsonResponse({"token": str(token.token)})
-        response.set_cookie("token", str(token.token))
+        #Смена типа токена - на email-token
+        AuthToken = create_email_token(account, hash_token=AuthToken)
+
+        response = JsonResponse({
+            "token": str(AuthToken.token)
+            })
+        response.set_cookie("token", str(AuthToken.token))
         response.set_cookie("nickname", nickname)
         return response
         
 
 
+
+@csrf_exempt
+def create_hash_token(account):
+    token = str(randint(100000, 999999))
+    hashToken = AuthTokens(
+        account=account,
+        token=token,
+        type="hash",
+        expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
+    )
+    hashToken.save()
+    return token
+
+
+def create_email_token(account, hash_token=None):
+    if hash_token is None:
+        AuthToken = AuthTokens(account=account)
+    else:
+        AuthToken = hash_token
+
+    AuthToken.token = hex(randint(100, 0xFFFFFFFF))
+    AuthToken.type = "email"
+    AuthToken.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
+    AuthToken.save()
+    return AuthToken
 
 
 
