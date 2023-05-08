@@ -7,7 +7,6 @@
 {% load static %}
 {% block js_adding %}
 <script type="text/JavaScript" src = "{% static 'home/js/user_page.js' %}"></script>
-
 {% endblock js_adding %}
 
 
@@ -20,6 +19,10 @@
 <a class="nav-link">|</a>
 <li class="nav-item">
     <a class="nav-link active" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
+</li>
+<a class="nav-link">|</a>
+<li class="nav-item">
+    <a class="nav-link active" href="/settings">Настройки</a>
 </li>
 <a class="nav-link">|</a>
 <li class="nav-item">

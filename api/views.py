@@ -252,6 +252,98 @@ class Logout(APIView):
         return response
 
 
+class Settings(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'token', 'lastfm', 'secondFactor'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.TYPE_STRING),
+                'lastfm': openapi.Schema(type=openapi.TYPE_STRING),
+                'secondFactor':openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenticate Skatert Account by Password',
+        tags=['Users']
+    )
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except:
+            return HttpResponseBadRequest("Некорректный формат данных")
+
+        
+
+        nickname = data.get("nickname")
+        if not nickname:
+            return HttpResponseBadRequest("Не указан никнейм")
+        
+        token = data.get('token')
+        if not token:
+            return HttpResponseBadRequest("Не указан токен")
+
+        lastfmNickname = data.get('lastfm')
+        if not lastfmNickname:
+            return HttpResponseBadRequest("Не указан ник lastfm")
+        
+        secondFactor = data.get('secondFactor')
+        if secondFactor is None:
+            return HttpResponseBadRequest("Не указан способ аутентификации")
+        
+        if not check_token(nickname, token):
+            return HttpResponseBadRequest("Неверный токен досутпа")
+        
+        
+
+        user = User.objects.filter(nickname = nickname).get()
+        if user is None:
+            return HttpResponseBadRequest("Не найден пользователь")
+
+        account = Account.objects.filter(user = user).get()
+        if account is None:
+            return HttpResponseBadRequest("Не найден аккаунт")
+        
+        
+        user.lastfm = lastfmNickname
+        user.save()
+        account.secondFactor = secondFactor
+        account.save()
+
+        return HttpResponse()
+    
+
+
+
+        
+
+
+def check_token(nickname, tokenVal):
+    account = Account.objects.filter(user__nickname=nickname).get()
+    if account is None:
+        return False
+
+    token = AuthTokens.objects.filter(account=account).filter(token=tokenVal).get()
+    if token is None:
+        return False
+
+    if token.type != "email":
+        return False
+
+    if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
+        token.delete()
+        return False
+
+    return True
+
+
 @csrf_exempt
 def create_hash_token(account):
     token = str(randint(100000, 999999))

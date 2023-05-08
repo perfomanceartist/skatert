@@ -1,0 +1,58 @@
+{% extends "home/user_page.html" %}
+
+{% load static %}
+{% block js_adding %}
+<script type="text/JavaScript" >
+    async function set_settings(nickname) {
+    var lastFmNickname = document.getElementById("lastfm").value;
+    var secondFactor = document.getElementById("secondFactor").checked;
+
+    var token = document.cookie.match(/token=(.+?)(;|$)/)[1];
+
+    console.log(JSON.stringify({
+        nickname : nickname,
+        token: token,
+        lastfm: lastFmNickname,
+        secondFactor: secondFactor
+    }));
+
+
+    const response = await fetch("/api/settings", {
+    method: "POST",
+    headers: { "Accept": "application/json" },
+    body: JSON.stringify({
+        nickname : nickname,
+        token: token,
+        lastfm: lastFmNickname,
+        secondFactor: secondFactor
+    })
+    });
+    if (response.ok === true) {
+    alert("Success!");
+    }
+    else alert("Error!")
+}
+</script>
+{% endblock js_adding %}
+
+{% block content %}
+<h2>Настройки</h2>
+
+<div>
+    <label for="lastfm">Имя пользователя в Last.FM</label>
+    <input type="text" id="lastfm" name="lastfm" value={{user.lastfmLogin}} />
+</div>
+    
+<div>
+    <label for="secondFactor">Использовать двухфакторную аутентификацию (email)</label>
+    {% if user.secondFactor%}
+    <input type="checkbox" id="secondFactor" name="secondFactor" checked />
+    {% else %}
+    <input type="checkbox" id="secondFactor" name="secondFactor" />
+    {% endif %}
+</div>
+    
+<input type="button" onclick="set_settings('{{user.nickname}}')" value="Сохранить"/>
+
+
+{% endblock content %}

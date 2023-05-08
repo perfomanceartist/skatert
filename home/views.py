@@ -1,9 +1,10 @@
 import datetime
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
 
-from users.models import AuthTokens, Account
+from users.models import AuthTokens, Account, User
+
 
 
 def check_token(nickname, tokenVal):
@@ -70,3 +71,30 @@ def mypage(request):
 
     data = {"user": {"nickname": nickname}}
     return render(request, "home/user_page.html", context=data)
+
+
+def settings(request):
+    if check_cookie(request) is False:
+       return HttpResponseRedirect('/login')
+
+    nickname = request.COOKIES.get("nickname")
+    if nickname is None:
+        return HttpResponseRedirect("/login")
+
+    user = User.objects.filter(nickname=nickname).get()
+    if user is None:
+        return HttpResponseBadRequest()
+
+
+    account = Account.objects.filter(user=user).get()
+    if account is None:
+        return HttpResponseBadRequest()
+
+    data = {"user": {
+        "nickname": nickname,
+        "lastfmLogin": user.lastfm,
+        "secondFactor": account.secondFactor,        
+        }
+        }
+    
+    return render(request, "home/settings_page.html", context=data)
