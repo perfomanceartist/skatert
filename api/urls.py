@@ -26,6 +26,6 @@ urlpatterns = [
     path("login_pass", views.PasswordAuth.as_view()),
     path("login_email", views.EmailAuth.as_view()),
     path("register", views.Register.as_view()),
-    path("logout", views.user_logout),
+    path("logout", views.Logout.as_view()),
     path("integrate", views.music_integration)
 ]

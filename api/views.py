@@ -225,6 +225,31 @@ class EmailAuth(APIView):
         return response
         
 
+class Logout(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'token'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Logging Out Skatert Account',
+        tags=['Users']
+    )
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        
+        response = HttpResponseRedirect('/login')
+        response.delete_cookie('token')
+        response.delete_cookie('nickname')
+        return response
 
 
 @csrf_exempt
@@ -254,12 +279,7 @@ def create_email_token(account, hash_token=None):
 
 
 
-@csrf_exempt
-def user_logout(request):
-    response = HttpResponseRedirect('/login')
-    response.delete_cookie('token')
-    response.delete_cookie('nickname')
-    return response
+
 
 
 @csrf_exempt
