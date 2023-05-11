@@ -1,54 +1,131 @@
-.form-control{
-    background: #D9D9D9;
-    border: 3px solid #FF8E00;
-} 
-
-
-.form-control:focus{
-    background: #FFFFFF;
-    border: 3px solid #FF8E00;
-    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
-    filter: drop-shadow(0px 0px 35px #FF8E00);
-}
-
-.aright:link, .aright:visited, .aright:hover, .aright:active {
-    color : #FF8E00;
-    text-decoration: none;
-    font-weight: bold;
-
-}
-
-
-.btn{
-    position: absolute;
-    width: 160px;
-    height: 40px;
-
-    background: #D5D7DB;
-    border: 3px solid #000000;
-    border-radius: 40px;
-
+h3 {
     font-family: 'Consolas';
-    font-weight: 700;
-    font-size: 28px;
+    font-weight: 800;
+    font-size: 48px;
     line-height: 4px;
+    text-align: center;
     letter-spacing: 0.1em;
 
+    margin-top: 5%;
+
+
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1.5px black;
+    -webkit-text-stroke: 2px black;
+}
+
+.container {
+    margin-top: 5%;
+    width: 80%;
+}
+
+
+.list_element {
+    margin : 2%;
+
+    border: 3px solid black;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2% 2%;
+
 }
 
 
 
+.like_button {
+    float: left;
+    margin: 10px;
+    width: 20px;
+    height: 20px;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    background-color: black;
+    padding: 0;
+    border: none;
+    outline:none;
+}
 
-.btn:hover, .btn:focus{
-    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
-    filter: drop-shadow(0px 0px 35px #FF8E00);
-    background: rgba(255, 142, 0, 0.6);
-    border: 3px solid #FFFFFF;
-    border-radius: 40px;
+.like_button:hover, .like_button:focus{
+    background-color: #FF8E00;
+}
 
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1.5px white;
+.like_button:hover:before, .like_button:focus:before{
+    background-color: #FF8E00;
+}
+.like_button:hover:after, .like_button:focus:after{
+    background-color: #FF8E00;
+}
+  
+.like_button:before, .like_button:after {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    content: '';
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -o-border-radius: 50%;
+    border-radius: 50%;
+    background-color: black;
+}
+  
+.like_button:before {
+    bottom: 0px;
+    left: -10px;
+}
+  
+.like_button:after {
+    top: -10px;
+    right: 0px;
+}
 
+
+.button_box{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border: 3px solid black;
+
+    width: 100px;
+    height: 100px;
+}
+
+.album_box{
+    border: 3px solid black;
+    width: 100px;
+    height: 100px;
+}
+
+.song_box{
+
+    padding: 1% 1%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    border: 3px solid black;
+    width: 480px;
+    height: 140px;
+}
+
+.song_info{
+    color : #FF8E00;
+    display: inline-block;
+    text-align: left;
+    font-weight: 600;
+}
+
+.song_name {
+    font-weight:800;
+    font-size:x-large;
+    font-style: italic;
+    margin-bottom: 2%;
+
+    line-height: 100%;
 }

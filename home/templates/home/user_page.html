@@ -5,6 +5,10 @@
 {% endblock title %}
 
 {% load static %}
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'home/css/user_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
+{% endblock css_adding %} 
 {% block js_adding %}
 <script type="text/JavaScript" src = "{% static 'home/js/user_page.js' %}"></script>
 {% endblock js_adding %}
@@ -31,6 +35,11 @@
 {% endblock userpage %}
 
 {% block content %}
-<h3>Пользователь {{user.nickname}}</h3>
-<ul id = "mylist"></ul>
+<h3 id = "user_page_header">ВАШИ ДОБАВЛЕННЫЕ ТРЕКИ</h3>
+<div class="container">
+    <ul id = "user_tracks" class = "listlist"></ul>
+    <ul id = "user_recomendations" class = "listlist"></ul>
+</div>
+<script type="text/JavaScript">list_user_tracks('{{user.nickname}}')</script>
+<!-- <script type="text/JavaScript">set_listeners()</script> -->
 {% endblock content %}
