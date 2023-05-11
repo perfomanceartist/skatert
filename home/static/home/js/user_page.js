@@ -12,7 +12,9 @@ async function exit_account() {
 
 async function import_tracks(nickname) {
 
-  // console.log(nickname)
+  console.log("IMPORT_TRACKS");
+
+  document.getElementById("user_page_header").innerText = "ИМПОРТИРОВАННАЯ БИБЛИОТЕКА"
 
   const response_lastfm_nick = await fetch("/users/lastfm", {
   method: "POST",
@@ -23,7 +25,6 @@ async function import_tracks(nickname) {
   });
 
   var lastFmNickname = await response_lastfm_nick.text();
-  // console.log(lastFmNickname);
 
   try {
   const response_integrate = await fetch("/music/lastFM-integration/", {
@@ -35,12 +36,8 @@ async function import_tracks(nickname) {
     })
   });
 
-  // var data = await response_integrate.json();
-  // console.log(data)
   }
-  catch{
-
-  }
+  catch{}
 
   const response_fav_tracks = await fetch("/music/getUserFavouriteTracks/?nickname=" + nickname, {
     headers: { "Accept": "application/json" }
@@ -48,19 +45,53 @@ async function import_tracks(nickname) {
 
   var tracks = await response_fav_tracks.json();
 
-  // console.log(tracks)
 
-  document.getElementById("mylist").innerHTML = "";
+  document.getElementById("user_tracks").innerHTML = "";
+  document.getElementById("user_recomendations").innerHTML = "";
+
 
   for (var obj in tracks) {
-    console.log(tracks[obj]);
+    
     var track = tracks[obj];
-    // var menu = main_category[i];
 
-    var li = document.createElement("li");
-    li.innerHTML = track["name"] + "---" + track["artist"] + "---" + track["album"];
-    // li.innerHTML = tracks[track]["name"];
-    document.getElementById("mylist").appendChild(li);
+        /* ТРЕК В СПИСКЕ РЕКОМЕНДОВАННЫХ */
+    var element = document.createElement("div");
+    element.className = "list_element";
+
+        /* ИНФОРМАЦИЯ О ТРЕКЕ */
+    var song_box = document.createElement("div");
+    song_box.className = "song_box";
+
+    var song_name = document.createElement("li");
+    song_name.className = "song_info song_name";
+    song_name.innerText = track["name"];
+
+    var song_artist = document.createElement("li");
+    song_artist.className = "song_info song_artist";
+    song_artist.innerText = track["artist"];
+
+    if (typeof track["album"] !== 'undefined') {
+      var song_album = document.createElement("li");
+      song_album.className = "song_info song_album";
+      song_album.innerText = track["album"];
+    }
+
+    song_box.appendChild(song_name);
+    song_box.appendChild(song_artist);
+
+    if (typeof song_album !== 'undefined') {
+      song_box.appendChild(song_album);
+    }
+
+        /* ОБЛОЖКА АЛЬБОМА */
+
+    var album_box = document.createElement("div");
+    album_box.className = "album_box";
+
+        /* СБОР ТРЕКА */
+    element.appendChild(song_box);
+    element.appendChild(album_box);
+    document.getElementById("user_tracks").appendChild(element);
   }
 
 
