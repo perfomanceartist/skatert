@@ -30,7 +30,7 @@ class Register(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['nickname', 'lastfm_nickname', 'email', 'hash'],
+            required=['nickname', 'email', 'hash'],
             properties={
                 'nickname': openapi.Schema(type=openapi.TYPE_STRING),
                 'lastfm_nickname' : openapi.Schema(type=openapi.TYPE_STRING),
@@ -61,7 +61,7 @@ class Register(APIView):
         
         lastfm_nickname = data.get("lastfm_nickname")
         if not lastfm_nickname:
-            return HttpResponse(status=223)
+            lastfm_nickname = "-"
 
         email = data.get("email")
         if not email:
@@ -368,44 +368,3 @@ def create_email_token(account, hash_token=None):
     AuthToken.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
     AuthToken.save()
     return AuthToken
-
-
-
-
-
-
-@csrf_exempt
-def music_integration(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-        except:
-            return HttpResponseBadRequest("Некорректный формат данных")
-
-        lastfm_nickname = data.get("lastfm")
-        if not lastfm_nickname:
-            return HttpResponse(status=223)
-
-        nickname = request.COOKIES.get("nickname")
-        if not nickname:
-            return user_logout(request)
-
-        try:
-            music.lastfm_api.userGetInfo(lastfm_nickname)
-        except RuntimeError as error:
-            return HttpResponseBadRequest("Last fm user cannot be found: " + str(error))
-
-        user = User.objects.get(nickname=nickname)
-        user.lastfm = lastfm_nickname
-        user.save()
-
-        # tracks = lastfm.download_from_user(lastfm_nickname)
-        # for track in tracks:
-        #     t = user.favouriteTracks.add(track)
-        #     if not t:  # Если t - не none
-        #         track.rating += 1
-        #         track.save()
-
-        user.save()
-
-        return HttpResponse(str(0)) #len(tracks)))

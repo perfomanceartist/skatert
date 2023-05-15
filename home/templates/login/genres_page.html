@@ -16,23 +16,57 @@
 {% endblock js_adding %}
 
 {% block logincontent %}
-<h2>{{user.nickname}}, выбери интересующие жанры</h2>
-<div class="row">
+
+<h2 id="choice_header" class="d-none">Выбери способ установки предпочтений:</h2>
+
+<div id="type_choosing" class = "d-none">
+  <button class="buttons_elem btn-primary" onclick="load_lastfm()">Автоматически</button> 
+  <button class="buttons_elem btn-primary" onclick="load_genres()">Вручную</button>   
+</div>
+
+<h2 id="genres_header">Выбери интересующие жанры:</h2>
+<div id="genres" class="row" >
     <div class="column">
-      <label class = "genre hiphop"><input id = "CB_hiphop" type="checkbox" ><span>ХИП-ХОП</span></label>
-      <label class = "genre rap"><input id = "CB_rap" type="checkbox"><span>РЭП</span></label>
-      <label class = "genre edm"><input id = "CB_edm" type="checkbox" ><span>EDM</span></label>
-      <label class = "genre rock"><input id = "CB_rock" type="checkbox" ><span>РОК</span></label>
+      <label class = "genre hiphop"><input class="genres_checkbox" id = "CB_hiphop" type="checkbox" ><span>ХИП-ХОП</span></label>
+      <label class = "genre rap"><input class="genres_checkbox" id = "CB_rap" type="checkbox"><span>РЭП</span></label>
+      <label class = "genre edm"><input class="genres_checkbox" id = "CB_edm" type="checkbox" ><span>EDM</span></label>
+      <label class = "genre rock"><input class="genres_checkbox" id = "CB_rock" type="checkbox" ><span>РОК</span></label>
     </div>
     <div class="column">
-      <label class = "genre classical"><input id = "CB_class" type="checkbox" ><span>КЛАССИКА</span></label>
-      <label class = "genre rnbsoul"><input id = "CB_rnb" type="checkbox" ><span>R&B и СОУЛ</span></label>
-      <label class = "genre pop"><input id = "CB_pop" type="checkbox" ><span>ПОП</span></label>
-      <label class = "genre alternative"><input id = "CB_alt"  type="checkbox" ><span>АЛЬТ</span></label>
+      <label class = "genre classical"><input class="genres_checkbox" id = "CB_class" type="checkbox" ><span>КЛАССИКА</span></label>
+      <label class = "genre rnbsoul"><input class="genres_checkbox" id = "CB_rnb" type="checkbox" ><span>R&BиСоул</span></label>
+      <label class = "genre pop"><input class="genres_checkbox" id = "CB_pop" type="checkbox" ><span>ПОП</span></label>
+      <label class = "genre alternative"><input class="genres_checkbox" id = "CB_alt"  type="checkbox" ><span>АЛЬТ</span></label>
       
     </div>
 </div> 
-<div>
-  <button class="buttons_elem btn-primary" onclick="choose_genres('{{user.nickname}}')">Готово</button>  
+
+<h2 id="lastfm_header">Импорт жанров из Last.FM</h2>
+<div id="lastfm_container" class="container">
+    <div>
+        <label for="lastfm">Никнейм в Last.FM:</label>
+        <form id="lastFmNickname">
+            <input type="text" class = "form-control" id="lastfm_nickname"/>
+        </form>
+        <button class="btn-primary" id="button_find" onclick="find_user()">Найти</button>  
+    </div>
+    <div class="d-none" id = "lastfm_pfp">
+      
+    </div>
 </div>
+
+
+<div id="action_choosing">
+  <button class="btn-primary" id="button_back" onclick="load_choice()">Назад</button>
+  <div id="loader" class="d-none"><img src="/static/login/img/loading.gif"></div>    
+  <button class="btn-primary d-none" id="button_next" onclick="apply_preferences('{{user.nickname}}')">Далее</button>  
+</div>
+
+<div class="mb-3 d-none" id="user_not_found">
+  <p style="color:#FF8E00; text-align: right;">Пользователь Last.FM не найден!</p>
+</div>
+
+
+<script type="text/JavaScript">load_choice()</script>
+<script type="text/JavaScript">set_listeners()</script>
 {% endblock logincontent %}

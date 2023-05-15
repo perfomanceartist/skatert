@@ -1,58 +1,37 @@
 {% extends "home/user_page.html" %}
 
 {% load static %}
+
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'home/css/settings_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
+{% endblock css_adding %} 
+
+
 {% block js_adding %}
-<script type="text/JavaScript" >
-    async function set_settings(nickname) {
-    var lastFmNickname = document.getElementById("lastfm").value;
-    var secondFactor = document.getElementById("secondFactor").checked;
-
-    var token = document.cookie.match(/token=(.+?)(;|$)/)[1];
-
-    console.log(JSON.stringify({
-        nickname : nickname,
-        token: token,
-        lastfm: lastFmNickname,
-        secondFactor: secondFactor
-    }));
-
-
-    const response = await fetch("/api/settings", {
-    method: "POST",
-    headers: { "Accept": "application/json" },
-    body: JSON.stringify({
-        nickname : nickname,
-        token: token,
-        lastfm: lastFmNickname,
-        secondFactor: secondFactor
-    })
-    });
-    if (response.ok === true) {
-    alert("Success!");
-    }
-    else alert("Error!")
-}
-</script>
+<script type="text/JavaScript" src = "{% static 'home/js/settings_page.js' %}"></script>
 {% endblock js_adding %}
 
 {% block content %}
 <h2>Настройки</h2>
-
-<div>
-    <label for="lastfm">Имя пользователя в Last.FM</label>
-    <input type="text" id="lastfm" name="lastfm" value={{user.lastfmLogin}} />
+<div class="container">
+    <div>
+        <label for="lastfm">Никнейм в Last.FM:</label>
+        <form id="lastFmNickname">
+            <input type="text" class = "form-control" id="lastfm" name="lastfm" value={{user.lastfmLogin}} />
+        </form>
+    </div>
+    <div class="div_cb">
+        <label for="secondFactor">Двухфакторная аутентификация:</label>
+        <label class = "auth">
+            {% if user.secondFactor%}
+            <input id = "CB" type="checkbox" checked>
+            {% else %}
+            <input id = "CB" type="checkbox">
+            {% endif %}
+            <span>✔</span>
+        </label>
+    </div>
+    <input type="button" class="btn-primary" onclick="set_settings('{{user.nickname}}')" value="Сохранить"/>
 </div>
-    
-<div>
-    <label for="secondFactor">Использовать двухфакторную аутентификацию (email)</label>
-    {% if user.secondFactor%}
-    <input type="checkbox" id="secondFactor" name="secondFactor" checked />
-    {% else %}
-    <input type="checkbox" id="secondFactor" name="secondFactor" />
-    {% endif %}
-</div>
-    
-<input type="button" onclick="set_settings('{{user.nickname}}')" value="Сохранить"/>
-
-
 {% endblock content %}

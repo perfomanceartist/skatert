@@ -35,11 +35,10 @@
 {% endblock userpage %}
 
 {% block content %}
-<h3 id = "user_page_header">ВАШИ ДОБАВЛЕННЫЕ ТРЕКИ</h3>
+<h2 id = "user_page_header">ВАШИ ДОБАВЛЕННЫЕ ТРЕКИ</h2>
 <div class="container">
     <ul id = "user_tracks" class = "listlist"></ul>
     <ul id = "user_recomendations" class = "listlist"></ul>
 </div>
 <script type="text/JavaScript">list_user_tracks('{{user.nickname}}')</script>
-<!-- <script type="text/JavaScript">set_listeners()</script> -->
 {% endblock content %}

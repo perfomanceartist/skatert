@@ -31,6 +31,7 @@ class MakeLastFmIntegration(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
+            print(data["nickname"], data["lastFmNickname"])
             result = loadUserLastFM(data["nickname"], data["lastFmNickname"])
             if result is False:
                 return HttpResponseBadRequest("No such user")
@@ -180,6 +181,7 @@ class SetUserGenres(APIView):
             genres = GenreList.defaultList()
             for key in data["genres"]:
                 genres.set(key, data["genres"][key])
+            print(genres.values)
             genres.setToUser(user)
 
             return JsonResponse(prepareUserInfo(user))

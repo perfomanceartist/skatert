@@ -16,7 +16,7 @@ async function import_tracks(nickname) {
 
   document.getElementById("user_page_header").innerText = "ИМПОРТИРОВАННАЯ БИБЛИОТЕКА"
 
-  const response_lastfm_nick = await fetch("/users/lastfm", {
+  const response_lastfm_nick = await fetch("/users/lastfm_nick", {
   method: "POST",
   headers: { "Accept": "application/json" },
   body: JSON.stringify({
@@ -99,9 +99,9 @@ async function import_tracks(nickname) {
 
 }
 
-async function like_handler(button){
+async function like_handler(button, nickname){
 
-  console.log(button.dataset.value);
+  console.log(nickname);
   console.log(button.value);
   if(button.value == 0) {
     button.value = 1;
@@ -191,7 +191,7 @@ async function get_recomendations(nickname) {
     var like_button = document.createElement("button");
     like_button.className = "element reaction like_button";
     like_button.value = 0;
-    like_button.dataset.value = nickname;
+    // like_button.dataset.value = nickname;
     button_box.appendChild(like_button)
 
         /* СБОР ТРЕКА */
@@ -201,16 +201,16 @@ async function get_recomendations(nickname) {
     document.getElementById("user_tracks").appendChild(element);
 
   }
-  set_listeners();
+  set_listeners(nickname);
 }
 
-async function set_listeners(){
+async function set_listeners(nickname){
   var buttons = document.querySelectorAll(".reaction");
   console.log(buttons.length);
   for (var i = 0; i < buttons.length; i++) {
     buttons[i].addEventListener("click", (function(button) {
       return function() {
-        like_handler(button);
+        like_handler(button, nickname);
       }
     })(buttons[i]));
   }

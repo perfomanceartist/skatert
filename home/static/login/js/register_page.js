@@ -1,6 +1,6 @@
 async function register() {
     var nickname = document.getElementById('loginControlInputNick').value;
-    var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
+    // var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
     var email = document.getElementById('loginControlInputEmail').value;
     var password = document.getElementById('loginControlInputPassword').value;
     var passwordConfirm = document.getElementById('loginControlInputPasswordConfirm').value;
@@ -14,14 +14,13 @@ async function register() {
       document.getElementById('password').reset();
       return;
     }
-    // отправляет запрос и получаем ответ
-    console.log(lastfm_nickname)
+    
+    
     const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Accept": "application/json" },
         body: JSON.stringify({
             nickname: nickname,
-            lastfm_nickname : lastfm_nickname,
             email: email,
             hash: password
         })

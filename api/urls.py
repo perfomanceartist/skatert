@@ -27,6 +27,5 @@ urlpatterns = [
     path("login_email", views.EmailAuth.as_view()),
     path("register", views.Register.as_view()),
     path("logout", views.Logout.as_view()),
-    path("settings", views.Settings.as_view()),
-    path("integrate", views.music_integration)
+    path("settings", views.Settings.as_view())
 ]

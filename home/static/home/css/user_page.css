@@ -1,17 +1,3 @@
-h3 {
-    font-family: 'Consolas';
-    font-weight: 800;
-    font-size: 48px;
-    line-height: 4px;
-    text-align: center;
-    letter-spacing: 0.1em;
-
-    margin-top: 5%;
-
-
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 2px black;
-}
 
 .container {
     margin-top: 5%;

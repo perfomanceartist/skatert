@@ -1,0 +1,58 @@
+.btn-primary{
+    margin-top: 2%;
+    margin-left: 35%;
+    font-weight: 600;
+    font-size: 24px;
+}
+
+.container {
+    margin-top: 5%;
+    width: 600px;
+}
+
+
+.auth {
+    border-radius: 5px;
+    width: auto; 
+    margin: 5%;
+    border-radius: 10px;
+}
+
+.auth input {
+    display: none;
+    text-size-adjust:auto;
+}
+
+.auth input + span{
+    border-radius: 10px;
+
+    user-select: none;
+    text-align: center;
+    display: block;
+
+    font-size: 30px;
+    width: 50px;
+
+    font-weight: 650;
+    -webkit-text-fill-color: #D5D7DB;
+    -webkit-text-stroke: 1.5px  black;
+    border: 4px solid black;
+
+    filter: saturate(0);
+}
+
+.auth input:checked + span {
+    border-radius: 10px;
+    -webkit-text-fill-color: white;
+    -webkit-text-stroke: 1.5px  #FF8E00;
+    border: 4px solid white;
+    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
+    filter: drop-shadow(0px 0px 25px #FF8E00);
+
+}
+
+.div_cb{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

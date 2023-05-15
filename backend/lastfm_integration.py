@@ -109,31 +109,38 @@ def prepareUserTracks(user):
 def loadUserLastFM(nickname, lastfmNickname):
     if not User.objects.filter(nickname=nickname).exists():
         return False # if no such user we cannot integrate
+    
     user = User.objects.filter(nickname=nickname).get()
-    if user.lastfm == "":
+    if user.lastfm == "" or user.lastfm == "-":
         user.lastfm = lastfmNickname
         user.save()
-
-
     
     lastFmAmount = music.lastfm_api.userGetLovedTracksAmount(lastfmNickname)
     dbAmount = user.favouriteTracks.count
     if dbAmount == int(lastFmAmount):
         return
  
-    userGenresCounts = [0 for _ in range(len(GenreNames))]
+    print(GenreList.fromUser(user).values.values())
 
     userTracksToAdd = prepareUserTracks(lastfmNickname)
-    for trackToAdd in userTracksToAdd:
-        user.favouriteTracks.add(trackToAdd)
-        currentGenres = GenreList.fromTrack(trackToAdd).values
-        for i in range(len(GenreNames)):
-            if currentGenres[GenreNames[i]]:
-                userGenresCounts[i] += 1
-    user.save()
 
-    chosenUserGenres = [count * len(GenreNames) >= len(userGenresCounts) for count in userGenresCounts]
-    GenreList(chosenUserGenres).setToUser(user)
+    if True in GenreList.fromUser(user).values.values():
+        for trackToAdd in userTracksToAdd:
+            user.favouriteTracks.add(trackToAdd)
+        user.save()
+    else:
+        userGenresCounts = [0 for _ in range(len(GenreNames))]
+
+        for trackToAdd in userTracksToAdd:
+            user.favouriteTracks.add(trackToAdd)
+            currentGenres = GenreList.fromTrack(trackToAdd).values
+            for i in range(len(GenreNames)):
+                if currentGenres[GenreNames[i]]:
+                    userGenresCounts[i] += 1
+        user.save()
+
+        chosenUserGenres = [count * len(GenreNames) >= len(userGenresCounts) for count in userGenresCounts]
+        GenreList(chosenUserGenres).setToUser(user)
 
 
 
