@@ -5,6 +5,10 @@
 {% endblock title %}
 
 {% load static %}
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'home/css/user_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
+{% endblock css_adding %} 
 {% block js_adding %}
 <script type="text/JavaScript" src = "{% static 'home/js/user_page.js' %}"></script>
 
@@ -15,18 +19,27 @@
 {% block userpage %}
 <a class="nav-link">|</a>
 <li class="nav-item">
-    <a class="nav-link active" href="#">Рекомендации</a>
+    <a class="nav-link active" onclick="get_recomendations('{{user.nickname}}')">Рекомендации</a>
 </li>
 <a class="nav-link">|</a>
 <li class="nav-item">
-    <a class="nav-link active" href="" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
+    <a class="nav-link active" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
 </li>
 <a class="nav-link">|</a>
 <li class="nav-item">
-    <a class="nav-link active link"  href="#" onclick="exit_account()">Выход</a>
+    <a class="nav-link active" href="/settings">Настройки</a>
+</li>
+<a class="nav-link">|</a>
+<li class="nav-item">
+    <a class="nav-link active link"  onclick="exit_account()">Выход</a>
 </li>
 {% endblock userpage %}
 
 {% block content %}
-<h3>Пользователь {{user.nickname}}</h3>
+<h2 id = "user_page_header">ВАШИ ДОБАВЛЕННЫЕ ТРЕКИ</h2>
+<div class="container">
+    <ul id = "user_tracks" class = "listlist"></ul>
+    <ul id = "user_recomendations" class = "listlist"></ul>
+</div>
+<script type="text/JavaScript">list_user_tracks('{{user.nickname}}')</script>
 {% endblock content %}

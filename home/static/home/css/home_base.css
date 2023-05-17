@@ -1,24 +1,11 @@
 .nav-item {
     -webkit-text-fill-color: black;
+    user-select : none;
 
 }
 
 .nav-item:hover, .nav-item:focus {
     -webkit-text-fill-color: #FF8E00;
-}
-
-
-.form-control{
-    background: #D9D9D9;
-    border: 3px solid #FF8E00;
-} 
-
-
-.form-control:focus{
-    background: #FFFFFF;
-    border: 3px solid #FF8E00;
-    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
-    filter: drop-shadow(0px 0px 35px #FF8E00);
 }
 
 .btn-outline-success{

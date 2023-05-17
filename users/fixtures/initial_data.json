@@ -1,0 +1,51 @@
+[
+  {
+    "model": "users.MusicPreferences",
+    "pk": 0,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 1,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 2,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 3,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 4,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 5,
+    "fields": {
+      "usersBitmask": []
+    }
+  },
+  {
+    "model": "users.MusicPreferences",
+    "pk": 6,
+    "fields": {
+      "usersBitmask": []
+    }
+  }
+]

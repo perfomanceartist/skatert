@@ -1,13 +1,13 @@
-import datetime
 from music.models import Track
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+
 
 class User(models.Model):
     nickname = models.CharField(max_length=50, blank=False, unique=True)
     lastfm = models.CharField(max_length=50, blank=True)
     favouriteTracks = models.ManyToManyField(Track)
-    
+    recommenders = ArrayField(models.IntegerField(), default=list, primary_key=False, blank=False)
 
 
 class MusicPreferences(models.Model):
@@ -30,12 +30,11 @@ class Subscriptions(models.Model):
     subscriptions = ArrayField(models.IntegerField(), primary_key=False, blank=False)
 
 
-
-
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     passwordhash = models.CharField(max_length=16)
-    email = models.EmailField()
+    email = models.EmailField()    
+    secondFactor = models.BooleanField(default=False, blank=False)
 
 
 class AuthTokens(models.Model):

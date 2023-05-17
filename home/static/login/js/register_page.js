@@ -1,7 +1,6 @@
 async function register() {
     var nickname = document.getElementById('loginControlInputNick').value;
-    var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
-    console.log(lastfm_nickname);
+    // var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
     var email = document.getElementById('loginControlInputEmail').value;
     var password = document.getElementById('loginControlInputPassword').value;
     var passwordConfirm = document.getElementById('loginControlInputPasswordConfirm').value;
@@ -15,7 +14,8 @@ async function register() {
       document.getElementById('password').reset();
       return;
     }
-    // отправляет запрос и получаем ответ
+    
+    
     const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Accept": "application/json" },
@@ -41,7 +41,8 @@ async function register() {
         return;
     }
     if (response.ok === true) {
-        window.location.replace('/login');
+        document.cookie = `reg_nickname=${nickname};`;
+        window.location.replace('/genres');
     }
     else alert('Registration error!');
 }

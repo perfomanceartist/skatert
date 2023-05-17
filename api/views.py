@@ -5,8 +5,13 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
-from users.models import AuthTokens, Account, User
-from music.lastfm import LastFm
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.views import APIView
+
+
+import music.lastfm_api
+from users.models import AuthTokens, Account, User, MusicPreferences
 import re
 
 
@@ -21,9 +26,28 @@ def _check_email(email: str):
     return False
 
 
-@csrf_exempt
-def register(request):
-    if request.method == "POST":
+class Register(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'email', 'hash'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'lastfm_nickname' : openapi.Schema(type=openapi.TYPE_STRING),
+                'email': openapi.Schema(type=openapi.TYPE_STRING),
+                'hash': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Register Skatert Account',
+        tags=['Users']
+    )
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):        
         try:
             data = json.loads(request.body.decode("utf-8"))
         except Exception:
@@ -34,17 +58,12 @@ def register(request):
             return HttpResponse(status=222)
         if not nickname:
             return HttpResponse(status=223)
-        
-        lastfm_nickname = data.get("lastfm_nickname")
-        if not lastfm_nickname:
-            return HttpResponse(status=223)
 
         email = data.get("email")
         if not email:
             return HttpResponse(status=223)
         if not _check_email(email):
             return HttpResponse(status=225)
-
         hash = data.get("hash")
         if not hash:
             return HttpResponse(status=223)
@@ -53,20 +72,19 @@ def register(request):
         user.save()
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()
+
+        music_prefs = MusicPreferences.objects.all()
+        for music_pref in music_prefs:
+            music_pref.usersBitmask += [False]
+            music_pref.save()       
+
         return HttpResponse("Registered")
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
+    
+
 
 
 def _email_request(account):
-    token = str(randint(100000, 999999))
-    hashToken = AuthTokens(
-        account=account,
-        token=token,
-        type="hash",
-        expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
-    )
-    hashToken.save()
+    token = create_hash_token(account)
 
     send_mail(
         "Skatert. Код Подтверждения входа",  # subject
@@ -80,9 +98,27 @@ def _email_request(account):
     return token
 
 
-@csrf_exempt
-def password_auth(request):
-    if request.method == "POST":
+class PasswordAuth(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'hash'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'hash': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenticate Skatert Account by Password',
+        tags=['Users']
+    )
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
@@ -108,15 +144,45 @@ def password_auth(request):
         if account is None:
             return HttpResponseBadRequest("Неверные учетные данные")
 
-        token = _email_request(account)
-        return HttpResponse("Token: " + token)
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
+        if account.secondFactor:
+            tokenInt = _email_request(account)
+            response = JsonResponse({
+                "token": "-"
+                })
+        else:
+            AuthToken = create_email_token(account)
+            response = JsonResponse({"token": str(AuthToken.token)})            
+            response.status_code = 201
+            response.set_cookie("token", str(AuthToken.token))
+            response.set_cookie("nickname", nickname)
+        
+        return response
+
+       
 
 
-@csrf_exempt
-def email_auth(request):
-    if request.method == "POST":
+
+class EmailAuth(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'code'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'code': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenicate Skatert Account by Email',
+        tags=['Users']
+    )
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):        
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
@@ -129,71 +195,172 @@ def email_auth(request):
         if not code:
             return HttpResponseBadRequest("Не указан email")
 
+
+        # Поиск аккаунта
         account = Account.objects.filter(user__nickname=nickname).get()
         if not account:
             return HttpResponseBadRequest("Некорректные данные")
 
-        token = AuthTokens.objects.filter(account=account).filter(token=code).get()
-        if not token:
+        # Поиск токена (тип - хеш-токен)
+        AuthToken = AuthTokens.objects.filter(account=account).filter(type="hash").filter(token=code).get()
+        if not AuthToken:
             return HttpResponseBadRequest("Некорректный код")
-        if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
-            token.delete()
+        # Проверка актуальности 
+        if datetime.datetime.now().timestamp() > AuthToken.expiration_date.timestamp():
+            AuthToken.delete()
             return HttpResponseBadRequest("Токен не актуален. Попробуйте ещё раз.")
 
-        token.token = hex(randint(100, 0xFFFFFFFF))
-        token.type = "email"
-        token.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
-        token.save()    
-        response = JsonResponse({"token": str(token.token)})
-        response.set_cookie("token", str(token.token))
+        #Смена типа токена - на email-token
+        AuthToken = create_email_token(account, hash_token=AuthToken)
+
+        response = JsonResponse({
+            "token": str(AuthToken.token)
+            })
+        response.set_cookie("token", str(AuthToken.token))
         response.set_cookie("nickname", nickname)
         return response
-    else:
-        return HttpResponseBadRequest("Некорректный метод запроса")
+        
+
+class Logout(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'token'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.TYPE_STRING),
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Logging Out Skatert Account',
+        tags=['Users']
+    )
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        
+        response = HttpResponseRedirect('/login')
+        response.delete_cookie('token')
+        response.delete_cookie('nickname')
+        return response
 
 
-@csrf_exempt
-def user_logout(request):
-    response = HttpResponseRedirect('/login')
-    response.delete_cookie('token')
-    response.delete_cookie('nickname')
-    return response
+class Settings(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['nickname', 'token', 'lastfm', 'secondFactor'],
+            properties={
+                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.TYPE_STRING),
+                'lastfm': openapi.Schema(type=openapi.TYPE_STRING),
+                'secondFactor':openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            200: openapi.Response(description='OK'),
+            400: openapi.Response(description='Bad request'),
+            500: openapi.Response(description='Internal server error'),
+        },
+        operation_description='Authenticate Skatert Account by Password',
+        tags=['Users']
+    )
 
-
-@csrf_exempt
-def music_integration(request):
-    if request.method == "POST":
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
+
         
-        lastfm_nickname = data.get("lastfm")
-        if not lastfm_nickname:
-            return HttpResponse(status=223)
-        
-        nickname = request.COOKIES.get("nickname")
+
+        nickname = data.get("nickname")
         if not nickname:
-            return user_logout(request)
+            return HttpResponseBadRequest("Не указан никнейм")
+        
+        token = data.get('token')
+        if not token:
+            return HttpResponseBadRequest("Не указан токен")
+
+        lastfmNickname = data.get('lastfm')
+        if not lastfmNickname:
+            return HttpResponseBadRequest("Не указан ник lastfm")
+        
+        secondFactor = data.get('secondFactor')
+        if secondFactor is None:
+            return HttpResponseBadRequest("Не указан способ аутентификации")
+        
+        if not check_token(nickname, token):
+            return HttpResponseBadRequest("Неверный токен досутпа")
         
         
-        lastfm = LastFm()
-        if not lastfm.check_user(lastfm_nickname):
-            return HttpResponseBadRequest("Last fm user cannot be found")
+
+        user = User.objects.filter(nickname = nickname).get()
+        if user is None:
+            return HttpResponseBadRequest("Не найден пользователь")
+
+        account = Account.objects.filter(user = user).get()
+        if account is None:
+            return HttpResponseBadRequest("Не найден аккаунт")
         
-        user = User.objects.get(nickname=nickname)
-        user.lastfm = lastfm_nickname
+        
+        user.lastfm = lastfmNickname
         user.save()
+        account.secondFactor = secondFactor
+        account.save()
 
-        tracks = lastfm.download_from_user(lastfm_nickname)
-        for track in tracks:            
-            t = user.favouriteTracks.add(track)
-            if not t : # Если t - не none
-                track.rating +=1
-                track.save()
-
-        user.save()
-
-        return HttpResponse(str(len(tracks)))
+        return HttpResponse()
+    
 
 
+
+        
+
+
+def check_token(nickname, tokenVal):
+    account = Account.objects.filter(user__nickname=nickname).get()
+    if account is None:
+        return False
+
+    token = AuthTokens.objects.filter(account=account).filter(token=tokenVal).get()
+    if token is None:
+        return False
+
+    if token.type != "email":
+        return False
+
+    if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
+        token.delete()
+        return False
+
+    return True
+
+
+@csrf_exempt
+def create_hash_token(account):
+    token = str(randint(100000, 999999))
+    hashToken = AuthTokens(
+        account=account,
+        token=token,
+        type="hash",
+        expiration_date=datetime.datetime.now() + datetime.timedelta(minutes=15),
+    )
+    hashToken.save()
+    return token
+
+
+def create_email_token(account, hash_token=None):
+    if hash_token is None:
+        AuthToken = AuthTokens(account=account)
+    else:
+        AuthToken = hash_token
+
+    AuthToken.token = hex(randint(100, 0xFFFFFFFF))
+    AuthToken.type = "email"
+    AuthToken.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
+    AuthToken.save()
+    return AuthToken
