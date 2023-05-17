@@ -105,15 +105,17 @@ async function like_handler(button, nickname){
   console.log(button.value);
   if(button.value == 0) {
     button.value = 1;
-    button.style.backgroundColor =  "#FF8E00";
+    // button.style.backgroundColor =  "#FF8E00";
     //не знаю хули не работает, потом разберусь
+    button.style.setProperty('--bg-color', "#FF8E00");
     button.style.setProperty('--after-bg-color', "#FF8E00");
     button.style.setProperty('--before-bg-color', "#FF8E00");
   }
   else{
     button.value = 0;
-    button.style.backgroundColor =  "#000000";
+    // button.style.backgroundColor =  "#000000";
     //не знаю хули не работает, потом разберусь
+    button.style.setProperty('--bg-color', "#000000");
     button.style.setProperty('--before-bg-color', "#000000");
     button.style.setProperty('--after-bg-color', "#000000");
   }
@@ -191,7 +193,10 @@ async function get_recomendations(nickname) {
     var like_button = document.createElement("button");
     like_button.className = "element reaction like_button";
     like_button.value = 0;
-    // like_button.dataset.value = nickname;
+    like_button.style.setProperty('--bg-color', "#000000");
+    like_button.style.setProperty('--before-bg-color', "#000000");
+    like_button.style.setProperty('--after-bg-color', "#000000");
+    
     button_box.appendChild(like_button)
 
         /* СБОР ТРЕКА */

@@ -30,23 +30,33 @@
     -ms-transform: rotate(45deg);
     -o-transform: rotate(45deg);
     transform: rotate(45deg);
-    background-color: black;
+    background-color: var(--bg-color);
+    
+    
+
     padding: 0;
     border: none;
     outline:none;
 }
 
-.like_button:hover, .like_button:focus{
-    background-color: #FF8E00;
-}
-
-.like_button:hover:before, .like_button:focus:before{
-    background-color: #FF8E00;
-}
-.like_button:hover:after, .like_button:focus:after{
-    background-color: #FF8E00;
+/* .like_button:hover{
+    --bg-color: #FF8E00; 
+} */
+  
+.like_button:before {
+    background-color: var(--before-bg-color);
+    /* --before-bg-color : black; */
+    bottom: 0px;
+    left: -10px;
 }
   
+.like_button:after {
+    background-color: var(--after-bg-color);
+    /* --after-bg-color : black; */
+    top: -10px;
+    right: 0px;
+}
+
 .like_button:before, .like_button:after {
     position: absolute;
     width: 20px;
@@ -56,18 +66,14 @@
     -moz-border-radius: 50%;
     -o-border-radius: 50%;
     border-radius: 50%;
-    background-color: black;
 }
-  
-.like_button:before {
-    bottom: 0px;
-    left: -10px;
+
+/* .like_button:hover:before{
+    --before-bg-color: #FF8E00;
 }
-  
-.like_button:after {
-    top: -10px;
-    right: 0px;
-}
+.like_button:hover:after{
+    --after-bg-color: #FF8E00;
+} */
 
 
 .button_box{
