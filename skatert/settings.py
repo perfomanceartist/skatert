@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-1iy!%afn=!u8j5w=vm-9h8p93%i$bi-b*!xz(5gfo=nb2p3ljz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -85,8 +85,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "Skatert",
-        "USER": "postgres",
-        "PASSWORD": CREDS["DBpassword"],  # введите пароль для своего postgres-сервера
+        "USER": CREDS.get("db", {}).get("user") or "skatert",
+        "PASSWORD": CREDS.get("db", {}).get("password") or CREDS.get("DBpassword"),  # введите пароль для своего postgres-сервера
         "HOST": "localhost",
         "PORT": "",
     }
