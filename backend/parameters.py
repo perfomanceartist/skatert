@@ -33,11 +33,7 @@ class GenreList:
             self.values[name] = self.values[name] or otherList.values[name]
 
     def countMatches(self, otherList):
-        count = 0
-        for name in GenreNames:
-            if self.values[name] == otherList.values[name]:
-                count += 1
-        return count
+        return sum(map(lambda name: self.values[name] == otherList.values[name], GenreNames))
 
     def show(self):
         print(*self.values.values(), sep=", ")

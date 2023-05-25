@@ -1,6 +1,8 @@
-from music.models import Artist, Album, Track
-from users.models import User, MusicPreferences
+from typing import Optional
+
 from backend.parameters import GenreList
+from music.models import Album, Artist, Track
+from users.models import MusicPreferences, User
 
 
 def getRecommendations(currentUser, amount=20) -> list:
@@ -53,30 +55,34 @@ def getRecommendations(currentUser, amount=20) -> list:
     raise ValueError("Not enough records in the database")
 
 
-def getUserByNickname(nickname) -> User | None:
-    if User.objects.filter(nickname=nickname).exists():
-        return User.objects.get(nickname=nickname)
-    return None
+def getUserByNickname(nickname) -> Optional[User]:
+    return User.objects.get(nickname=nickname)
 
 
-def getTrackById(trackId) -> Track | None:
-    if Track.objects.filter(id=trackId).exists():
-        return Track.objects.get(id=trackId)
-    return None
+def getTrackById(trackId) -> Optional[Track]:
+    return Track.objects.get(id=trackId)
 
 
 def getTrackInformation(track) -> dict:
-    if track.album is not None:
-        return {"name": track.name, "artist": track.artist.name, "album": track.album.name, "genres": track.genres,
-                "listeners": track.lovers, "recommended": track.recommended}
-    else:
-        return {"name": track.name, "artist": track.artist.name, "genres": track.genres,
-                "listeners": track.lovers, "recommended": track.recommended}
+    result_dict = {
+        "name": track.name,
+        "artist": track.artist.name,
+        "genres": track.genres,
+        "listeners": track.lovers,
+        "recommended": track.recommended
+    }
+
+    if track.album:
+        result_dict["album"] = track.album.name
+
+    return result_dict
 
 
 def prepareUserInfo(user) -> dict:
-    return {"nickname": user.nickname,
-            "lastFmNickname": user.lastfm,
-            "favouriteTracksAmount": len(user.favouriteTracks.all()),
-            "genres": dict(GenreList.fromUser(user).values),
-            "recommenders": list(user.recommenders)}
+    return {
+        "nickname": user.nickname,
+        "lastFmNickname": user.lastfm,
+        "favouriteTracksAmount": len(user.favouriteTracks.all()),
+        "genres": dict(GenreList.fromUser(user).values),
+        "recommenders": list(user.recommenders)
+    }

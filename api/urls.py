@@ -1,9 +1,9 @@
-from django.urls import path,re_path
-from . import views
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
+from django.urls import path, re_path
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
+from . import views
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -16,7 +16,6 @@ schema_view = get_schema_view(
    public=True,
    permission_classes=[permissions.AllowAny],
 )
-
 
 
 urlpatterns = [

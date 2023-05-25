@@ -1,8 +1,11 @@
 from django.test import TestCase
-from users.models import *
-from backend.lastfm_integration import loadUserLastFM
-from backend.display import showTrack, showUsers, showMusicDatabase, showMusicPreferences
+
 from backend.backend import getRecommendations
+from backend.display import (showMusicDatabase, showMusicPreferences,
+                             showTrack, showUsers)
+from backend.lastfm_integration import loadUserLastFM
+from users.models import *
+
 
 class UserTestCase(TestCase):
 

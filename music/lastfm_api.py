@@ -1,4 +1,5 @@
 import requests
+
 from backend.parameters import lastFmApiKey
 
 
@@ -26,7 +27,6 @@ def userGetInfo(username):
         return makeGetRequest(params)
     except (TimeoutError, requests.exceptions.JSONDecodeError) as exception:
         raise RuntimeError("Failed to get user information: " + exception)
-
 
 
 def userGetLovedTracksAmount(username):
