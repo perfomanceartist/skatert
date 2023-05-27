@@ -62,20 +62,36 @@ def getUserByNickname(nickname) -> Optional[User]:
     return User.objects.get(nickname=nickname)
 
 
-def getTrackById(trackId) -> Optional[Track]:
-    return Track.objects.get(id=trackId)
-
-
 def getArtistByName(artist: str) -> Optional[Artist]:
     return Artist.objects.get(name=artist)
 
 
-def getTrackByInfo(name_str: str, artist_str: str) -> Optional[Track]:
+def getAlbumByName(album: str) -> Optional[Artist]:
+    return Album.objects.get(name=album)
+
+
+def getTrackById(trackId: int) -> Optional[Track]:
+    return Track.objects.get(id=trackId)
+
+
+def getTrackIdByInfo(name_str: str, artist_str: str, album_str: str=None) -> Optional[int]:
     if not name_str:
-        return
-    if (artist := getArtistByName(artist_str)) is not None:
-        return Track.objects.get(name=name_str, artist=artist)
-    
+        return None
+
+    if (artist := getArtistByName(artist_str)) is None:
+        return None
+
+    if album_str and (album := getAlbumByName(album_str)) is not None:
+        if Track.objects.filter(name=name_str, artist=artist, album=album).exists():
+            return Track.objects.get(name=name_str, artist=artist, album=album).id
+
+    if Track.objects.filter(name=name_str, artist=artist).exists():
+        return Track.objects.get(name=name_str, artist=artist).id
+
+
+def getTrackByInfo(name_str: str, artist_str: str, album_str: str=None) -> Optional[Track]:
+    if (trackId := getTrackIdByInfo(name_str, artist_str, album_str)) is not None:
+        return getTrackById(trackId)
 
 
 def getTrackInformation(track) -> dict:

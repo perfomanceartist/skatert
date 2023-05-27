@@ -389,6 +389,7 @@ def _prepareUserAndTrack(data: dict) -> tuple[User, Track]:
 
 
 class ClickLike(APIView):
+    # TODO: user auth
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
