@@ -55,7 +55,7 @@ class Register(APIView):
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data.get("nickname")
-        lastfm_nickname = data.get("lastfm_nickname")
+        lastfm_nickname = data.get("lastfm_nickname", "-")
         if User.objects.filter(nickname=nickname).exists():
             return HttpResponse(status=222)
         if not nickname:

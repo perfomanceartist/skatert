@@ -21,7 +21,6 @@ async function register() {
         headers: { "Accept": "application/json" },
         body: JSON.stringify({
             nickname: nickname,
-            lastfm_nickname : lastfm_nickname,
             email: email,
             hash: password
         })
