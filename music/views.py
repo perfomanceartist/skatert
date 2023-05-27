@@ -1,11 +1,24 @@
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, \
-    HttpResponseServerError
+from django.http import (
+    JsonResponse,
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseNotFound,
+    HttpResponseServerError,
+)
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
-from users.models import User
+from users.models import User, Track
 from backend.lastfm_integration import loadUserLastFM
-from backend.backend import getRecommendations, getUserByNickname, getTrackById, getTrackInformation, prepareUserInfo
+from backend.backend import (
+    getRecommendations,
+    getUserByNickname,
+    getTrackById,
+    getTrackInformation,
+    prepareUserInfo,
+    tryRemoveDislike,
+    tryRemoveLike,
+)
 from backend.parameters import GenreNames, GenreList
 import json
 
@@ -14,19 +27,19 @@ class MakeLastFmIntegration(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['nickname', 'lastFmNickname'],
+            required=["nickname", "lastFmNickname"],
             properties={
-                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
-                'lastFmNickname': openapi.Schema(type=openapi.TYPE_STRING),
-            }
+                "nickname": openapi.Schema(type=openapi.TYPE_STRING),
+                "lastFmNickname": openapi.Schema(type=openapi.TYPE_STRING),
+            },
         ),
         responses={
-            200: openapi.Response(description='OK'),
-            400: openapi.Response(description='Bad request'),
-            500: openapi.Response(description='Internal server error'),
+            200: openapi.Response(description="OK"),
+            400: openapi.Response(description="Bad request"),
+            500: openapi.Response(description="Internal server error"),
         },
-        operation_description='Make integration with Last.fm',
-        tags=['Music']
+        operation_description="Make integration with Last.fm",
+        tags=["Music"],
     )
     def post(self, request, *args, **kwargs):
         try:
@@ -35,140 +48,134 @@ class MakeLastFmIntegration(APIView):
             result = loadUserLastFM(data["nickname"], data["lastFmNickname"])
             if result is False:
                 return HttpResponseBadRequest("No such user")
-            return JsonResponse(prepareUserInfo(User.objects.get(nickname=data['nickname'], lastfm=data['lastFmNickname'])))
+            return JsonResponse(
+                prepareUserInfo(
+                    User.objects.get(
+                        nickname=data["nickname"], lastfm=data["lastFmNickname"]
+                    )
+                )
+            )
         except (KeyError, json.JSONDecodeError):
-            return HttpResponseBadRequest('Failed to decode json data.')
+            return HttpResponseBadRequest("Failed to decode json data.")
         except (RuntimeError, ValueError) as error:
             return HttpResponseServerError(error)
 
 
 class GetUserGenres(APIView):
     @swagger_auto_schema(
-        operation_summary='Get user genres',
-        operation_description='Get genres of a user by their nickname',
+        operation_summary="Get user genres",
+        operation_description="Get genres of a user by their nickname",
         manual_parameters=[
             openapi.Parameter(
-                name='nickname',
+                name="nickname",
                 in_=openapi.IN_QUERY,
-                description='The nickname of the user to get genres for',
-                type=openapi.TYPE_STRING
+                description="The nickname of the user to get genres for",
+                type=openapi.TYPE_STRING,
             )
         ],
-        tags=['Music'],
+        tags=["Music"],
         responses={
             200: openapi.Response(
-                description='Genres successfully retrieved',
+                description="Genres successfully retrieved",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'genres': openapi.Schema(
+                        "genres": openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             additional_properties=openapi.Schema(
                                 type=openapi.TYPE_INTEGER
-                            )
+                            ),
                         )
-                    }
-                )
+                    },
+                ),
             ),
             400: openapi.Response(
-                description='Bad request',
+                description="Bad request",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(
-                            type=openapi.TYPE_STRING
-                        )
-                    }
-                )
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             404: openapi.Response(
-                description='User not found',
+                description="User not found",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(
-                            type=openapi.TYPE_STRING
-                        )
-                    }
-                )
-            )
-        }
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+        },
     )
     def get(self, request, *args, **kwargs):
-        nickname = request.GET.get('nickname')
+        nickname = request.GET.get("nickname")
         if nickname is None:
-            return HttpResponseBadRequest('Skatert nickname should be specified for this type of request.')
+            return HttpResponseBadRequest(
+                "Skatert nickname should be specified for this type of request."
+            )
 
         user = getUserByNickname(nickname)
         if user is None:
-            return HttpResponseNotFound("User with nickname '" + nickname + "' is not found.")
+            return HttpResponseNotFound(
+                "User with nickname '" + nickname + "' is not found."
+            )
         return JsonResponse(GenreList.fromUser(user).values)
 
 
 class SetUserGenres(APIView):
     @swagger_auto_schema(
-        operation_summary='Set user genres',
-        operation_description='Set genres of a user by their nickname',
-        tags=['Music'],
+        operation_summary="Set user genres",
+        operation_description="Set genres of a user by their nickname",
+        tags=["Music"],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'nickname': openapi.Schema(
+                "nickname": openapi.Schema(
                     type=openapi.TYPE_STRING,
-                    description='The nickname of the user to set genres for'
+                    description="The nickname of the user to set genres for",
                 ),
-                'genres': openapi.Schema(
+                "genres": openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     additional_properties=openapi.Schema(
                         type=openapi.TYPE_BOOLEAN,
-                        description='The weight of the genre (true/false)'
-                    )
-                )
+                        description="The weight of the genre (true/false)",
+                    ),
+                ),
             },
         ),
         responses={
             200: openapi.Response(
-                description='Genres successfully set',
+                description="Genres successfully set",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        'nickname': openapi.Schema(
+                        "nickname": openapi.Schema(
                             type=openapi.TYPE_STRING,
-                            description='The nickname of the user that genres were set for'
+                            description="The nickname of the user that genres were set for",
                         ),
-                        'genres': openapi.Schema(
+                        "genres": openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             additional_properties=openapi.Schema(
                                 type=openapi.TYPE_BOOLEAN,
-                                description='The weight of the genre (true/false)'
-                            )
-                        )
-                    }
-                )
+                                description="The weight of the genre (true/false)",
+                            ),
+                        ),
+                    },
+                ),
             ),
             400: openapi.Response(
-                description='Bad request',
+                description="Bad request",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(
-                            type=openapi.TYPE_STRING
-                        )
-                    }
-                )
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
             ),
             404: openapi.Response(
-                description='User not found',
+                description="User not found",
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(
-                            type=openapi.TYPE_STRING
-                        )
-                    }
-                )
-            )
-        }
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+        },
     )
     def post(self, request, *args, **kwargs):
         try:
@@ -176,7 +183,9 @@ class SetUserGenres(APIView):
 
             user = getUserByNickname(data["nickname"])
             if user is None:
-                return HttpResponseNotFound("User with nickname '" + data["nickname"] + "' is not found.")
+                return HttpResponseNotFound(
+                    "User with nickname '" + data["nickname"] + "' is not found."
+                )
 
             genres = GenreList.defaultList()
             for key in data["genres"]:
@@ -186,7 +195,7 @@ class SetUserGenres(APIView):
 
             return JsonResponse(prepareUserInfo(user))
         except (KeyError, json.JSONDecodeError):
-            return HttpResponseBadRequest('Failed to decode json data.')
+            return HttpResponseBadRequest("Failed to decode json data.")
         except (RuntimeError, ValueError) as error:
             return HttpResponseServerError(error)
 
@@ -195,10 +204,8 @@ class GetAppliedGenres(APIView):
     @swagger_auto_schema(
         operation_summary="Get applied genres",
         operation_description="Retrieve the list of all applied music genres.",
-        tags=['Music'],
-        responses={
-            200: "The list of all applied music genres."
-        }
+        tags=["Music"],
+        responses={200: "The list of all applied music genres."},
     )
     def get(self, request, *args, **kwargs):
         try:
@@ -209,21 +216,28 @@ class GetAppliedGenres(APIView):
 
 class GetTrackById(APIView):
     @swagger_auto_schema(
-        operation_summary='Get track by id',
-        operation_description='Retrieve information about a track by its id.',
-        tags=['Music'],
+        operation_summary="Get track by id",
+        operation_description="Retrieve information about a track by its id.",
+        tags=["Music"],
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_QUERY, 'Track id', type=openapi.TYPE_STRING, required=True)]
+            openapi.Parameter(
+                "id",
+                openapi.IN_QUERY,
+                "Track id",
+                type=openapi.TYPE_STRING,
+                required=True,
+            )
+        ],
     )
     def get(self, request, *args, **kwargs):
         try:
-            trackId = request.GET.get('id')
+            trackId = request.GET.get("id")
             if trackId is None:
-                return HttpResponseBadRequest('Track id must be specified.')
+                return HttpResponseBadRequest("Track id must be specified.")
 
             track = getTrackById(trackId)
             if track is None:
-                return HttpResponseNotFound('Specified track is not found.')
+                return HttpResponseNotFound("Specified track is not found.")
             return JsonResponse(getTrackInformation(track))
         except (RuntimeError, ValueError, KeyError) as error:
             return HttpResponseServerError(error)
@@ -231,45 +245,41 @@ class GetTrackById(APIView):
 
 class GetUserFavouriteTracks(APIView):
     @swagger_auto_schema(
-        operation_summary='Get a list of a user\'s favourite tracks',
+        operation_summary="Get a list of a user's favourite tracks",
         manual_parameters=[
             openapi.Parameter(
-                name='nickname',
+                name="nickname",
                 in_=openapi.IN_QUERY,
-                type='string',
-                description='The nickname of the user whose favourite tracks are to be returned'
+                type="string",
+                description="The nickname of the user whose favourite tracks are to be returned",
             )
         ],
-        tags=['Music'],
+        tags=["Music"],
         responses={
             200: openapi.Response(
-                description='OK',
+                description="OK",
             ),
             400: openapi.Response(
-                description='Bad Request',
-                examples={
-                    'application/json': {'error': 'Nickname must be specified.'}
-                }
+                description="Bad Request",
+                examples={"application/json": {"error": "Nickname must be specified."}},
             ),
             404: openapi.Response(
-                description='Not Found',
+                description="Not Found",
                 examples={
-                    'application/json': {'error': 'User \'nickname\' is not found.'}
-                }
+                    "application/json": {"error": "User 'nickname' is not found."}
+                },
             ),
             500: openapi.Response(
-                description='Internal Server Error',
-                examples={
-                    'application/json': {'error': 'Internal Server Error'}
-                }
-            )
-        }
+                description="Internal Server Error",
+                examples={"application/json": {"error": "Internal Server Error"}},
+            ),
+        },
     )
     def get(self, request, *args, **kwargs):
         try:
-            nickname = request.GET.get('nickname')
+            nickname = request.GET.get("nickname")
             if nickname is None:
-                return HttpResponseBadRequest('Nickname must be specified.')
+                return HttpResponseBadRequest("Nickname must be specified.")
 
             user = getUserByNickname(nickname)
             if user is None:
@@ -287,7 +297,7 @@ class GetUsers(APIView):
     @swagger_auto_schema(
         operation_summary="Get a list of all users",
         operation_description="Retrieve a list of all users with their details",
-        tags=['Music'],
+        tags=["Music"],
         responses={
             200: openapi.Response(
                 description="List of all users",
@@ -296,7 +306,7 @@ class GetUsers(APIView):
                 ),
             ),
             500: "Internal server error",
-        }
+        },
     )
     def get(self, request, *args, **kwargs):
         try:
@@ -311,25 +321,38 @@ class GetUsers(APIView):
 class GetRecommendations(APIView):
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('nickname', openapi.IN_QUERY, description="User nickname", type=openapi.TYPE_STRING),
-            openapi.Parameter('amount', openapi.IN_QUERY, description="Amount of recommended tracks",
-                              type=openapi.TYPE_INTEGER),
+            openapi.Parameter(
+                "nickname",
+                openapi.IN_QUERY,
+                description="User nickname",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
+                "amount",
+                openapi.IN_QUERY,
+                description="Amount of recommended tracks",
+                type=openapi.TYPE_INTEGER,
+            ),
         ],
-        tags=['Music'],
+        tags=["Music"],
         responses={
-            200: openapi.Response(description="Recommended tracks",),
+            200: openapi.Response(
+                description="Recommended tracks",
+            ),
             400: "Bad Request",
             404: "Not Found",
-            500: "Internal Server Error"
-        }
+            500: "Internal Server Error",
+        },
     )
     def get(self, request, *args, **kwargs):
         try:
-            nickname = request.GET.get('nickname')
+            nickname = request.GET.get("nickname")
             if nickname is None:
-                return HttpResponseBadRequest("Nickname should be specified for this type of requests.")
+                return HttpResponseBadRequest(
+                    "Nickname should be specified for this type of requests."
+                )
 
-            amount = request.GET.get('amount')
+            amount = request.GET.get("amount")
             if amount is None or int(amount) < 1:
                 return HttpResponseBadRequest("Incorrect amount of records.")
 
@@ -345,4 +368,61 @@ class GetRecommendations(APIView):
             return HttpResponseServerError(error)
 
 
+def __prepareUserAndTrack(data: dict) -> tuple[User, Track]:
+    nickname = data.get("nickname")
+    trackId = data.get("trackId")
 
+    if nickname is None or trackId is None:
+        raise KeyError(
+            "Nickname and Track ID should be specified for this type of requests."
+        )
+
+    if (user := getUserByNickname(nickname)) is None:
+        raise ValueError("User not found.")
+
+    if (track := getTrackById(trackId)) is None:
+        raise ValueError("Track not found.")
+    
+    return user, track
+
+
+class ClickLike(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            user, track = __prepareUserAndTrack(data)
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest("Incorrect json format.")
+        except (KeyError, ValueError) as e:
+            return HttpResponseNotFound("Data error: " + str(e))
+
+        tryRemoveDislike(user, track)
+
+        if track in user.favouriteTracks.all():
+            user.favouriteTracks.remove(track)
+        else:
+            user.favouriteTracks.add(track)
+        user.save()
+
+        return HttpResponse(status=200)
+
+
+class ClickDislike(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            user, track = __prepareUserAndTrack(data)
+        except json.decoder.JSONDecodeError:
+            return HttpResponseBadRequest("Incorrect json format.")
+        except (KeyError, ValueError) as e:
+            return HttpResponseNotFound("Data error: " + str(e))
+
+        tryRemoveLike(user, track)
+
+        if track in user.unfavouriteTracks.all():
+            user.unfavouriteTracks.remove(track)
+        else:
+            user.unfavouriteTracks.add(track)
+        user.save()
+
+        return HttpResponse(status=200)

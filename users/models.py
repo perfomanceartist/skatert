@@ -7,8 +7,8 @@ from music.models import Track
 class User(models.Model):
     nickname = models.CharField(max_length=50, blank=False, unique=True)
     lastfm = models.CharField(max_length=50, blank=True)
-    favouriteTracks = models.ManyToManyField(Track, related_name='favourite_tracks')
-    unfavouriteTracks = models.ManyToManyField(Track, related_name='unfavourite_tracks')
+    favouriteTracks = models.ManyToManyField(Track, related_name='favouriteTracks')
+    unfavouriteTracks = models.ManyToManyField(Track, related_name='unfavouriteTracks')
     recommenders = ArrayField(models.IntegerField(), default=list, primary_key=False, blank=False)
 
 

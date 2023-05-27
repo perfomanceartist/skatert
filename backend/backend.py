@@ -14,9 +14,12 @@ def getRecommendations(currentUser, amount=20) -> list:
     currentUserPreferences = GenreList.fromUser(currentUser)
 
     recommendations = []
+    unfavouriteTracks = currentUser.unfavouriteTracks.all()
     for recommender in currentUser.recommenders:
         for track in User.objects.get(id=recommender).favouriteTracks.order_by('recommended'):
             if track in currentUser.favouriteTracks.all():
+                continue
+            if track in unfavouriteTracks:  # skip unfavourite tracks
                 continue
 
             track.recommended += 1
@@ -86,3 +89,17 @@ def prepareUserInfo(user) -> dict:
         "genres": dict(GenreList.fromUser(user).values),
         "recommenders": list(user.recommenders)
     }
+
+
+def tryRemoveDislike(user: User, track: Track):
+    "If dislike is set, remove it."
+    if track in user.unfavouriteTracks.all():
+        user.unfavouriteTracks.remove(track)
+        user.save()
+
+
+def tryRemoveLike(user: User, track: Track):
+    "If like is set, remove it."
+    if track in user.favouriteTracks.all():
+        user.favouriteTracks.remove(track)
+        user.save()

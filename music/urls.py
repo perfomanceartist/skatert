@@ -12,4 +12,6 @@ urlpatterns = [
     path('getUserFavouriteTracks/', views.GetUserFavouriteTracks.as_view(), name="GetUserFavouriteTracks"),
     path('getUsers/', views.GetUsers.as_view(), name="GetUsers"),
     path('getRecommendations/', views.GetRecommendations.as_view(), name="GetRecommendations"),
+    path('clickLike/', views.GetRecommendations.as_view(), name="ClickLike"),
+    path('clickDislike/', views.GetRecommendations.as_view(), name="ClickDislike"),
 ]
