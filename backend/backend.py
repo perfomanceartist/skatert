@@ -14,7 +14,7 @@ def getRecommendations(currentUser, amount=20) -> list:
     currentUserPreferences = GenreList.fromUser(currentUser)
 
     recommendations = []
-    unfavouriteTracks = currentUser.unfavouriteTracks.all()
+    unfavouriteTracks = currentUser.unfavouriteTracks.all() or []
     for recommender in currentUser.recommenders:
         for track in User.objects.get(id=recommender).favouriteTracks.order_by('recommended'):
             if track in currentUser.favouriteTracks.all():
@@ -66,6 +66,18 @@ def getTrackById(trackId) -> Optional[Track]:
     return Track.objects.get(id=trackId)
 
 
+def getArtistByName(artist: str) -> Optional[Artist]:
+    return Artist.objects.get(name=artist)
+
+
+def getTrackByInfo(name_str: str, artist_str: str) -> Optional[Track]:
+    if not name_str:
+        return
+    if (artist := getArtistByName(artist_str)) is not None:
+        return Track.objects.get(name=name_str, artist=artist)
+    
+
+
 def getTrackInformation(track) -> dict:
     result_dict = {
         "name": track.name,
@@ -93,13 +105,13 @@ def prepareUserInfo(user) -> dict:
 
 def tryRemoveDislike(user: User, track: Track):
     "If dislike is set, remove it."
-    if track in user.unfavouriteTracks.all():
+    if track in (user.unfavouriteTracks.all() or []):
         user.unfavouriteTracks.remove(track)
         user.save()
 
 
 def tryRemoveLike(user: User, track: Track):
     "If like is set, remove it."
-    if track in user.favouriteTracks.all():
+    if track in (user.favouriteTracks.all() or []):
         user.favouriteTracks.remove(track)
         user.save()

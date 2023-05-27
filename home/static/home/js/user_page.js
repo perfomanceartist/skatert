@@ -121,9 +121,27 @@ else{
 var track_box = button.closest(".list_element");
 var song_info = track_box.querySelector(".song_box");
 var song_name = song_info.querySelector(".song_name");
+var song_artist = song_info.querySelector(".song_artist");
 
-console.log(song_name.innerText)
+const response_like_handler = await fetch("/music/clickLike/", {
+  method: "POST",
+  headers: { "Accept": "application/json" },
+  body: JSON.stringify({
+    nickname : nickname,
+    song_name : song_name.innerText,
+    song_artist : song_artist.innerText
+    })
+  });
 
+  if (response_like_handler.ok === true) {
+    return true;
+  }
+  else {
+    const text = await response_like_handler.text();
+    log.console(text)
+    return false;
+  }
+  console.log(song_name.innerText)
 }
 
 async function get_recomendations(nickname) {

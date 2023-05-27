@@ -13,6 +13,7 @@ from backend.lastfm_integration import loadUserLastFM
 from backend.backend import (
     getRecommendations,
     getUserByNickname,
+    getTrackByInfo,
     getTrackById,
     getTrackInformation,
     prepareUserInfo,
@@ -368,34 +369,34 @@ class GetRecommendations(APIView):
             return HttpResponseServerError(error)
 
 
-def __prepareUserAndTrack(data: dict) -> tuple[User, Track]:
-    nickname = data.get("nickname")
-    trackId = data.get("trackId")
+def _prepareUserAndTrack(data: dict) -> tuple[User, Track]:
+        nickname = data.get("nickname")
+        song_name = data.get("song_name")
+        song_artist = data.get("song_artist")
 
-    if nickname is None or trackId is None:
-        raise KeyError(
-            "Nickname and Track ID should be specified for this type of requests."
-        )
+        if nickname is None or song_name is None or song_artist is None:
+            raise KeyError(
+                "Nickname, song name and song artist should be specified for this type of requests."
+            )
 
-    if (user := getUserByNickname(nickname)) is None:
-        raise ValueError("User not found.")
+        if (user := getUserByNickname(nickname)) is None:
+            raise ValueError("User not found.")
+        
+        if (track := getTrackByInfo(song_name, song_artist)) is None:
+            raise ValueError("Track not found.")
 
-    if (track := getTrackById(trackId)) is None:
-        raise ValueError("Track not found.")
-    
-    return user, track
+        return user, track
 
 
 class ClickLike(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            user, track = __prepareUserAndTrack(data)
+            user, track = _prepareUserAndTrack(data)
         except json.decoder.JSONDecodeError:
             return HttpResponseBadRequest("Incorrect json format.")
         except (KeyError, ValueError) as e:
             return HttpResponseNotFound("Data error: " + str(e))
-
         tryRemoveDislike(user, track)
 
         if track in user.favouriteTracks.all():
@@ -411,7 +412,7 @@ class ClickDislike(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
-            user, track = __prepareUserAndTrack(data)
+            user, track = _prepareUserAndTrack(data)
         except json.decoder.JSONDecodeError:
             return HttpResponseBadRequest("Incorrect json format.")
         except (KeyError, ValueError) as e:

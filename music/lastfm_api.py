@@ -31,7 +31,7 @@ def userGetInfo(username):
     try:
         return makeGetRequest(params)
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError("Failed to get user information: " + exception)
+        raise RuntimeError("Failed to get user information: " + str(exception))
 
 
 def userGetLovedTracksAmount(username):
@@ -46,7 +46,7 @@ def userGetLovedTracksAmount(username):
         return int(makeGetRequest(params)["lovedtracks"]["@attr"]["total"])
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
         raise RuntimeError(
-            "Failed to get user's favourite tracks' amount: " + exception
+            "Failed to get user's favourite tracks' amount: " + str(exception)
         )
 
 
@@ -60,7 +60,7 @@ def userGetLovedTracks(username):
     try:
         return makeGetRequest(params)
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError("Failed to get user's favourite tracks: " + exception)
+        raise RuntimeError("Failed to get user's favourite tracks: " + str(exception))
 
 
 def userGetTopTags(username, limit=10):
@@ -73,7 +73,7 @@ def userGetTopTags(username, limit=10):
     try:
         return makeGetRequest(params)
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError("Failed to get user favourite tags: " + exception)
+        raise RuntimeError("Failed to get user favourite tags: " + str(exception))
 
 
 def artistGetInfo(artistName):
@@ -86,7 +86,7 @@ def artistGetInfo(artistName):
     try:
         return makeGetRequest(params)
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError("Failed to get artist information: " + exception)
+        raise RuntimeError("Failed to get artist information: " + str(exception))
 
 
 def trackGetInfo(trackName, artistName):
@@ -100,4 +100,4 @@ def trackGetInfo(trackName, artistName):
     try:
         return makeGetRequest(params)
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError("Failed to get track information: " + exception)
+        raise RuntimeError("Failed to get track information: " + str(exception))
