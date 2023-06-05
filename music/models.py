@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 IMAGE_PATH_MAXIMUM_SIZE = 256
 OBJECT_NAME_MAXIMUM_SIZE = 150
@@ -29,5 +29,3 @@ class Track(models.Model):
     genres = ArrayField(models.BooleanField(), default=list, blank=True)
     lovers = models.PositiveBigIntegerField(default=1, blank=False)
     recommended = models.PositiveBigIntegerField(default=0, blank=False)
-
-    

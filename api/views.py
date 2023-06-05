@@ -1,18 +1,19 @@
 import datetime
 import json
+import re
 from random import randint
+
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseRedirect, JsonResponse)
 from django.views.decorators.csrf import csrf_exempt
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 
-
 import music.lastfm_api
-from users.models import AuthTokens, Account, User, MusicPreferences
-import re
+from users.models import Account, AuthTokens, MusicPreferences, User
 
 
 def index(request):
@@ -30,10 +31,10 @@ class Register(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['nickname', 'lastfm_nickname', 'email', 'hash'],
+            required=['nickname', 'email', 'hash'],
             properties={
                 'nickname': openapi.Schema(type=openapi.TYPE_STRING),
-                'lastfm_nickname' : openapi.Schema(type=openapi.TYPE_STRING),
+                'lastfm_nickname': openapi.Schema(type=openapi.TYPE_STRING),
                 'email': openapi.Schema(type=openapi.TYPE_STRING),
                 'hash': openapi.Schema(type=openapi.TYPE_STRING),
             }
@@ -47,20 +48,17 @@ class Register(APIView):
         tags=['Users']
     )
     @csrf_exempt
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
 
         nickname = data.get("nickname")
+        lastfm_nickname = data.get("lastfm_nickname", "-")
         if User.objects.filter(nickname=nickname).exists():
             return HttpResponse(status=222)
         if not nickname:
-            return HttpResponse(status=223)
-        
-        lastfm_nickname = data.get("lastfm_nickname")
-        if not lastfm_nickname:
             return HttpResponse(status=223)
 
         email = data.get("email")
@@ -72,7 +70,7 @@ class Register(APIView):
         if not hash:
             return HttpResponse(status=223)
 
-        user = User(nickname=nickname, lastfm = lastfm_nickname)
+        user = User(nickname=nickname, lastfm=lastfm_nickname)
         user.save()
         account = Account(user=user, email=email, passwordhash=hash)
         account.save()
@@ -80,11 +78,9 @@ class Register(APIView):
         music_prefs = MusicPreferences.objects.all()
         for music_pref in music_prefs:
             music_pref.usersBitmask += [False]
-            music_pref.save()       
+            music_pref.save()
 
         return HttpResponse("Registered")
-    
-
 
 
 def _email_request(account):
@@ -120,7 +116,6 @@ class PasswordAuth(APIView):
         operation_description='Authenticate Skatert Account by Password',
         tags=['Users']
     )
-
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
@@ -149,21 +144,18 @@ class PasswordAuth(APIView):
             return HttpResponseBadRequest("Неверные учетные данные")
 
         if account.secondFactor:
-            tokenInt = _email_request(account)
+            _email_request(account)
             response = JsonResponse({
                 "token": "-"
-                })
+            })
         else:
             AuthToken = create_email_token(account)
-            response = JsonResponse({"token": str(AuthToken.token)})            
+            response = JsonResponse({"token": str(AuthToken.token)})
             response.status_code = 201
             response.set_cookie("token", str(AuthToken.token))
             response.set_cookie("nickname", nickname)
-        
+
         return response
-
-       
-
 
 
 class EmailAuth(APIView):
@@ -184,9 +176,8 @@ class EmailAuth(APIView):
         operation_description='Authenicate Skatert Account by Email',
         tags=['Users']
     )
-
     @csrf_exempt
-    def post(self, request, *args, **kwargs):        
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
@@ -199,7 +190,6 @@ class EmailAuth(APIView):
         if not code:
             return HttpResponseBadRequest("Не указан email")
 
-
         # Поиск аккаунта
         account = Account.objects.filter(user__nickname=nickname).get()
         if not account:
@@ -209,21 +199,21 @@ class EmailAuth(APIView):
         AuthToken = AuthTokens.objects.filter(account=account).filter(type="hash").filter(token=code).get()
         if not AuthToken:
             return HttpResponseBadRequest("Некорректный код")
-        # Проверка актуальности 
+        # Проверка актуальности
         if datetime.datetime.now().timestamp() > AuthToken.expiration_date.timestamp():
             AuthToken.delete()
             return HttpResponseBadRequest("Токен не актуален. Попробуйте ещё раз.")
 
-        #Смена типа токена - на email-token
+        # Смена типа токена - на email-token
         AuthToken = create_email_token(account, hash_token=AuthToken)
 
         response = JsonResponse({
             "token": str(AuthToken.token)
-            })
+        })
         response.set_cookie("token", str(AuthToken.token))
         response.set_cookie("nickname", nickname)
         return response
-        
+
 
 class Logout(APIView):
     @swagger_auto_schema(
@@ -245,7 +235,7 @@ class Logout(APIView):
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        
+
         response = HttpResponseRedirect('/login')
         response.delete_cookie('token')
         response.delete_cookie('nickname')
@@ -261,7 +251,7 @@ class Settings(APIView):
                 'nickname': openapi.Schema(type=openapi.TYPE_STRING),
                 'token': openapi.Schema(type=openapi.TYPE_STRING),
                 'lastfm': openapi.Schema(type=openapi.TYPE_STRING),
-                'secondFactor':openapi.Schema(type=openapi.TYPE_STRING)
+                'secondFactor': openapi.Schema(type=openapi.TYPE_STRING)
             }
         ),
         responses={
@@ -272,7 +262,6 @@ class Settings(APIView):
         operation_description='Authenticate Skatert Account by Password',
         tags=['Users']
     )
-
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
@@ -280,12 +269,10 @@ class Settings(APIView):
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        
-
         nickname = data.get("nickname")
         if not nickname:
             return HttpResponseBadRequest("Не указан никнейм")
-        
+
         token = data.get('token')
         if not token:
             return HttpResponseBadRequest("Не указан токен")
@@ -293,36 +280,28 @@ class Settings(APIView):
         lastfmNickname = data.get('lastfm')
         if not lastfmNickname:
             return HttpResponseBadRequest("Не указан ник lastfm")
-        
+
         secondFactor = data.get('secondFactor')
         if secondFactor is None:
             return HttpResponseBadRequest("Не указан способ аутентификации")
-        
+
         if not check_token(nickname, token):
             return HttpResponseBadRequest("Неверный токен досутпа")
-        
-        
 
-        user = User.objects.filter(nickname = nickname).get()
+        user = User.objects.filter(nickname=nickname).get()
         if user is None:
             return HttpResponseBadRequest("Не найден пользователь")
 
-        account = Account.objects.filter(user = user).get()
+        account = Account.objects.filter(user=user).get()
         if account is None:
             return HttpResponseBadRequest("Не найден аккаунт")
-        
-        
+
         user.lastfm = lastfmNickname
         user.save()
         account.secondFactor = secondFactor
         account.save()
 
         return HttpResponse()
-    
-
-
-
-        
 
 
 def check_token(nickname, tokenVal):
@@ -368,44 +347,3 @@ def create_email_token(account, hash_token=None):
     AuthToken.expiration_date = datetime.datetime.now() + datetime.timedelta(days=1)
     AuthToken.save()
     return AuthToken
-
-
-
-
-
-
-@csrf_exempt
-def music_integration(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
-        except:
-            return HttpResponseBadRequest("Некорректный формат данных")
-
-        lastfm_nickname = data.get("lastfm")
-        if not lastfm_nickname:
-            return HttpResponse(status=223)
-
-        nickname = request.COOKIES.get("nickname")
-        if not nickname:
-            return user_logout(request)
-
-        try:
-            music.lastfm_api.userGetInfo(lastfm_nickname)
-        except RuntimeError as error:
-            return HttpResponseBadRequest("Last fm user cannot be found: " + str(error))
-
-        user = User.objects.get(nickname=nickname)
-        user.lastfm = lastfm_nickname
-        user.save()
-
-        # tracks = lastfm.download_from_user(lastfm_nickname)
-        # for track in tracks:
-        #     t = user.favouriteTracks.add(track)
-        #     if not t:  # Если t - не none
-        #         track.rating += 1
-        #         track.save()
-
-        user.save()
-
-        return HttpResponse(str(0)) #len(tracks)))

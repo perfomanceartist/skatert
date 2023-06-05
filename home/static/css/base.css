@@ -1,3 +1,84 @@
+h1 {
+    margin-left: 25%;
+    text-align: center;
+
+    margin-top: 5%;
+    position: relative;
+    width: 50%;
+    height: 70px;
+
+    font-family: 'Consolas';
+    
+    font-weight: 900;
+    font-size:64px;
+    line-height: 68px;
+    letter-spacing: 0.1em;
+
+    user-select: none;
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 3px  #FF8E00;
+    text-shadow: 0px 0px 35px #FF8E00;
+}
+
+h2 {
+    font-family: 'Consolas';
+    font-weight: 800;
+    font-size: 48px;
+    text-align: center;
+    letter-spacing: 0.1em;
+
+    margin-left: 25%;
+    width: 50%;
+
+
+    /* width: max-content;
+    max-width: 700px; */
+
+    user-select: none;
+
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px black;
+}
+
+
+h3 {
+    font-family: 'Consolas';
+    font-weight: 700;
+    font-size: 32px;
+    text-align: center;
+    letter-spacing: 0.1em;
+
+    margin-left: 25%;
+    width: 50%;
+
+
+    /* width: max-content; */
+    /* max-width: 500px; */
+    user-select: none;
+
+
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.5px black;
+}
+
+label {
+    font-family: 'Consolas';
+    font-weight: 600;
+    font-size: 24px;
+    
+    text-align: center;
+    letter-spacing: 0.1em;
+
+    margin-top: 5%;
+
+
+    -webkit-text-fill-color: #FF8E00;
+}
+
+
 body {
     background-image: url("/static/img/sktrt.png");
     background-position: left;
@@ -28,5 +109,61 @@ body {
 .navbar-brand:hover, .navbar-brand:focus{
 
     text-shadow: 0px 0px 15px #FF8E00;
+
+}
+
+
+.form-control{
+    background: #D9D9D9;
+    border: 3px solid #FF8E00;
+} 
+
+
+.form-control:focus{
+    background: #FFFFFF;
+    border: 3px solid #FF8E00;
+    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
+    filter: drop-shadow(0px 0px 35px #FF8E00);
+}
+
+
+
+
+.btn-primary{
+
+    box-sizing: border-box;
+
+    position: relative;
+    width: 160px;
+    height: 40px;
+
+    background: #D5D7DB;
+    border: 3px solid #000000;
+    border-radius: 20px;
+
+    font-family: 'Consolas';
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 4px;
+    text-align: center;
+    letter-spacing: 0.1em;
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.5px black;
+    
+}
+
+
+
+
+.btn-primary:hover, .btn-primary:focus{
+    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
+    filter: drop-shadow(0px 0px 35px #FF8E00);
+    background: rgba(255, 142, 0, 0.6);
+    border: 3px solid #FFFFFF;
+    border-radius: 40px;
+
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1.5px white;
 
 }

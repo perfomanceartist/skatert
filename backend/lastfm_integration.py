@@ -1,8 +1,8 @@
-from backend.display import showMusicPreferences
-from music.models import Artist, Album, Track
-from users.models import User, MusicPreferences
 import music.lastfm_api
-from backend.parameters import GenreNames, GenreList
+from backend.display import showMusicPreferences
+from backend.parameters import GenreList, GenreNames
+from music.models import Album, Artist, Track
+from users.models import MusicPreferences, User
 
 
 def prepareArtist(artistName):
@@ -96,7 +96,7 @@ def prepareUserTracks(user):
     try:
         usersTrack = music.lastfm_api.userGetLovedTracks(user)["lovedtracks"]
         if usersTrack["@attr"]["user"].lower() != user.lower():
-            raise RuntimeError("Received tracks for different users: " + user + ", " + usersTrack["@attr"]["user"] + '.')
+            raise RuntimeError(f'Received tracks for different users: {user}, {usersTrack["@attr"]["user"]}.')
 
         trackList = []
         for trackInfo in usersTrack["track"]:
@@ -108,37 +108,36 @@ def prepareUserTracks(user):
 
 def loadUserLastFM(nickname, lastfmNickname):
     if not User.objects.filter(nickname=nickname).exists():
-        return False # if no such user we cannot integrate
+        return False  # if no such user we cannot integrate
+
     user = User.objects.filter(nickname=nickname).get()
-    if user.lastfm == "":
+    if user.lastfm == "" or user.lastfm == "-":
         user.lastfm = lastfmNickname
         user.save()
 
-
-    
     lastFmAmount = music.lastfm_api.userGetLovedTracksAmount(lastfmNickname)
     dbAmount = user.favouriteTracks.count
     if dbAmount == int(lastFmAmount):
         return
- 
-    userGenresCounts = [0 for _ in range(len(GenreNames))]
+
+    print(GenreList.fromUser(user).values.values())
 
     userTracksToAdd = prepareUserTracks(lastfmNickname)
-    for trackToAdd in userTracksToAdd:
-        user.favouriteTracks.add(trackToAdd)
-        currentGenres = GenreList.fromTrack(trackToAdd).values
-        for i in range(len(GenreNames)):
-            if currentGenres[GenreNames[i]]:
-                userGenresCounts[i] += 1
-    user.save()
 
-    chosenUserGenres = [count * len(GenreNames) >= len(userGenresCounts) for count in userGenresCounts]
-    GenreList(chosenUserGenres).setToUser(user)
+    if True in GenreList.fromUser(user).values.values():
+        for trackToAdd in userTracksToAdd:
+            user.favouriteTracks.add(trackToAdd)
+        user.save()
+    else:
+        userGenresCounts = [0] * len(GenreNames)
 
+        for trackToAdd in userTracksToAdd:
+            user.favouriteTracks.add(trackToAdd)
+            currentGenres = GenreList.fromTrack(trackToAdd).values
+            for i, name in enumerate(GenreNames):
+                if currentGenres[name]:
+                    userGenresCounts[i] += 1
+        user.save()
 
-
-
-
-
-
-
+        chosenUserGenres = [count * len(GenreNames) >= len(userGenresCounts) for count in userGenresCounts]
+        GenreList(chosenUserGenres).setToUser(user)
