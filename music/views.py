@@ -390,6 +390,51 @@ def _prepareUserAndTrack(data: dict) -> tuple[User, Track]:
 
 class ClickLike(APIView):
     # TODO: user auth
+    @swagger_auto_schema(
+        operation_summary="Like track",
+        operation_description="Undislike and like a track",
+        tags=["Music"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "nickname": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The nickname of the user to set genres for",
+                ),
+                "song_name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Name of the song",
+                ),
+                "song_artist": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Name of the artist",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Like is set",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+            404: openapi.Response(
+                description="User not found",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+        },
+    )
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
@@ -410,6 +455,51 @@ class ClickLike(APIView):
 
 
 class ClickDislike(APIView):
+    @swagger_auto_schema(
+        operation_summary="Dislike track",
+        operation_description="Unlike and dislike a track",
+        tags=["Music"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "nickname": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="The nickname of the user to set genres for",
+                ),
+                "song_name": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Name of the song",
+                ),
+                "song_artist": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Name of the artist",
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="Dislike is set",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+            404: openapi.Response(
+                description="User not found",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={"error": openapi.Schema(type=openapi.TYPE_STRING)},
+                ),
+            ),
+        },
+    )
     def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
