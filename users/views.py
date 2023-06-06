@@ -120,3 +120,66 @@ class SetUserLastfmNickname(APIView):
             return HttpResponseBadRequest('Failed to decode json data.')
         except (RuntimeError, ValueError) as error:
             return HttpResponseServerError(error)
+
+
+
+class Subscribe(APIView):
+    @swagger_auto_schema(
+        operation_summary='Subscribe to user',
+        tags=['Users'],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'nickname': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='The nickname of the current user'
+                ),
+                'target_nickname': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description='The nickname of the target user'
+                ),
+                'subscribed': openapi.Schema(
+                    type=openapi.TYPE_BOOLEAN,
+                    description='if true, trying to subscribe, if false, trying to unsubscribe'
+                )
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description='Subscribed',
+            ),
+            400: openapi.Response(
+                description='Bad request',
+            ),
+            404: openapi.Response(
+                description='User not found',
+            )
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+
+            user = getUserByNickname(data["nickname"])
+            if user is None:
+                return HttpResponseNotFound("User with nickname '" + data["nickname"] + "' is not found.")
+
+            target = getUserByNickname(data["target_nickname"])
+            if target is None:
+                return HttpResponseNotFound("User with nickname '" + data["target_nickname"] + "' is not found.")
+              
+            action = data["subscribed"]
+            if action == True:
+                if target.id in user.subscriptions:
+                    return HttpResponseBadRequest("Already subscribed to target")
+                user.subscriptions.append(target)
+            else:
+                if not target.id in user.subscriptions:
+                    return HttpResponseBadRequest("User was not subscribed to target")
+                user.subscriptions.remove(target)
+            user.save()
+            return HttpResponse("")
+        except (KeyError, json.JSONDecodeError):
+            return HttpResponseBadRequest('Failed to decode json data.')
+        except (RuntimeError, ValueError) as error:
+            return HttpResponseServerError(error)
