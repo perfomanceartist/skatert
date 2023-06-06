@@ -5,17 +5,45 @@ from music.models import Album, Artist, Track
 from users.models import MusicPreferences, User
 
 
-def getRecommendations(currentUser, amount=20) -> list:
-    if amount > len(Track.objects.all()):
-        raise ValueError("Not enough records in the database")
-    if amount == len(Track.objects.all()):
-        return Track.objects.all()
+def getUserRecommenders(currentUser : User, SIMILAR_PEOPLE_COUNT : int) -> list:
+    if len(currentUser.recommenders) >= SIMILAR_PEOPLE_COUNT:
+        return currentUser.recommenders
 
     currentUserPreferences = GenreList.fromUser(currentUser)
+    # Проходит по всем пользователям, формируя массив списков usersWithGenreSimilarities.
+    # Индекс массива - количество совпадений по жанрам, значение массива - список пользователей с таким числом совпадений.
+    usersWithGenreSimilarities = {i: [] for i in range(len(MusicPreferences.objects.all()) + 1)}
+    for otherUser in User.objects.all():
+        similarGenres = currentUserPreferences.countMatches(GenreList.fromUser(otherUser))
+        usersWithGenreSimilarities[similarGenres].append(otherUser.id)
+
+    # Считаем с конца
+    for genreSimilarities in range(len(MusicPreferences.objects.all()), 0, -1):
+         for similarUser in usersWithGenreSimilarities[genreSimilarities]:
+            if similarUser not in currentUser.recommenders:
+                currentUser.recommenders.append(similarUser)
+                if len(currentUser.recommenders) >= SIMILAR_PEOPLE_COUNT:
+                    break
+
+    
+    currentUser.save()
+    return currentUser.recommenders
+
+
+def getRecommendations(currentUser, SIMILAR_PEOPLE_COUNT=25, MATCH_LIMIT=0.6, RECOMMENDED_AMOUNT=20) -> list:
+    if Track.objects.count() < RECOMMENDED_AMOUNT:
+        raise ValueError("Not enough records in the database")
+    if Track.objects.count() == RECOMMENDED_AMOUNT:
+        return Track.objects.all()
+
+
+
+    recommenders = getUserRecommenders(currentUser, SIMILAR_PEOPLE_COUNT)
+    
 
     recommendations = []
     unfavouriteTracks = currentUser.unfavouriteTracks.all() or []
-    for recommender in currentUser.recommenders:
+    for recommender in recommenders:
         for track in User.objects.get(id=recommender).favouriteTracks.order_by('recommended'):
             if track in currentUser.favouriteTracks.all():
                 continue
@@ -26,34 +54,12 @@ def getRecommendations(currentUser, amount=20) -> list:
             track.save()
 
             recommendations.append(track)
-            if len(recommendations) >= amount:
+            if len(recommendations) >= RECOMMENDED_AMOUNT:
                 return recommendations
 
-    # Key - amount of common genres, value - list of user ID's.
-    usersWithGenreSimilarities = {i: [] for i in range(len(MusicPreferences.objects.all()) + 1)}
-    for otherUser in User.objects.all():
-        similarGenres = currentUserPreferences.countMatches(GenreList.fromUser(otherUser))
-        usersWithGenreSimilarities[similarGenres].append(otherUser.id)
+    
 
-    for genreSimilarities in range(len(MusicPreferences.objects.all()), 0, -1):
-        for similarUser in usersWithGenreSimilarities[genreSimilarities]:
-            for track in User.objects.get(id=similarUser).favouriteTracks.order_by('recommended'):
-                # Skips common tracks.
-                if track in currentUser.favouriteTracks.all():
-                    continue
-
-                track.recommended += 1
-                track.save()
-
-                if similarUser not in currentUser.recommenders:
-                    currentUser.recommenders.append(similarUser)
-                    currentUser.save()
-
-                recommendations.append(track)
-                if len(recommendations) >= amount:
-                    return recommendations
-
-    if len(recommendations) >= amount:
+    if len(recommendations) >= RECOMMENDED_AMOUNT:
         return recommendations
     raise ValueError("Not enough records in the database")
 
