@@ -16,9 +16,9 @@
         {% block userpage %}
         {% endblock userpage %}
     </ul>
-    <form class="d-flex" role="search">
-      <input class="form-control me-2" type="search" placeholder="Искать треки" aria-label="search">
-      <button class="btn btn-outline-success" type="submit">Искать</button>
-    </form>
+    
+      <input class="form-control me-2" id="search_field" type="search" placeholder="Искать треки" aria-label="search">
+      <button class="btn btn-outline-success" id="search_button" onclick="get_search_results()">Искать</button>
+    
 </div>
 {% endblock site_head %}

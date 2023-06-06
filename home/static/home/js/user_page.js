@@ -289,3 +289,85 @@ for (var obj in tracks) {
   document.getElementById("user_tracks").appendChild(element);
 }
 }
+
+
+async function get_search_results() {
+
+  document.getElementById("user_page_header").innerText = "РЕЗУЛЬТАТЫ ПОИСКА";
+  
+  console.log("GET_SEARCH_RESULTS");
+  
+  var track_name = document.getElementById("search_field").value;
+  console.log("Finding \"" + track_name + "\"");
+
+  const response_recomendation = await fetch("/music/findTrack?" + new URLSearchParams({
+    track_name: track_name
+  }),
+  {
+    headers: { "Accept": "application/json" }
+  });
+  
+  
+  var tracks = await response_recomendation.json();
+  
+  document.getElementById("user_tracks").innerHTML = "";
+  document.getElementById("user_recomendations").innerHTML = "";
+  
+  
+  for (var obj in tracks) {
+    var track = tracks[obj];
+    console.log(track);
+        /* ТРЕК В СПИСКЕ РЕКОМЕНДОВАННЫХ */
+    var element = document.createElement("div");
+    element.className = "list_element";
+  
+        /* ИНФОРМАЦИЯ О ТРЕКЕ */
+    var song_box = document.createElement("div");
+    song_box.className = "song_box";
+  
+    var song_name = document.createElement("li");
+    song_name.className = "song_info song_name";
+    song_name.innerText = track["name"];
+  
+    var song_artist = document.createElement("li");
+    song_artist.className = "song_info song_artist";
+    song_artist.innerText = track["artist"];
+  
+    if (typeof track["album"] !== 'undefined') {
+      var song_album = document.createElement("li");
+      song_album.className = "song_info song_album";
+      song_album.innerText = track["album"];
+    }
+  
+    song_box.appendChild(song_name);
+    song_box.appendChild(song_artist);
+  
+    if (typeof song_album !== 'undefined') {
+      song_box.appendChild(song_album);
+    }
+  
+        /* ОБЛОЖКА АЛЬБОМА */
+  
+    var album_box = document.createElement("div");
+    album_box.className = "album_box";
+  
+        /* КНОПКИ РЕАКЦИИ */
+    var button_box = document.createElement("div");
+    button_box.className = "button_box";
+    var like_button = document.createElement("button");
+    like_button.className = "element reaction like_button";
+    like_button.value = 0;
+    // like_button.dataset.value = nickname;
+    button_box.appendChild(like_button)
+  
+        /* СБОР ТРЕКА */
+    element.appendChild(song_box);
+    element.appendChild(button_box);
+    element.appendChild(album_box);
+    document.getElementById("user_tracks").appendChild(element);
+  
+  }
+  set_listeners(nickname);
+  }
+  
+  

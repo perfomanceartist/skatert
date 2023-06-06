@@ -573,3 +573,55 @@ class ClickDislike(APIView):
         user.save()
 
         return HttpResponse(status=200)
+
+
+class FindTrack(APIView):
+    @swagger_auto_schema(
+        operation_summary="Find track by its name",
+        tags=["Music"],
+        manual_parameters=[
+            openapi.Parameter(
+                name="track_name",
+                in_=openapi.IN_QUERY,
+                description="Name of track to find",
+                type=openapi.TYPE_STRING,
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="List of potential tracks",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_STRING
+                    )
+                ),
+            ),
+            500: "Internal server error",
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        
+        
+        try:
+            answer = []
+            trackname = request.GET.get("track_name")
+            if trackname is None or trackname == "":
+                return HttpResponseBadRequest(
+                    "Query string (track name) should be specified for this type of request."
+                )
+
+            tracks = Track.objects.filter(name__icontains=trackname)
+            for track in tracks:
+                answer.append(getTrackInformation(track))
+            
+
+            return JsonResponse(answer, safe=False)
+        except (RuntimeError, ValueError, KeyError) as error:
+            return HttpResponseServerError(error)
