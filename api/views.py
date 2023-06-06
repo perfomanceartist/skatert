@@ -5,12 +5,13 @@ from random import randint
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import (HttpResponse, HttpResponseBadRequest,
+from django.http import (HttpResponse, HttpResponseBadRequest, HttpResponseForbidden,
                          HttpResponseRedirect, JsonResponse)
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
+from backend.auth import check_cookie
 
 import music.lastfm_api
 from users.models import Account, AuthTokens, MusicPreferences, User
@@ -235,7 +236,12 @@ class Logout(APIView):
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         response = HttpResponseRedirect('/login')
         response.delete_cookie('token')
         response.delete_cookie('nickname')
@@ -264,6 +270,12 @@ class Settings(APIView):
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:

@@ -2,6 +2,7 @@ import json
 
 from django.http import (HttpResponse, HttpResponseBadRequest,
                          HttpResponseNotFound, HttpResponseServerError,
+                         HttpResponseForbidden,
                          JsonResponse)
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
@@ -11,6 +12,7 @@ from rest_framework.views import APIView
 from backend.backend import getUserByNickname
 from music.lastfm_api import userGetInfo
 
+from backend.auth import check_cookie
 
 # Create your views here.
 def index(request):
@@ -65,6 +67,12 @@ class GetUserLastfmInfo(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        try:
             nickname = request.GET.get('nickname')
             if nickname is None:
                 return HttpResponseBadRequest('Nickname must be specified.')
@@ -106,6 +114,12 @@ class SetUserLastfmNickname(APIView):
         }
     )
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
 
@@ -157,6 +171,12 @@ class Subscribe(APIView):
         }
     )
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
 

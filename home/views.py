@@ -1,36 +1,10 @@
-import datetime
-
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 
-from users.models import Account, AuthTokens, User
+from users.models import Account, User
 
+from backend.auth import check_cookie
 
-def check_token(nickname, tokenVal):
-    account = Account.objects.filter(user__nickname=nickname).get()
-    if account is None:
-        return False
-
-    token = AuthTokens.objects.filter(account=account).filter(token=tokenVal).get()
-    if token is None:
-        return False
-
-    if token.type != "email":
-        return False
-
-    if datetime.datetime.now().timestamp() > token.expiration_date.timestamp():
-        token.delete()
-        return False
-
-    return True
-
-
-def check_cookie(request):
-    nickname = request.COOKIES.get("nickname")
-    token = request.COOKIES.get("token")
-    if nickname is None or token is None:
-        return False
-    return check_token(nickname, token)
 
 
 def skatert(request):

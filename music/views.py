@@ -3,11 +3,13 @@ from django.http import (
     HttpResponse,
     HttpResponseBadRequest,
     HttpResponseNotFound,
+    HttpResponseForbidden,
     HttpResponseServerError,
 )
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
+from backend.auth import check_cookie
 from users.models import User, Track
 from backend.lastfm_integration import loadUserLastFM
 from backend.backend import (
@@ -43,6 +45,12 @@ class MakeLastFmIntegration(APIView):
         tags=["Music"],
     )
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
             print(data["nickname"], data["lastFmNickname"])
@@ -107,6 +115,12 @@ class GetUserGenres(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         nickname = request.GET.get("nickname")
         if nickname is None:
             return HttpResponseBadRequest(
@@ -180,6 +194,12 @@ class SetUserGenres(APIView):
     )
     def post(self, request, *args, **kwargs):
         try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        try:
             data = json.loads(request.body)
 
             user = getUserByNickname(data["nickname"])
@@ -232,6 +252,12 @@ class GetTrackById(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        try:
             trackId = request.GET.get("id")
             if trackId is None:
                 return HttpResponseBadRequest("Track id must be specified.")
@@ -278,6 +304,12 @@ class GetUserFavouriteTracks(APIView):
     )
     def get(self, request, *args, **kwargs):
         try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        try:
             nickname = request.GET.get("nickname")
             if nickname is None:
                 return HttpResponseBadRequest("Nickname must be specified.")
@@ -310,6 +342,12 @@ class GetUsers(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             answer = []
             for user in User.objects.all():
@@ -346,6 +384,12 @@ class GetRecommendations(APIView):
         },
     )
     def get(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             nickname = request.GET.get("nickname")
             if nickname is None:
@@ -389,7 +433,6 @@ def _prepareUserAndTrack(data: dict) -> tuple[User, Track]:
 
 
 class ClickLike(APIView):
-    # TODO: user auth
     @swagger_auto_schema(
         operation_summary="Like track",
         operation_description="Undislike and like a track",
@@ -436,6 +479,12 @@ class ClickLike(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
             user, track = _prepareUserAndTrack(data)
@@ -501,6 +550,12 @@ class ClickDislike(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
             user, track = _prepareUserAndTrack(data)
