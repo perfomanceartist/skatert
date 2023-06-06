@@ -10,26 +10,28 @@ class User(models.Model):
     favouriteTracks = models.ManyToManyField(Track, related_name='favouriteTracks')
     unfavouriteTracks = models.ManyToManyField(Track, related_name='unfavouriteTracks')
     recommenders = ArrayField(models.IntegerField(), default=list, primary_key=False, blank=False)
+    subscriptions = ArrayField(models.IntegerField(), default=list, primary_key=False, blank=False)
 
 
 class MusicPreferences(models.Model):
+    "Запись вида Жанр - Битовая маска пользователей"
     genre = models.IntegerField(primary_key=True, blank=False)
     usersBitmask = ArrayField(models.BooleanField(), primary_key=False, blank=False)
 
 
 class FilmsPreferences(models.Model):
+    "Запись вида Жанр - Битовая маска пользователей"
     genre = models.IntegerField(primary_key=True, blank=False)
     usersBitmask = ArrayField(models.BooleanField(), primary_key=False, blank=False)
 
 
 class BooksPreferences(models.Model):
+    "Запись вида Жанр - Битовая маска пользователей"
     genre = models.IntegerField(primary_key=True, blank=False)
     usersBitmask = ArrayField(models.BooleanField(), primary_key=False, blank=False)
 
 
-class Subscriptions(models.Model):
-    id = models.ForeignKey(User, primary_key=True, on_delete=models.CASCADE)
-    subscriptions = ArrayField(models.IntegerField(), primary_key=False, blank=False)
+
 
 
 class Account(models.Model):
