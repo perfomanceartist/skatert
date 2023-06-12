@@ -13,6 +13,7 @@ from backend.backend import getUserByNickname
 from music.lastfm_api import userGetInfo
 
 from backend.auth import check_cookie
+from users.models import User
 
 # Create your views here.
 def index(request):
@@ -202,4 +203,82 @@ class Subscribe(APIView):
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest('Failed to decode json data.')
         except (RuntimeError, ValueError) as error:
+            return HttpResponseServerError(error)
+        
+
+
+
+class GetUserSubscriptions(APIView):
+    @swagger_auto_schema(
+        operation_summary='Get user\'s subscriptions list',
+        manual_parameters=[
+            openapi.Parameter(
+                name='nickname',
+                in_=openapi.IN_QUERY,
+                type='string',
+                description='User\'s nickname whose subsriptions are returned for'
+            )
+        ],
+        tags=['Users'],
+        responses={
+            200: openapi.Response(
+                description='OK',
+		examples={
+                    'application/json': ['user1', 'user2']
+                }
+            ),
+            400: openapi.Response(
+                description='Bad Request',
+                examples={
+                    'application/json': {'error': 'Nickname must be specified.'}
+                }
+            ),
+            403: openapi.Response(
+                description='Not Authorised',
+                examples={
+                    'application/json': {'error': 'Bad cookie.'}
+                }
+            ),
+            404: openapi.Response(
+                description='Not Found',
+                examples={
+                    'application/json': {'error': 'User \'nickname\' is not found.'}
+                }
+            ),
+            500: openapi.Response(
+                description='Internal Server Error',
+                examples={
+                    'application/json': {'error': 'Internal Server Error'}
+                }
+            )
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        try:
+            if not check_cookie(request):
+                return HttpResponseForbidden("Bad cookie")
+        except Exception as error:
+            print(error)
+            return HttpResponseForbidden("Bad cookie")
+        try:
+            nickname = request.GET.get('nickname')
+            if nickname is None:
+                return HttpResponseBadRequest('Nickname must be specified.')
+            
+            user = getUserByNickname(nickname)
+            if user is None:
+                return HttpResponseNotFound("User with nickname '" + nickname + "' is not found.")
+            subs = []
+            for id in user.subscriptions:
+                try:
+                    sub = User.objects.filter(id=id).get()
+                    if sub is None:
+                        return HttpResponseServerError("В списке пользователей плохой айди")
+                except Exception as e:
+                    return HttpResponseServerError(e)
+                subs.append(sub.nickname)
+            
+
+            return JsonResponse(subs, safe=False)
+        except (RuntimeError, ValueError, KeyError) as error:
             return HttpResponseServerError(error)

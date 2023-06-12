@@ -37,6 +37,20 @@ def user(request, nickname):
     data = {"user": {"nickname": nickname}}
     return render(request, "home/user_page.html", context=data)
 
+def subscriptions(request):
+    if check_cookie(request) is False:
+       return HttpResponseRedirect('/login')
+    
+    nickname = request.COOKIES.get("nickname")
+    if nickname is None:
+        return HttpResponseRedirect("/login")
+
+    data = {
+        "user": {
+            "nickname": nickname,
+        }
+    }
+    return render(request, "home/subscriptions_page.html", context=data)
 
 def mypage(request):
     if check_cookie(request) is False:
