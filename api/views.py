@@ -81,7 +81,11 @@ class Register(APIView):
             music_pref.usersBitmask += [False]
             music_pref.save()
 
-        return HttpResponse("Registered")
+        AuthToken = create_email_token(account)
+        response = HttpResponse("Registered")
+        response.set_cookie("token", str(AuthToken.token))
+        response.set_cookie("nickname", nickname)
+        return response
 
 
 def _email_request(account):

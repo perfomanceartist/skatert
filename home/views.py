@@ -14,6 +14,8 @@ def skatert(request):
 
 
 def login(request):
+    if check_cookie(request):
+        return HttpResponseRedirect("/")
     return render(request, "login/login_page.html")
 
 
