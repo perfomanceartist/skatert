@@ -19,9 +19,11 @@
 <li class="nav-item">
     <a class="nav-link active" onclick="get_recomendations('{{user.nickname}}')">Рекомендации</a>
 </li>
+{% if user.imported is not True %}
 <li class="nav-item">
     <a class="nav-link active" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
 </li>
+{% endif %}
 <li class="nav-item">
     <a class="nav-link active link"  onclick="exit_account()">Выход</a>
 </li>
