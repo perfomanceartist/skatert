@@ -8,6 +8,7 @@
 
 
 {% block site_head %}
+<script type="text/JavaScript" src = "{% static 'home/js/home_base.js' %}"></script>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav">
         <li class="nav-item">
@@ -21,7 +22,9 @@
         </li>
         {% block userpage %}
         {% endblock userpage %}
-        
+        <li class="nav-item">
+          <a class="nav-link active link"  onclick="exit_account()">Выйти</a>
+        </li>
     </ul>
     <div class="container-search">
       {% block music_search %}
