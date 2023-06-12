@@ -85,7 +85,6 @@ body {
     background-color: #D5D7DB;
 }
 
-
 .navbar{
     background-color: #CCCCCC;
     border: 1px solid rgba(0, 0, 0, 0.88);
@@ -134,12 +133,16 @@ body {
     box-sizing: border-box;
 
     position: relative;
-    width: 160px;
-    height: 40px;
+    /* width: 160px; */
+    width:fit-content;
+    height: fit-content;
+    min-height: 40px;
+    padding: 2%;
+    /* margin: 1%; */
 
     background: #D5D7DB;
     border: 3px solid #000000;
-    border-radius: 20px;
+    border-radius: 15px;
 
     font-family: 'Consolas';
     font-weight: 700;
@@ -150,6 +153,8 @@ body {
 
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 1.5px black;
+
+    user-select: none;
     
 }
 
@@ -161,7 +166,9 @@ body {
     filter: drop-shadow(0px 0px 35px #FF8E00);
     background: rgba(255, 142, 0, 0.6);
     border: 3px solid #FFFFFF;
-    border-radius: 40px;
+    border-radius: 20px;
+    user-select: none;
+
 
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 1.5px white;

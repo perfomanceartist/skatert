@@ -9,16 +9,25 @@
 
 {% block site_head %}
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <ul class="navbar-nav">
         <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/mypage">Моя страница</a>
+            <a id="music_link" class="nav-link active" aria-current="page" href="/mypage">Музыка</a>
+        </li>
+        <li class="nav-item">
+          <a id="subscriptions_link" class="nav-link active" aria-current="page" href="/subscriptions">Подписки</a>
+        </li>
+        <li class="nav-item">
+          <a  id="settings_link" class="nav-link active" aria-current="page" href="/settings">Настройки</a>
         </li>
         {% block userpage %}
         {% endblock userpage %}
+        
     </ul>
-    
-      <input class="form-control me-2" id="search_field" type="search" placeholder="Искать треки" aria-label="search">
-      <button class="btn btn-outline-success" id="search_button" onclick="get_search_results()">Искать</button>
-    
+    <div class="container-search">
+      {% block music_search %}
+      {% endblock music_search %}
+      {% block subscriptions_search %}
+      {% endblock subscriptions_search %}
+    </div>
 </div>
 {% endblock site_head %}

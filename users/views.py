@@ -193,11 +193,11 @@ class Subscribe(APIView):
             if action == True:
                 if target.id in user.subscriptions:
                     return HttpResponseBadRequest("Already subscribed to target")
-                user.subscriptions.append(target)
+                user.subscriptions.append(target.id)
             else:
                 if not target.id in user.subscriptions:
                     return HttpResponseBadRequest("User was not subscribed to target")
-                user.subscriptions.remove(target)
+                user.subscriptions.remove(target.id)
             user.save()
             return HttpResponse("")
         except (KeyError, json.JSONDecodeError):

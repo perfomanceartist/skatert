@@ -1,48 +1,21 @@
 .nav-item {
     -webkit-text-fill-color: black;
     user-select : none;
-
 }
 
 .nav-item:hover, .nav-item:focus {
     -webkit-text-fill-color: #FF8E00;
+    cursor: pointer;
 }
 
-.btn-outline-success{
-
-    box-sizing: border-box;
-
-    position: relative;
-    width: 160px;
-    height: 40px;
-
-    background: #D5D7DB;
-    border: 3px solid #000000;
-    border-radius: 5px;
-
-    font-family: 'Consolas';
-    font-weight: 700;
-    font-size: 22px;
-    line-height: 4px;
-    text-align: center;
-    letter-spacing: 0.1em;
-
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px black;
-    
+#navbarSupportedContent{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
-
-.btn-outline-success:hover, .btn-outline-success:focus{
-
-    box-shadow: inset 0px 0px 5px rgba(240, 178, 101, 0.4);
-    filter: drop-shadow(0px 0px 35px #FF8E00);
-    background: rgba(255, 142, 0, 0.6);
-
-    border: 3px solid #FFFFFF;
-    /* border-radius: 5px; */
-
-    -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px white;
-
+.container-search{
+    display: flex;
+    flex-direction: row;
+    min-width: 20%;
 }
