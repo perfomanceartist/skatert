@@ -16,23 +16,20 @@
 
 
 {% block userpage %}
-<a class="nav-link">|</a>
 <li class="nav-item">
     <a class="nav-link active" onclick="get_recomendations('{{user.nickname}}')">Рекомендации</a>
 </li>
-<a class="nav-link">|</a>
+{% if user.imported is not True %}
 <li class="nav-item">
     <a class="nav-link active" onclick="import_tracks('{{user.nickname}}')">Импортировать</a>
 </li>
-<a class="nav-link">|</a>
-<li class="nav-item">
-    <a class="nav-link active" href="/settings">Настройки</a>
-</li>
-<a class="nav-link">|</a>
-<li class="nav-item">
-    <a class="nav-link active link"  onclick="exit_account()">Выход</a>
-</li>
+{% endif %}
 {% endblock userpage %}
+
+{% block music_search %}
+<input class="form-control me-2" id="music_search_field" type="search" placeholder="Найти трек" aria-label="search">
+<button class="btn btn-primary" id="music_search_button" onclick="get_search_results('{{user.nickname}}')">Найти</button>
+{% endblock music_search %}
 
 {% block content %}
 <h2 id = "user_page_header">ВАШИ ДОБАВЛЕННЫЕ ТРЕКИ</h2>
@@ -40,5 +37,5 @@
     <ul id = "user_tracks" class = "listlist"></ul>
     <ul id = "user_recomendations" class = "listlist"></ul>
 </div>
-<script type="text/JavaScript">list_user_tracks('{{user.nickname}}')</script>
+<script type="text/JavaScript">setup_user_page('{{user.nickname}}')</script>
 {% endblock content %}

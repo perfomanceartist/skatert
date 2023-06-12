@@ -1,0 +1,38 @@
+{% extends "home/home_base.html" %}
+
+{% block title %}
+{{user.nickname}} | Skatert
+{% endblock title %}
+
+{% load static %}
+{% block css_adding %} 
+  <link rel = "stylesheet" href = "{% static 'home/css/subscriptions_page.css' %}">
+  <link rel = "stylesheet" href = "{% static 'home/css/home_base.css' %}">
+{% endblock css_adding %} 
+{% block js_adding %}
+<script type="text/JavaScript" src = "{% static 'home/js/subscriptions_page.js' %}"></script>
+{% endblock js_adding %}
+
+
+
+
+{% block subscriptions_search %}
+<input class="form-control me-2" id="subscriptions_search_field" type="search" placeholder="Найти пользователя" aria-label="search">
+<button class="btn btn-primary" id="subscriptions_search_button" onclick="subscribe_to_user('{{user.nickname}}')">Подписаться</button>
+{% endblock subscriptions_search %}
+
+{% block content %}
+<!--  -->
+<div class="mb-3 d-none" id="user_not_found">
+  <p style="color: #FF8E00; text-align: right;">Пользователь с таким именем не найден</p>
+</div>
+<div class="mb-3 d-none" id="already_subscribed">
+  <p style="color: #FF8E00; text-align: right;">Вы уже подписаны на этого пользователя</p>
+</div>
+<!--  -->
+<h2 id = "user_page_header">ВАШИ ПОДПИСКИ</h2>
+<div class="container">
+  <ul id = "user_subscriptions" class = "listlist"></ul>
+</div>
+<script type="text/JavaScript">setup_subscriptions_page('{{user.nickname}}')</script>
+{% endblock content %}

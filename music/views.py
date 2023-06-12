@@ -581,6 +581,12 @@ class FindTrack(APIView):
         tags=["Music"],
         manual_parameters=[
             openapi.Parameter(
+                "nickname",
+                openapi.IN_QUERY,
+                description="User nickname",
+                type=openapi.TYPE_STRING,
+            ),
+            openapi.Parameter(
                 name="track_name",
                 in_=openapi.IN_QUERY,
                 description="Name of track to find",
@@ -611,6 +617,13 @@ class FindTrack(APIView):
         
         try:
             answer = []
+            nickname = request.GET.get("nickname")
+            user = getUserByNickname(nickname)
+            if user is None:
+                return HttpResponseBadRequest(
+                    "User must be specified for this type of request."
+                )
+            
             trackname = request.GET.get("track_name")
             if trackname is None or trackname == "":
                 return HttpResponseBadRequest(
@@ -619,7 +632,12 @@ class FindTrack(APIView):
 
             tracks = Track.objects.filter(name__icontains=trackname)
             for track in tracks:
-                answer.append(getTrackInformation(track))
+                search_track_info = getTrackInformation(track)
+                if track in user.favouriteTracks.all():
+                    search_track_info["in_favourite"] = True
+                else:
+                    search_track_info["in_favourite"] = False
+                answer.append(search_track_info)
             
 
             return JsonResponse(answer, safe=False)

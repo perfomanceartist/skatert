@@ -161,6 +161,7 @@ def getTrackInformation(track) -> dict:
 
     if track.album:
         result_dict["album"] = track.album.name
+        result_dict["cover"] = track.album.img_large
 
     return result_dict
 

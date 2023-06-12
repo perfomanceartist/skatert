@@ -34,7 +34,8 @@ def genres(request):
 def user(request, nickname):
     if check_cookie(request) is False:
         return HttpResponseRedirect("/login")
-    data = {"user": {"nickname": nickname}}
+    
+    data = {"user": {"nickname": nickname, "imported": True}}
     return render(request, "home/user_page.html", context=data)
 
 def subscriptions(request):
@@ -44,7 +45,7 @@ def subscriptions(request):
     nickname = request.COOKIES.get("nickname")
     if nickname is None:
         return HttpResponseRedirect("/login")
-
+    
     data = {
         "user": {
             "nickname": nickname,
@@ -60,7 +61,13 @@ def mypage(request):
     if nickname is None:
         return HttpResponseRedirect("/login")
 
-    data = {"user": {"nickname": nickname}}
+    user = User.objects.filter(nickname=nickname).get()
+    if user is None:
+        return HttpResponseBadRequest()
+    imported = True
+    if user.favouriteTracks.count() == 0:
+        imported = False
+    data = {"user": {"nickname": nickname, "imported": imported}}
     return render(request, "home/user_page.html", context=data)
 
 
