@@ -1,8 +1,8 @@
 install:
-	python manage.py makemigrations music
-	python manage.py makemigrations
-	python manage.py migrate
-	python manage.py loaddata initial_data
+	python3 manage.py makemigrations music
+	python3 manage.py makemigrations
+	python3 manage.py migrate
+	python3 manage.py loaddata initial_data
 
 
 migrations:
