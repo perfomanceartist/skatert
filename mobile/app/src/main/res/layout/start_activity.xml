@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="5dp"
-            android:text="@string/log_in" />
+            android:text="@string/Authorize" />
 
         <Button
             android:id="@+id/setup_sign_in_button"
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="5dp"
-            android:text="@string/sign_in" />
+            android:text="@string/Sign_In" />
 
     </LinearLayout>
 

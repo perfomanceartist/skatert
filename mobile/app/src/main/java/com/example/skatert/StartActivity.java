@@ -19,11 +19,15 @@ public class StartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+        if(!sharedPref.getString(getString(R.string.SharedPreferencesNickname), "").equals(""))
+            startActivity(new Intent(StartActivity.this, HomeActivity.class));
+
         setContentView(R.layout.start_activity);
 
         loginButton = findViewById(R.id.setup_login_button);
         registerButton = findViewById(R.id.setup_sign_in_button);
-        Settings.init(this);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override

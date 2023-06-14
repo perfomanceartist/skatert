@@ -1,19 +1,28 @@
 <resources>
     <string name="app_name">Skatert</string>
 
-    <string name="log_in">Log in</string>
-    <string name="sign_in">Sign in</string>
+    <string name="Authorize">Log in</string>
+    <string name="Sign_In">Sign in</string>
 
-    <string name="main_activity_text">This is the main window of our application.</string>
-    <string name="ok">Okay</string>
+    <string name="Ok">Okay</string>
 
-    <string name="username">Username</string>
-    <string name="password">Password</string>
-    <string name="email">Email</string>
+    <string name="Username">Username</string>
+    <string name="Password">Password</string>
+    <string name="Email">Email</string>
 
-    <string name="confirm">Confirm</string>
-    <string name="favourite_tracks">Skater music recommendations:</string>
-    <string name="song_title">Track name</string>
-    <string name="artist_name">Artist</string>
-    <string name="album_name">Album</string>
+    <string name="Confirm">Confirm</string>
+    <string name="VerificationCodeAction">Enter verification code</string>
+
+    <string name="HomeActivityToolbar">Skatert</string>
+    <string name="HomeActivityDrawerTitle">Skatert Music</string>
+    <string name="HomeActivityDrawerOpen">Open</string>
+    <string name="HomeActivityDrawerClose">Close</string>
+    <string name="HomeActivityButtonContentDescription">Opens drawer</string>
+    <string name="HomeActivityDrawerToolbar">Skatert options</string>
+
+    <string name="SharedPreferencesList">MainSharedPreferences</string>
+    <string name="SharedPreferencesNickname">Preferences-Nickname</string>
+    <string name="HomeActivityMakeLastFM">Make LastFM integration</string>
+    <string name="HomeActivityLogOut">Log out</string>
+    <string name="HomeActivityRefresh">Refresh</string>
 </resources>

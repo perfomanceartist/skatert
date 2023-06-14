@@ -1,9 +1,9 @@
 package com.example.skatert;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
@@ -16,51 +16,23 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Objects;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.skatert.utility.Hash;
+import com.example.skatert.utility.SiteMap;
 
-public class LoginActivity extends AppCompatActivity implements OnTaskCompleted {
+import org.json.JSONObject;
+
+public class LoginActivity extends AppCompatActivity {
     EditText usernameEditText;
     EditText passwordEditText;
     Button loginButton;
 
+    AlertDialog dialog = null;
 
-    String host = "http://127.0.0.1:8000/";
-    String authStepOne = host + "api/login_pass";
-    String authStepTwo = host + "api/login_email";
-
-    String lastFmIntegration = host + "music/lastFM-integration";
-
-    String lastResult;
-
-    String nickname;
-
-    String code;
-
-    String authData;
-
-    public void onTaskCompleted(String result) {
-        if(Objects.equals(result, "CompletedFirst")) {
-            lastResult = result;
-
-            showEmailCodeDialog(nickname);
-
-            authData = "{ \"nickname\": \"" + nickname + "\", \"code\": " + String.valueOf(code) + " }";
-            new MyHttpPostTask(this).execute(authStepTwo);
-        }
-
-        if(Objects.equals(result, "CompletedSecond")) {
-            authData = "{\n" +
-                    "    \"nickname\": \"" + nickname + "\",\n" +
-                    "    \"lastFmNickname\": \"" + nickname + "\"\n" +
-                    "}";
-            new MyHttpPostTask(this).execute(lastFmIntegration);
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-        }
-    }
+    RequestQueue volleyQueue = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,113 +40,112 @@ public class LoginActivity extends AppCompatActivity implements OnTaskCompleted 
         setContentView(R.layout.login_activity);
 
         usernameEditText = findViewById(R.id.email_edit_text);
+        usernameEditText.setText("Alexander");
+
         passwordEditText = findViewById(R.id.password_edit_text);
+        passwordEditText.setText("Password");
+
         loginButton = findViewById(R.id.login_button);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    logIn();
-                } catch (IllegalArgumentException iae) {
-                    Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+        volleyQueue = Volley.newRequestQueue(this);
+
+        loginButton.setOnClickListener(v -> {
+            try {
+                final String nickname = String.valueOf(usernameEditText.getText());
+                if (nickname.length() == 0)
+                    throw new IllegalArgumentException("Please enter your username");
+
+                final String password = String.valueOf(passwordEditText.getText());
+                if (password.length() == 0)
+                    throw new IllegalArgumentException("Please enter your password");
+
+                final JSONObject stepOneData = prepareStepOneData(nickname, password);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.authStepOne, stepOneData,
+                        response -> {
+                                showEmailCodeDialog(nickname);
+                        },
+                        error -> {
+                            Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                        }
+                );
+                volleyQueue.add(jsonObjectRequest);
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    void logIn() {
-        nickname = String.valueOf(usernameEditText.getText());
-        if(nickname.length() == 0)
-            throw new IllegalArgumentException("Please enter your username");
-        String password = String.valueOf(passwordEditText.getText());
-        if(password.length() == 0)
-            throw new IllegalArgumentException("Please enter your password");
+    private JSONObject prepareStepOneData(String nickname, String password) {
+        JSONObject authData = new JSONObject();
 
-        authData = "{ \"nickname\": \"" + nickname + "\", \"hash\": \"" + password + "\"}";
-        System.out.println("Using string: " + authData);
-        Toast.makeText(getApplicationContext(), authData, Toast.LENGTH_SHORT).show();
+        try {
+            authData.put("nickname", nickname);
+            authData.put("hash", Hash.makeHash(password));
+        } catch (Exception ignored) {
+            Log.println(Log.ERROR, "Authorization", "LogIn data preparation failed.");
+        }
 
-        new MyHttpPostTask(this).execute(authStepOne);
+        return authData;
     }
 
-    public class MyHttpPostTask extends AsyncTask<String, Void, String> {
-        private OnTaskCompleted listener;
+    private JSONObject prepareStepTwoData(String nickname, String code) {
+        JSONObject authData = new JSONObject();
 
-        public MyHttpPostTask(OnTaskCompleted listener) {
-            this.listener = listener;
+        try {
+            authData.put("nickname", nickname);
+            authData.put("code", Integer.parseInt(code));
+        } catch (Exception ignored) {
+            Log.println(Log.ERROR, "Authorization", "LogIn data preparation failed.");
         }
 
-        protected String doInBackground(String... urls) {
-            System.out.println("Making get request on: " + urls[0]);
-            int attempts = 20;
-            for(int i = 0; i < attempts; ++i) {
-                try {
-                    URL url = new URL(urls[0]);
-
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                    conn.setRequestProperty("Accept", "application/json");
-                    conn.setDoOutput(true);
-
-                    try(OutputStream os = conn.getOutputStream()) {
-                        byte[] input = authData.getBytes("utf-8");
-                        os.write(input, 0, input.length);
-                    }
-
-
-                    int status = conn.getResponseCode();
-                    if(status != 200)
-                        throw new RuntimeException("Registration failed: code" + String.valueOf(status));
-                    if(urls[0].contains(authStepOne)) {
-                        System.out.println("First step completed.");
-                        return "CompletedFirst";
-                    }
-                    else
-                        return "CompletedSecond";
-                } catch (Exception error) {
-                    System.out.println("Warning: " + error);
-                }
-            }
-            return "Failed";
-        }
-
-        protected void onPostExecute(String result) {
-            listener.onTaskCompleted(result);
-        }
+        return authData;
     }
+
 
     public void showEmailCodeDialog(String nickname) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
 
-        // Загрузка макета для диалогового окна
         View view = inflater.inflate(R.layout.email_integration, null);
 
-        // Настройка заголовка окна
         TextView titleTextView = view.findViewById(R.id.text_view_title);
-        titleTextView.setText("Enter verification code");
+        titleTextView.setText(R.string.VerificationCodeAction);
 
-        // Настройка поля ввода кода
         EditText codeEditText = view.findViewById(R.id.edit_text_code);
-        codeEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
+        codeEditText.setFilters(new InputFilter[]{ new InputFilter.LengthFilter(6) });
 
-        // Создание диалогового окна
-        builder.setView(view).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        code = codeEditText.getText().toString();
-                        System.out.println("Code received.");
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+        builder.setView(view).setPositiveButton("OK", (dialog, id) -> {
+            try {
+                final String code = codeEditText.getText().toString();
+                if(code.isEmpty())
+                    throw new IllegalArgumentException("Please enter your verification code");
 
-        AlertDialog dialog = builder.create();
+                final JSONObject stepTwoData = prepareStepTwoData(nickname, code);
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.authStepTwo, stepTwoData,
+                        response -> {
+                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(getString(R.string.SharedPreferencesNickname), nickname);
+                            editor.apply();
+
+                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                        },
+                        error -> {
+                            Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                        }
+                );
+                volleyQueue.add(jsonObjectRequest);
+            } catch (IllegalArgumentException iae) {
+                Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch (Exception re) {
+                Log.println(Log.ERROR, "Authorization", re.toString());
+            }
+            dialog.dismiss();
+        })
+                .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
+
+        dialog = builder.create();
         dialog.show();
     }
 

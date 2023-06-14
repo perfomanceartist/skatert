@@ -1,58 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/favourite_tracks"
-        android:textColor="@color/white"
-        android:textSize="40sp"
-        android:textAlignment="center"
-        android:layout_margin="5sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintStart_toStartOf="parent"
-        android:id="@+id/constraints1">
-
-        <Button
-            android:id="@+id/button1"
+        <RelativeLayout
+            android:id="@+id/toolbar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5sp"
-            android:text="Get recommendations"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            android:layout_margin="5sp">
 
-        <Button
-            android:id="@+id/button2"
+            <ImageButton
+                android:id="@+id/button"
+                android:layout_width="50sp"
+                android:layout_height="50sp"
+                android:src="@drawable/format_list_bulleted"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:contentDescription="@string/HomeActivityButtonContentDescription" />
+
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="match_parent"
+                android:layout_height="50sp"
+                android:layout_toEndOf="@id/button"
+                android:gravity="center"
+                android:text="@string/HomeActivityToolbar"
+                android:textColor="@color/white"
+                android:textSize="25sp"/>
+
+        </RelativeLayout>
+
+
+        <ListView
+            android:id="@+id/favouriteTracks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5sp"
-            android:text="Get my tracks"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintStart_toStartOf="parent">
+        </ListView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-    <ListView
-        android:id="@+id/favouriteTracks"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraints1"
-        app:layout_constraintStart_toStartOf="parent">
-    </ListView>
+        android:orientation="vertical"
+        android:layout_gravity="start">
 
-</LinearLayout>
+        <!-- Текстовое название -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityToolbar"
+            android:textSize="24sp"
+            android:padding="16sp"
+            android:textColor="@color/white" />
+
+        <!-- Кнопка 1 -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityRefresh"
+            android:layout_margin="5sp"/>
+
+        <!-- Кнопка 2 -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityMakeLastFM"
+            android:layout_margin="5sp"/>
+
+        <!-- Кнопка 3 -->
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityLogOut"
+            android:layout_margin="5sp"/>
+
+    </LinearLayout>
+
+
+</androidx.drawerlayout.widget.DrawerLayout>

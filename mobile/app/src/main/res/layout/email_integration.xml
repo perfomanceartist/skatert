@@ -21,10 +21,4 @@
         android:hint="123456"
         android:textSize="16sp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/log_in">
-    </Button>
-
 </LinearLayout>
