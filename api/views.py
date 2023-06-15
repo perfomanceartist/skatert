@@ -91,9 +91,10 @@ class Register(APIView):
 def _email_request(account):
     token = create_hash_token(account)
 
+    message =  f"Уважаемый {account.user.nickname}! \nКод подтверждения для входа в Skatert: {token}. Код действителен в течение 15 минут. \n\nС уважением, \nВаша Skatert"
     send_mail(
-        "Skatert. Код Подтверждения входа",  # subject
-        f"Код подтверждения для входа в Skatert: {token}",  # message
+        "Skatert. Код подтверждения входа",  # subject
+        message,  # message
         settings.EMAIL_HOST_USER,
         [
             account.email,
