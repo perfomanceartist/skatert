@@ -53,23 +53,69 @@ class Register(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except Exception:
-            return HttpResponseBadRequest("Некорректный формат данных")
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 400,
+                    "description": "Некорректный формат данных"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
 
         nickname = data.get("nickname")
         lastfm_nickname = data.get("lastfm_nickname", "-")
-        if User.objects.filter(nickname=nickname).exists():
-            return HttpResponse(status=222)
-        if not nickname:
-            return HttpResponse(status=223)
 
+        if not nickname:
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 223,
+                    "description": "User is not specified"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
         email = data.get("email")
         if not email:
-            return HttpResponse(status=223)
-        if not _check_email(email):
-            return HttpResponse(status=225)
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 223,
+                    "description": "Email is not specified"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
         hash = data.get("hash")
         if not hash:
-            return HttpResponse(status=223)
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 223,
+                    "description": "Hash is not specified"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
+
+        if User.objects.filter(nickname=nickname).exists():
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 222,
+                    "description": "Such user already exists"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
+            
+        if not _check_email(email):
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 225,
+                    "description": "Bad email format"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
+        
+        
 
         user = User(nickname=nickname, lastfm=lastfm_nickname)
         user.save()
@@ -82,7 +128,12 @@ class Register(APIView):
             music_pref.save()
 
         AuthToken = create_email_token(account)
-        response = HttpResponse("Registered")
+        response = JsonResponse({
+            "error": {
+                    "code": 0,
+                    "description": "Successfully Registered"
+            }   
+        })
         response.set_cookie("token", str(AuthToken.token))
         response.set_cookie("nickname", nickname)
         return response
@@ -127,16 +178,46 @@ class PasswordAuth(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
-            return HttpResponseBadRequest("Некорректный формат данных")
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 400,
+                    "description": "Некорректный формат данных"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
 
-        nickname = data.get("nickname")
-        if not Account.objects.filter(user__nickname=nickname).exists():
-            return HttpResponse(status=224)
+        nickname = data.get("nickname")     
+        hash = data.get("hash")  
         if not nickname:
-            return HttpResponse(status=223)
-        hash = data.get("hash")
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 223,
+                    "description": "User is not specified"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
         if not hash:
-            return HttpResponse(status=223)
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 223,
+                    "description": "Hash is not specified"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
+
+        if not Account.objects.filter(user__nickname=nickname).exists():
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 224,
+                    "description": "No such user"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
+
 
         try:
             account = (
@@ -144,20 +225,44 @@ class PasswordAuth(APIView):
                 .filter(passwordhash=hash)
                 .get()
             )
-        except:
-            return HttpResponseBadRequest("Неверные учетные данные")
+        except Exception as e :
+            print(e)
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 225,
+                    "description": "Неверные учетные данные"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
         if account is None:
-            return HttpResponseBadRequest("Неверные учетные данные")
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 225,
+                    "description": "Неверные учетные данные"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
 
         if account.secondFactor:
             _email_request(account)
             response = JsonResponse({
+                "error": {
+                    "code": 0,
+                    "description": "Successful step 1 of 2 factor"
+                },    
                 "token": "-"
             })
         else:
             AuthToken = create_email_token(account)
-            response = JsonResponse({"token": str(AuthToken.token)})
-            response.status_code = 201
+            response = JsonResponse({
+                "error": {
+                    "code": 201,
+                    "description": "Successful authentication"
+                },    
+                "token": str(AuthToken.token)
+            })
             response.set_cookie("token", str(AuthToken.token))
             response.set_cookie("nickname", nickname)
 
@@ -187,7 +292,14 @@ class EmailAuth(APIView):
         try:
             data = json.loads(request.body.decode("utf-8"))
         except:
-            return HttpResponseBadRequest("Некорректный формат данных")
+            errorResponse = JsonResponse({
+                "error": {
+                    "code": 400,
+                    "description": "Некорректный формат данных"
+                }                
+            })
+            errorResponse.status_code=400 # BadRequest
+            return errorResponse
 
         nickname = data.get("nickname")
         if not nickname:

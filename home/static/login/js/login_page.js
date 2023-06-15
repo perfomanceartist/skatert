@@ -26,30 +26,33 @@ function hash(string) {
         hash: passwordHash
       })
     });
-    
-    if (response.status == 224) {  // unknown user
-      document.getElementById('unknown_user').classList.remove('d-none');
-      return false;
-    }
-    if (response.status == 223) {  // empty_field(s)
+    var responseJson = await response.json();
+    var status = responseJson["error"]["code"]
+    if (status == 223) {  // empty_field(s)
       document.getElementById('empty_field').classList.remove('d-none');
       return false;
     }
-    if (response.status == 201) {
+    if (status == 224) {  // unknown user
+      document.getElementById('unknown_user').classList.remove('d-none');
+      return false;
+    }    
+    if (status == 225) { // wrong pass
+      document.getElementById('incorrect_pass').classList.remove('d-none');
+      document.getElementById('password').reset();
+      return [false, false];
+    }
+
+    if (status == 201) { // Однофакторка, токен получен
       var responseJson = response.json();
       document.cookie += `nickname=${userNickname}; token=${responseJson['token']}`;
       window.location.replace('/');
       return [true, false];
     }
-    if (response.ok === true) {
+    if (response.ok === true) { //Двухфакторка
       userNickname = nickname; 
       return [true, true];
     }
-    else {
-      document.getElementById('incorrect_pass').classList.remove('d-none');
-      document.getElementById('password').reset();
-      return [false, false];
-    }
+    
   }
 
 
