@@ -36,7 +36,7 @@ class BooksPreferences(models.Model):
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    passwordhash = models.CharField(max_length=16)
+    passwordhash = models.CharField(max_length=64)
     email = models.EmailField()    
     secondFactor = models.BooleanField(default=False, blank=False)
 

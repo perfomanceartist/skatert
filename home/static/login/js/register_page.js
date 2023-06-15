@@ -1,3 +1,4 @@
+import {hash} from './hash.js';
 async function register() {
     var nickname = document.getElementById('loginControlInputNick').value;
     // var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
@@ -15,6 +16,7 @@ async function register() {
       return;
     }
     
+    var passwordHash = hash(password);
     
     const response = await fetch("/api/register", {
         method: "POST",
@@ -22,7 +24,7 @@ async function register() {
         body: JSON.stringify({
             nickname: nickname,
             email: email,
-            hash: password
+            hash: passwordHash
         })
     });
     if (response.status == 222) {  // nickname is not unique

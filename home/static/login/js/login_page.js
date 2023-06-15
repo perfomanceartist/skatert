@@ -1,16 +1,19 @@
 var step = 1;
 var userNickname = '';
+
+import {hash} from './hash.js';
+
   async function authStep1() {
     console.log('auth/step1');
     var nickname = document.getElementById('loginControlInputNick').value;
     var password = document.getElementById('loginControlPassword').value;
-    
+    var passwordHash = hash(password);
     const response = await fetch("/api/login_pass", {
       method: "POST",
       headers: { "Accept": "application/json" },
       body: JSON.stringify({
         nickname: nickname,
-        hash: password
+        hash: passwordHash
       })
     });
     
