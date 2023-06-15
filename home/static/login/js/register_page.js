@@ -1,4 +1,14 @@
-import {hash} from './hash.js';
+function hash(string) {
+    const utf8 = new TextEncoder().encode(string);
+    return crypto.subtle.digest('SHA-256', utf8).then((hashBuffer) => {
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray
+        .map((bytes) => bytes.toString(16).padStart(2, '0'))
+        .join('');
+      return hashHex;
+    });
+  }
+
 async function register() {
     var nickname = document.getElementById('loginControlInputNick').value;
     // var lastfm_nickname = document.getElementById('loginControlInputLastfmNick').value;
@@ -16,8 +26,8 @@ async function register() {
       return;
     }
     
-    var passwordHash = hash(password);
-    
+    var passwordHash = await hash(password);
+    console.log(passwordHash);
     const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Accept": "application/json" },
