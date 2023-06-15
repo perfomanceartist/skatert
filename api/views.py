@@ -51,6 +51,7 @@ class Register(APIView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
+            print("Body: ", request.body.decode("utf-8"))
             data = json.loads(request.body.decode("utf-8"))
         except Exception:
             return HttpResponseBadRequest("Некорректный формат данных")
