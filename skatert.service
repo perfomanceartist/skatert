@@ -1,0 +1,8 @@
+[Unit]
+Description=Skatert server
+                      
+[Service]
+ExecStart=/root/skatert/skatert.sh
+                      
+[Install]
+WantedBy=multi-user.target
