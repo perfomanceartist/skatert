@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="light_green">#8BC34A</color>
-    <color name="green">#369539</color>
-    <color name="dark_green">#3F51B5</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="yellow">#FFEB3B</color>
+    <color name="MainColorLight">#FF9800</color>
+    <color name="MainColor">#369539</color>
+    <color name="MainColorDark">#3F51B5</color>
+    <color name="Black">#FF000000</color>
+    <color name="White">#FFFFFFFF</color>
+    <color name="Yellow">#FFEB3B</color>
 </resources>

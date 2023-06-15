@@ -5,21 +5,20 @@
     android:padding="20dp">
 
     <TextView
-        android:id="@+id/email_integration_text"
+        android:id="@+id/lastfm_text_view_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/LogInActivityCodeVerification"
+        android:text="@string/HomeActivityLastFmNickname"
         android:textSize="18sp"
         android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/mail_edit_text_code"
+        android:id="@+id/lastfm_edit_text_code"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:maxLength="6"
-        android:hint="@string/LogInActivityCodeExample"
+        android:inputType="text"
+        android:hint="@string/HomeActivityLastFmNicknameExample"
         android:textSize="16sp"
-        android:autofillHints="Your verification code" />
+        android:autofillHints="Your LastFm nickname" />
 
 </LinearLayout>

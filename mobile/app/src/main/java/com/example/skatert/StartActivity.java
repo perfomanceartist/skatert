@@ -10,6 +10,9 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.Set;
 
 public class StartActivity extends AppCompatActivity {
@@ -20,6 +23,9 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        CookieManager manager = new CookieManager();
+        CookieHandler.setDefault(manager);
+
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
         if(!sharedPref.getString(getString(R.string.SharedPreferencesNickname), "").equals(""))
             startActivity(new Intent(StartActivity.this, HomeActivity.class));
@@ -27,22 +33,9 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.start_activity);
 
         loginButton = findViewById(R.id.setup_login_button);
+        loginButton.setOnClickListener(v -> startActivity(new Intent(StartActivity.this, LoginActivity.class)));
+
         registerButton = findViewById(R.id.setup_sign_in_button);
-
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(StartActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(StartActivity.this, SignInActivity.class);
-                startActivity(intent);
-            }
-        });
+        registerButton.setOnClickListener(v -> startActivity(new Intent(StartActivity.this, SignInActivity.class)));
     }
 }

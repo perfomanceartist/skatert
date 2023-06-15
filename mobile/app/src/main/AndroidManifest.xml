@@ -38,6 +38,11 @@
             android:exported="true"
             android:theme="@style/Theme.Skatert.NoActionBar">
         </activity>
+        <activity
+            android:name=".SubscriptionsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Skatert.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

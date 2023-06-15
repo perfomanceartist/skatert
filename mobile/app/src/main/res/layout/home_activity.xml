@@ -5,7 +5,6 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -33,7 +32,7 @@
                 android:layout_toEndOf="@id/button"
                 android:gravity="center"
                 android:text="@string/HomeActivityToolbar"
-                android:textColor="@color/white"
+                android:textColor="@color/White"
                 android:textSize="25sp"/>
 
         </RelativeLayout>
@@ -41,8 +40,8 @@
 
         <ListView
             android:id="@+id/favouriteTracks"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar"
             app:layout_constraintStart_toStartOf="parent">
         </ListView>
@@ -50,41 +49,47 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="180sp"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="start">
 
-        <!-- Текстовое название -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/HomeActivityToolbar"
+            android:text="@string/HomeActivityDrawerToolbar"
             android:textSize="24sp"
+            android:textAlignment="center"
             android:padding="16sp"
-            android:textColor="@color/white" />
+            android:textColor="@color/White" />
 
-        <!-- Кнопка 1 -->
         <Button
+            android:id="@+id/homeRefreshButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/HomeActivityRefresh"
             android:layout_margin="5sp"/>
 
-        <!-- Кнопка 2 -->
         <Button
+            android:id="@+id/homeLastFmButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/HomeActivityMakeLastFM"
             android:layout_margin="5sp"/>
 
-        <!-- Кнопка 3 -->
         <Button
+            android:id="@+id/homeGetSubscriptionsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityListSubscriptions"
+            android:layout_margin="5sp"/>
+
+        <Button
+            android:id="@+id/homeLogOutButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/HomeActivityLogOut"
             android:layout_margin="5sp"/>
-
     </LinearLayout>
 
 

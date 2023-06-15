@@ -16,22 +16,24 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.Hash;
 import com.example.skatert.utility.SiteMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public class LoginActivity extends AppCompatActivity {
-    EditText usernameEditText;
-    EditText passwordEditText;
+    EditText usernameEditText, passwordEditText;
     Button loginButton;
-
-    AlertDialog dialog = null;
-
     RequestQueue volleyQueue = null;
 
     @Override
@@ -39,15 +41,20 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
 
-        usernameEditText = findViewById(R.id.email_edit_text);
+        usernameEditText = findViewById(R.id.nickname_edit_text);
         usernameEditText.setText("Alexander");
 
         passwordEditText = findViewById(R.id.password_edit_text);
-        passwordEditText.setText("Password");
+        passwordEditText.setText("hello");
 
         loginButton = findViewById(R.id.login_button);
 
         volleyQueue = Volley.newRequestQueue(this);
+
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove(getString(R.string.SharedPreferencesNickname));
+        editor.remove(getString(R.string.SharedPreferencesToken)).apply();
 
         loginButton.setOnClickListener(v -> {
             try {
@@ -62,15 +69,48 @@ public class LoginActivity extends AppCompatActivity {
                 final JSONObject stepOneData = prepareStepOneData(nickname, password);
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.authStepOne, stepOneData,
                         response -> {
-                                showEmailCodeDialog(nickname);
+                            try {
+                                final String token = response.getString("token");
+                                if(!token.equals("-")) {
+                                    editor.putString(getString(R.string.SharedPreferencesNickname), nickname);
+                                    editor.putString(getString(R.string.SharedPreferencesToken), token).apply();
+                                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                } else
+                                    showEmailCodeDialog(nickname);
+                            } catch (JSONException e) {
+                                Toast.makeText(getApplicationContext(), "Authorization failed (3)", Toast.LENGTH_SHORT).show();
+                            }
                         },
                         error -> {
-                            Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                            switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                                case 224:
+                                    Toast.makeText(getApplicationContext(), "Such user is not found", Toast.LENGTH_SHORT).show();
+                                    break;
+                                case 223:
+                                    Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show();
+                                    break;
+                                default:
+                                    Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                                    break;
+                            }
                         }
-                );
+                ) {
+                    @Override
+                    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                        sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                        if (response.data.length == 0)
+                            response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                        return super.parseNetworkResponse(response);
+                    }
+                };
                 volleyQueue.add(jsonObjectRequest);
-            } catch (Exception e) {
-                Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+            } catch (IllegalArgumentException iae) {
+                Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+            catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Authorization failed (1)", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -80,7 +120,8 @@ public class LoginActivity extends AppCompatActivity {
 
         try {
             authData.put("nickname", nickname);
-            authData.put("hash", Hash.makeHash(password));
+            password = Hash.makeHash(password);
+            authData.put("hash", password);
         } catch (Exception ignored) {
             Log.println(Log.ERROR, "Authorization", "LogIn data preparation failed.");
         }
@@ -101,17 +142,12 @@ public class LoginActivity extends AppCompatActivity {
         return authData;
     }
 
-
     public void showEmailCodeDialog(String nickname) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
 
         View view = inflater.inflate(R.layout.email_integration, null);
-
-        TextView titleTextView = view.findViewById(R.id.text_view_title);
-        titleTextView.setText(R.string.VerificationCodeAction);
-
-        EditText codeEditText = view.findViewById(R.id.edit_text_code);
+        EditText codeEditText = view.findViewById(R.id.mail_edit_text_code);
         codeEditText.setFilters(new InputFilter[]{ new InputFilter.LengthFilter(6) });
 
         builder.setView(view).setPositiveButton("OK", (dialog, id) -> {
@@ -123,17 +159,33 @@ public class LoginActivity extends AppCompatActivity {
                 final JSONObject stepTwoData = prepareStepTwoData(nickname, code);
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.authStepTwo, stepTwoData,
                         response -> {
-                            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString(getString(R.string.SharedPreferencesNickname), nickname);
-                            editor.apply();
-
-                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            try {
+                                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString(getString(R.string.SharedPreferencesNickname), nickname)
+                                        .putString(getString(R.string.SharedPreferencesToken), response.getString("token"))
+                                        .apply();
+                                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                         },
                         error -> {
-                            Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                            try {
+                                if (Objects.requireNonNull(error.getMessage()).contains("Failed to connect"))
+                                    Toast.makeText(getApplicationContext(), "Server is unreachable", Toast.LENGTH_SHORT).show();
+                            } catch (Exception e) {
+                                Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                );
+                ) {
+                    @Override
+                    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                        sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+                        return super.parseNetworkResponse(response);
+                    }
+                };
                 volleyQueue.add(jsonObjectRequest);
             } catch (IllegalArgumentException iae) {
                 Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
@@ -142,11 +194,9 @@ public class LoginActivity extends AppCompatActivity {
                 Log.println(Log.ERROR, "Authorization", re.toString());
             }
             dialog.dismiss();
-        })
-                .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
+        }).setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
 
-        dialog = builder.create();
+        AlertDialog dialog = builder.create();
         dialog.show();
     }
-
 }
