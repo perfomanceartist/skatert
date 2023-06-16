@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
-from backend.auth import check_cookie
+from backend.auth import check_cookie, delete_token
 
 import music.lastfm_api
 from users.models import Account, AuthTokens, MusicPreferences, User
@@ -46,7 +46,7 @@ class Register(APIView):
             500: openapi.Response(description='Internal server error'),
         },
         operation_description='Register Skatert Account',
-        tags=['Users']
+        tags=['Аутентификация']
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
@@ -171,7 +171,7 @@ class PasswordAuth(APIView):
             500: openapi.Response(description='Internal server error'),
         },
         operation_description='Authenticate Skatert Account by Password',
-        tags=['Users']
+        tags=['Аутентификация']
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
@@ -285,7 +285,7 @@ class EmailAuth(APIView):
             500: openapi.Response(description='Internal server error'),
         },
         operation_description='Authenicate Skatert Account by Email',
-        tags=['Users']
+        tags=['Аутентификация']
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
@@ -335,21 +335,13 @@ class EmailAuth(APIView):
 
 class Logout(APIView):
     @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['nickname', 'token'],
-            properties={
-                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
-                'token': openapi.Schema(type=openapi.TYPE_STRING),
-            }
-        ),
         responses={
             200: openapi.Response(description='OK'),
             400: openapi.Response(description='Bad request'),
             500: openapi.Response(description='Internal server error'),
         },
         operation_description='Logging Out Skatert Account',
-        tags=['Users']
+        tags=['Аутентификация']
     )
     @csrf_exempt
     def post(self, request, *args, **kwargs):
@@ -359,6 +351,7 @@ class Logout(APIView):
         except Exception as error:
             print(error)
             return HttpResponseForbidden("Bad cookie")
+        delete_token(request)
         response = HttpResponseRedirect('/login')
         response.delete_cookie('token')
         response.delete_cookie('nickname')
