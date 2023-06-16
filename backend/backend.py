@@ -43,6 +43,8 @@ def sortRecommenders(currentUser : User, recommenders : list, subscriptions : li
 
     for sub in subscriptions:
         recTracks = User.objects.filter(id=sub).get().favouriteTracks.all()
+        if len(recTracks) == 0:
+            continue
         matches = 0
         newTracks = []
         for recommenderTrack in recTracks:
