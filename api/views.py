@@ -362,10 +362,8 @@ class Settings(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['nickname', 'token', 'lastfm', 'secondFactor'],
+            required=['lastfm', 'secondFactor'],
             properties={
-                'nickname': openapi.Schema(type=openapi.TYPE_STRING),
-                'token': openapi.Schema(type=openapi.TYPE_STRING),
                 'lastfm': openapi.Schema(type=openapi.TYPE_STRING),
                 'secondFactor': openapi.Schema(type=openapi.TYPE_STRING)
             }
@@ -391,13 +389,7 @@ class Settings(APIView):
         except:
             return HttpResponseBadRequest("Некорректный формат данных")
 
-        nickname = data.get("nickname")
-        if not nickname:
-            return HttpResponseBadRequest("Не указан никнейм")
-
-        token = data.get('token')
-        if not token:
-            return HttpResponseBadRequest("Не указан токен")
+        nickname = request.COOKIES.get("nickname")
 
         lastfmNickname = data.get('lastfm')
         if not lastfmNickname:
@@ -407,8 +399,7 @@ class Settings(APIView):
         if secondFactor is None:
             return HttpResponseBadRequest("Не указан способ аутентификации")
 
-        if not check_token(nickname, token):
-            return HttpResponseBadRequest("Неверный токен досутпа")
+        
 
         user = User.objects.filter(nickname=nickname).get()
         if user is None:

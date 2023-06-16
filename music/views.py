@@ -30,9 +30,8 @@ class MakeLastFmIntegration(APIView):
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["nickname", "lastFmNickname"],
+            required=["lastFmNickname"],
             properties={
-                "nickname": openapi.Schema(type=openapi.TYPE_STRING),
                 "lastFmNickname": openapi.Schema(type=openapi.TYPE_STRING),
             },
         ),
@@ -53,14 +52,16 @@ class MakeLastFmIntegration(APIView):
             return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
-            print(data["nickname"], data["lastFmNickname"])
-            result = loadUserLastFM(data["nickname"], data["lastFmNickname"])
+            nickname = request.COOKIES.get("nickname")
+            print(nickname, data["lastFmNickname"])
+
+            result = loadUserLastFM(nickname, data["lastFmNickname"])
             if result is False:
                 return HttpResponseBadRequest("No such user")
             return JsonResponse(
                 prepareUserInfo(
                     User.objects.get(
-                        nickname=data["nickname"], lastfm=data["lastFmNickname"]
+                        nickname=nickname, lastfm=data["lastFmNickname"]
                     )
                 )
             )
@@ -143,10 +144,6 @@ class SetUserGenres(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "nickname": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="The nickname of the user to set genres for",
-                ),
                 "genres": openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     additional_properties=openapi.Schema(
@@ -162,10 +159,6 @@ class SetUserGenres(APIView):
                 schema=openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        "nickname": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The nickname of the user that genres were set for",
-                        ),
                         "genres": openapi.Schema(
                             type=openapi.TYPE_OBJECT,
                             additional_properties=openapi.Schema(
@@ -201,11 +194,11 @@ class SetUserGenres(APIView):
             return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
-
-            user = getUserByNickname(data["nickname"])
+            nickname = request.COOKIES.get("nickname")
+            user = getUserByNickname(nickname)
             if user is None:
                 return HttpResponseNotFound(
-                    "User with nickname '" + data["nickname"] + "' is not found."
+                    "User with nickname '" + nickname + "' is not found."
                 )
 
             genres = GenreList.defaultList()
@@ -273,14 +266,6 @@ class GetTrackById(APIView):
 class GetUserFavouriteTracks(APIView):
     @swagger_auto_schema(
         operation_summary="Get a list of a user's favourite tracks",
-        manual_parameters=[
-            openapi.Parameter(
-                name="nickname",
-                in_=openapi.IN_QUERY,
-                type="string",
-                description="The nickname of the user whose favourite tracks are to be returned",
-            )
-        ],
         tags=["Music"],
         responses={
             200: openapi.Response(
@@ -310,9 +295,7 @@ class GetUserFavouriteTracks(APIView):
             print(error)
             return HttpResponseForbidden("Bad cookie")
         try:
-            nickname = request.GET.get("nickname")
-            if nickname is None:
-                return HttpResponseBadRequest("Nickname must be specified.")
+            nickname = request.COOKIES.get("nickname")
 
             user = getUserByNickname(nickname)
             if user is None:
@@ -361,12 +344,6 @@ class GetRecommendations(APIView):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
-                "nickname",
-                openapi.IN_QUERY,
-                description="User nickname",
-                type=openapi.TYPE_STRING,
-            ),
-            openapi.Parameter(
                 "amount",
                 openapi.IN_QUERY,
                 description="Amount of recommended tracks",
@@ -391,11 +368,7 @@ class GetRecommendations(APIView):
             print(error)
             return HttpResponseForbidden("Bad cookie")
         try:
-            nickname = request.GET.get("nickname")
-            if nickname is None:
-                return HttpResponseBadRequest(
-                    "Nickname should be specified for this type of requests."
-                )
+            nickname = request.COOKIES.get("nickname")
 
             amount = request.GET.get("amount")
             if amount is None or int(amount) < 1:
@@ -440,10 +413,6 @@ class ClickLike(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "nickname": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="The nickname of the user to set genres for",
-                ),
                 "song_name": openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description="Name of the song",
@@ -487,6 +456,7 @@ class ClickLike(APIView):
             return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
+            data["nickname"] = request.COOKIES.get("nickname")
             user, track = _prepareUserAndTrack(data)
         except json.decoder.JSONDecodeError:
             return HttpResponseBadRequest("Incorrect json format.")
@@ -511,10 +481,6 @@ class ClickDislike(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "nickname": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="The nickname of the user to set genres for",
-                ),
                 "song_name": openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description="Name of the song",
@@ -558,6 +524,7 @@ class ClickDislike(APIView):
             return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
+            data["nickname"] = request.COOKIES.get("nickname")
             user, track = _prepareUserAndTrack(data)
         except json.decoder.JSONDecodeError:
             return HttpResponseBadRequest("Incorrect json format.")
@@ -580,12 +547,6 @@ class FindTrack(APIView):
         operation_summary="Find track by its name",
         tags=["Music"],
         manual_parameters=[
-            openapi.Parameter(
-                "nickname",
-                openapi.IN_QUERY,
-                description="User nickname",
-                type=openapi.TYPE_STRING,
-            ),
             openapi.Parameter(
                 name="track_name",
                 in_=openapi.IN_QUERY,
@@ -617,7 +578,7 @@ class FindTrack(APIView):
         
         try:
             answer = []
-            nickname = request.GET.get("nickname")
+            nickname = request.COOKIES.get("nickname")
             user = getUserByNickname(nickname)
             if user is None:
                 return HttpResponseBadRequest(

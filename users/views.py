@@ -33,14 +33,6 @@ def lastfm_by_nick(request):
 class GetUserLastfmInfo(APIView):
     @swagger_auto_schema(
         operation_summary='Get user\'s lastFM information',
-        manual_parameters=[
-            openapi.Parameter(
-                name='nickname',
-                in_=openapi.IN_QUERY,
-                type='string',
-                description='lastFM_nickname of the user whose info is to be returned'
-            )
-        ],
         tags=['Users'],
         responses={
             200: openapi.Response(
@@ -74,9 +66,7 @@ class GetUserLastfmInfo(APIView):
             print(error)
             return HttpResponseForbidden("Bad cookie")
         try:
-            nickname = request.GET.get('nickname')
-            if nickname is None:
-                return HttpResponseBadRequest('Nickname must be specified.')
+            nickname = request.COOKIES.get("nickname")
             lastfm_user = userGetInfo(nickname)
             if lastfm_user.get("error", None) is not None:
                 return HttpResponseNotFound("User '" + nickname + "' not found.")
@@ -92,10 +82,6 @@ class SetUserLastfmNickname(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'nickname': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='The nickname of the user to set LastfmNickname for'
-                ),
                 'lastfm_nickname': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='LastfmNickname to set'
@@ -123,10 +109,10 @@ class SetUserLastfmNickname(APIView):
             return HttpResponseForbidden("Bad cookie")
         try:
             data = json.loads(request.body)
-
-            user = getUserByNickname(data["nickname"])
+            nickname = request.COOKIES.get("nickname")
+            user = getUserByNickname(nickname)
             if user is None:
-                return HttpResponseNotFound("User with nickname '" + data["nickname"] + "' is not found.")
+                return HttpResponseNotFound("User with nickname '" + nickname + "' is not found.")
 
             user.lastfm = data["lastfm_nickname"]
             user.save()
@@ -145,10 +131,6 @@ class Subscribe(APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'nickname': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description='The nickname of the current user'
-                ),
                 'target_nickname': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     description='The nickname of the target user'
@@ -179,7 +161,9 @@ class Subscribe(APIView):
             print(error)
             return HttpResponseForbidden("Bad cookie")
         try:
+            nickname = request.COOKIES.get("nickname")            
             data = json.loads(request.body)
+            data["nickname"] = nickname
 
             user = getUserByNickname(data["nickname"])
             if user is None:
@@ -211,14 +195,6 @@ class Subscribe(APIView):
 class GetUserSubscriptions(APIView):
     @swagger_auto_schema(
         operation_summary='Get user\'s subscriptions list',
-        manual_parameters=[
-            openapi.Parameter(
-                name='nickname',
-                in_=openapi.IN_QUERY,
-                type='string',
-                description='User\'s nickname whose subsriptions are returned for'
-            )
-        ],
         tags=['Users'],
         responses={
             200: openapi.Response(
@@ -261,7 +237,7 @@ class GetUserSubscriptions(APIView):
             print(error)
             return HttpResponseForbidden("Bad cookie")
         try:
-            nickname = request.GET.get('nickname')
+            nickname = request.COOKIES.get("nickname")
             if nickname is None:
                 return HttpResponseBadRequest('Nickname must be specified.')
             

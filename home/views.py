@@ -76,8 +76,6 @@ def settings(request):
        return HttpResponseRedirect('/login')
 
     nickname = request.COOKIES.get("nickname")
-    if nickname is None:
-        return HttpResponseRedirect("/login")
 
     user = User.objects.filter(nickname=nickname).get()
     if user is None:
