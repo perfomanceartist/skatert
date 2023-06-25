@@ -8,6 +8,8 @@
 .container {
     margin-top: 5%;
     width: 80%;
+    /* margin-top: 10%; */
+    
 }
 
 
@@ -121,12 +123,80 @@
   }
   
   [aria-checked="true"] .right-Side .heart:after, [aria-checked="true"]  .right-Side .heart:before{
-    background:#FF8E00;
+    background-color:#FF8E00;
+    transition: background-color 0.35s linear;
   }
 
   [aria-checked="true"] .left-Side .heart:after, [aria-checked="true"]  .left-Side .heart:before{
     background:#FF8E00;
+    transition: background-color 0.35s linear;
+
   }
+
+
+
+
+
+
+
+  .cross {
+    border-radius: 50%;
+    padding: 0.5em;
+    width: 45px;
+    height: 45px;
+    border: 3px solid black;
+    color: black;
+    position: relative;
+    box-shadow: inset 0px 0px 5px rgba(0,0,0,0.2);
+
+    cursor: pointer;
+
+  }
+
+
+
+  [aria-checked="true"] .cross{
+    border: 3px solid #FF8E00;
+    box-shadow: 0px 0px 6px rgba(255, 142, 0, 0.8);
+    transition: border 0.35s linear;
+  }
+
+  [aria-checked="true"] .cross:after, [aria-checked="true"]  .cross:before{
+    background-color:#FF8E00;
+    transition: background-color 0.35s linear;
+  }
+  
+
+  .cross::before {
+    content: " ";
+    position: absolute;
+    border-radius:40%;
+    display: block;
+    background-color: black;
+    width: 3px;
+    left: 18px;
+    top: 7px;
+    bottom: 7px;
+    transform: rotate(45deg);
+  }
+  .cross::after {
+    content: " ";
+    position: absolute;
+    border-radius:40%;
+    display: block;
+    background-color: black;
+    height: 3px;
+    top:18.5px;
+    left: 7px;
+    right: 7px;
+    transform: rotate(45deg);
+  }
+  
+
+
+
+
+
 
 
 
