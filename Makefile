@@ -4,6 +4,8 @@ install:
 	python3 manage.py migrate
 	python3 manage.py loaddata initial_data
 
+run:
+	python3 manage.py runserver 46.23.96.41:80 &
 
 migrations:
 	python3 manage.py makemigrations users

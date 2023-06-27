@@ -15,16 +15,23 @@
 <script type="text/JavaScript" src = "{% static 'login/js/genres_page.js' %}"></script>
 {% endblock js_adding %}
 
+{% block loginheader %}
+<h2 id="choice_header" class="d-none">ВЫБЕРИ СПОСОБ УСТАНОВКИ ПРЕДПОЧТЕНИЙ</h2>
+<h2 id="genres_header">ВЫБЕРИ ПРЕДПОЧТИТЕЛЬНЫЕ ЖАНРЫ</h2>
+<h2 id="lastfm_header">ИМПОРТ БИБЛИОТЕКИ LAST.FM</h2>
+{% endblock loginheader %}
+
+
 {% block logincontent %}
 
-<h2 id="choice_header" class="d-none">Выбери способ установки предпочтений:</h2>
+<!-- <h2 id="choice_header" class="d-none">Выбери способ установки предпочтений:</h2> -->
 
 <div id="type_choosing" class = "d-none">
   <button class="buttons_elem btn-primary" onclick="load_lastfm()">Автоматически</button> 
   <button class="buttons_elem btn-primary" onclick="load_genres()">Вручную</button>   
 </div>
 
-<h2 id="genres_header">Выбери интересующие жанры:</h2>
+<!-- <h2 id="genres_header">Выбери интересующие жанры:</h2> -->
 <div id="genres" class="row" >
     <div class="column">
       <label class = "genre hiphop"><input class="genres_checkbox" id = "CB_hiphop" type="checkbox" ><span>ХИП-ХОП</span></label>
@@ -41,7 +48,7 @@
     </div>
 </div> 
 
-<h2 id="lastfm_header">Импорт жанров из Last.FM</h2>
+<!-- <h2 id="lastfm_header">Импорт жанров из Last.FM</h2> -->
 <div id="lastfm_container" class="container">
     <div>
         <label for="lastfm">Никнейм в Last.FM:</label>

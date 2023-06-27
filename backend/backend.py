@@ -3,7 +3,7 @@ from typing import Optional
 from backend.parameters import GenreList
 from music.models import Album, Artist, Track
 from users.models import MusicPreferences, User
-
+from random import shuffle
 
 def getUserRecommenders(currentUser : User, SIMILAR_PEOPLE_COUNT : int) -> list:
     if len(currentUser.recommenders) >= SIMILAR_PEOPLE_COUNT:
@@ -32,13 +32,30 @@ def getUserRecommenders(currentUser : User, SIMILAR_PEOPLE_COUNT : int) -> list:
 
 
 
-def sortRecommenders(currentUser : User, recommenders : list, MATCH_LIMIT : int) -> list:
+def sortRecommenders(currentUser : User, recommenders : list, subscriptions : list, MATCH_LIMIT : int) -> list:
     """
     Сортировка рекомендаторов по количеству совпадающих треков    
     :return: Возвращает таблицу - id, доля совпадений, количество совпадений, новые треки      
     """
     currentUserFavouriteTracks = currentUser.favouriteTracks.all()
     recommendationsTable = list() # id, % match, matches, new tracks
+
+
+    for sub in subscriptions:
+        recTracks = User.objects.filter(id=sub).get().favouriteTracks.all()
+        if len(recTracks) == 0:
+            continue
+        matches = 0
+        newTracks = []
+        for recommenderTrack in recTracks:
+            if recommenderTrack in currentUserFavouriteTracks:
+                matches += 1
+            else:
+                newTracks.append(recommenderTrack)
+        
+        matchPart =  matches / len(recTracks)   
+
+        recommendationsTable.append((sub, matchPart, matches, newTracks, 0))
 
     for recommender in recommenders:
         recTracks = User.objects.filter(id=recommender).get().favouriteTracks.all()
@@ -54,9 +71,9 @@ def sortRecommenders(currentUser : User, recommenders : list, MATCH_LIMIT : int)
             continue
         matchPart =  matches / len(recTracks)   
 
-        recommendationsTable.append((recommender, matchPart, matches, newTracks))        
+        recommendationsTable.append((recommender, matchPart, matches, newTracks, 1))        
     
-    recommendationsTable.sort(key=lambda recommender: recommender[2])
+    recommendationsTable.sort(key=lambda recommender: (recommender[4], recommender[2]))
     return recommendationsTable
 
 
@@ -72,15 +89,17 @@ def getRecommendations(currentUser, RECOMMENDED_AMOUNT=20, SIMILAR_PEOPLE_COUNT=
     recommenders = getUserRecommenders(currentUser, SIMILAR_PEOPLE_COUNT)
     
     # Добавить в список пользователей из подписок
-    for sub in currentUser.subscriptions:
-        recommenders.append(sub)
+    #for sub in currentUser.subscriptions:
+        #recommenders.append(sub)
 
     # Отсортировали и получили кандидатов для рекомендаций
-    recommendationsTable = sortRecommenders(currentUser, recommenders, MATCH_LIMIT)
+    recommendationsTable = sortRecommenders(currentUser, recommenders, currentUser.subscriptions, MATCH_LIMIT)
 
     recommendations = []
     unfavouriteTracks = currentUser.unfavouriteTracks.all() or []
     for recommender in recommendationsTable:
+        # Перемешивает треки - для разнообразия списка рекомендаций
+        shuffle(recommender[3])
         for track in recommender[3]:
             if track in currentUser.favouriteTracks.all(): # убираем известные треки
                 continue

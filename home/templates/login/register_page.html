@@ -15,7 +15,8 @@
 <script type="text/JavaScript" src = "{% static 'login/js/register_page.js' %}"></script>
 {% endblock js_adding %}
 
-
+{% block loginheader %}
+{% endblock loginheader %}
 
 {% block logincontent %}
 <form id="nickname">
@@ -23,11 +24,6 @@
       <input type="text" class="form-control" id="loginControlInputNick" placeholder="ПОЛЬЗОВАТЕЛЬ">
   </div>
 </form>
-<!-- <form id="lastfm_nickname">
-  <div class="mb-3">
-      <input type="text" class="form-control" id="loginControlInputLastfmNick" placeholder="НИКНЕЙМ В LASTFM">
-  </div>
-</form> -->
 <form id="email">
   <div class="mb-3">
       <input type="email" class="form-control" id="loginControlInputEmail" placeholder="АДРЕС ЭЛЕКТРОННОЙ ПОЧТЫ">
@@ -35,7 +31,7 @@
 </form>
 <form id="password">
   <div class="mb-3">
-    <input type="password" class="form-control" id="loginControlInputPassword" placeholder="НОВЫЙ ПАРОЛЬ">
+    <input type="password" class="form-control" id="loginControlInputPassword" placeholder="ПАРОЛЬ">
   </div>
   <div class="mb-3">
     <input type="password" class="form-control" id="loginControlInputPasswordConfirm" placeholder="ПОВТОРИТЕ ПАРОЛЬ">

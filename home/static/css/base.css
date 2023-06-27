@@ -1,35 +1,40 @@
 h1 {
-    margin-left: 25%;
     text-align: center;
 
     margin-top: 5%;
-    position: relative;
-    width: 50%;
-    height: 70px;
+    /* position: relative; */
+    margin-left: 10%;
+    width: 80%;
 
     font-family: 'Consolas';
+    font-style: italic;
     
-    font-weight: 900;
-    font-size:64px;
+    font-weight: 800;
+    font-size:96px;
     line-height: 68px;
     letter-spacing: 0.1em;
 
     user-select: none;
 
-    -webkit-text-fill-color: transparent;
+    /* -webkit-text-fill-color: transparent; */
+    color: rgba(255, 255, 255, 0.15);
     -webkit-text-stroke: 3px  #FF8E00;
-    text-shadow: 0px 0px 35px #FF8E00;
+    /* text-shadow: 0px 0px 40px black; */
+    text-shadow: 0px 0px 50px rgba(255,142,0,0.8);
 }
 
 h2 {
+    margin-top: 5%;
+
     font-family: 'Consolas';
     font-weight: 800;
-    font-size: 48px;
+    font-size: 52px;
     text-align: center;
     letter-spacing: 0.1em;
+    font-style: italic;
 
-    margin-left: 25%;
-    width: 50%;
+    margin-left: 10%;
+    width: 80%;
 
 
     /* width: max-content;
@@ -80,34 +85,43 @@ label {
 
 
 body {
-    background-image: url("/static/img/sktrt.png");
+    background-image: url("/static/img/BACKGROUND_SKATERT4.png");
     background-position: left;
+    background-size: 40%;
     background-color: #D5D7DB;
+    /* bacopacity: 50%; */
+
+    margin-bottom: 10%;
 }
 
+
 .navbar{
-    background-color: #CCCCCC;
-    border: 1px solid rgba(0, 0, 0, 0.88);
+    background-color: #CDCDCD;
+    box-shadow: inset 0px 0px 5px rgba(0,0,0,0.6);
+    border: 1px solid rgba(0, 0, 0, 0.4);
 }
 
 
 .navbar-brand{
     position: relative;
+    font-style: italic;
 
-    font-weight: 700;
+    font-weight: 800;
     line-height: 150%;
     letter-spacing: 0.1em;
+    font-size: 24px;
     text-align: center;
 
     -webkit-text-fill-color: transparent;
-    -webkit-text-stroke: 1px  #FF8E00;
+    -webkit-text-stroke: 1.5px  #FF8E00;
 
 
 }
 
 .navbar-brand:hover, .navbar-brand:focus{
 
-    text-shadow: 0px 0px 15px #FF8E00;
+    /* text-shadow: 0px 0px 15px #FF8E00; */
+    text-shadow: 0px 0px 20px rgba(255,142,0,0.7);
 
 }
 
