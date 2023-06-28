@@ -2,15 +2,18 @@ package com.example.skatert;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Header;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -37,7 +41,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class SubscriptionsActivity extends AppCompatActivity {
-    ImageButton closeSubscriptionsButton;
     RequestQueue volleyQueue = null;
 
     private ListView subscriptionList;
@@ -49,8 +52,11 @@ public class SubscriptionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.subscriptions_list);
 
-        closeSubscriptionsButton = findViewById(R.id.closeSubscriptionsButton);
+        ImageButton closeSubscriptionsButton = findViewById(R.id.closeSubscriptionsButton);
         closeSubscriptionsButton.setOnClickListener(v -> startActivity(new Intent(SubscriptionsActivity.this, HomeActivity.class)));
+
+        Button subscribeButton = findViewById(R.id.subscribeButton);
+        subscribeButton.setOnClickListener(v -> makeSubscription());
 
         volleyQueue = Volley.newRequestQueue(this);
         refresh();
@@ -129,6 +135,68 @@ public class SubscriptionsActivity extends AppCompatActivity {
             }
         };
         volleyQueue.add(jsonObjectRequest);
+    }
+
+    private void makeSubscription() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+
+        View view = inflater.inflate(R.layout.new_subscription, null);
+        EditText codeEditText = view.findViewById(R.id.subscription_edit_text);
+
+        builder.setView(view).setPositiveButton("OK", (dialog, id) -> {
+                try {
+                    final String userNickname = codeEditText.getText().toString();
+                    if(userNickname.isEmpty())
+                        throw new IllegalArgumentException("Please enter nickname of the user");
+
+                    JSONObject data = new JSONObject();
+                    try {
+                        data.put("target_nickname", userNickname);
+                        data.put("subscribed", true);
+                    } catch (org.json.JSONException ignored) {}
+
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.subscribe, data,
+                            response -> {
+                                refresh();
+                                Toast.makeText(getApplicationContext(), "Subscribed to user " + userNickname, Toast.LENGTH_SHORT).show();
+                            },
+                            error -> {
+                                switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                                    case 403:
+                                        startActivity(new Intent(SubscriptionsActivity.this, StartActivity.class));
+                                    case 404:
+                                        Toast.makeText(getApplicationContext(), "User is not found.", Toast.LENGTH_SHORT).show(); break;
+                                    case 503:
+                                        Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                                    default:
+                                        Toast.makeText(getApplicationContext(), "Subscription failed", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    ) {
+                        @Override
+                        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                            sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                            if (response.data.length == 0)
+                                response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                            return super.parseNetworkResponse(response);
+                        }
+                    };
+//                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(3000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    volleyQueue.add(jsonObjectRequest);
+
+                } catch (IllegalArgumentException iae) {
+                    Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                catch (Exception re) {
+                    Log.println(Log.ERROR, "Subscription", re.toString());
+                }
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     class SubscriptionsAdapter extends ArrayAdapter<Object> {

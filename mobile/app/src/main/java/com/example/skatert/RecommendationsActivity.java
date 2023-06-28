@@ -27,39 +27,41 @@ import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.SiteMap;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class GetRecommendationsActivity extends AppCompatActivity {
-    ImageButton closeFavouriteTracksButton;
+public class RecommendationsActivity extends AppCompatActivity {
     RequestQueue volleyQueue = null;
 
-    String[] subscriptionNicknames;
+    TextView toolbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recommendations);
 
-        closeFavouriteTracksButton = findViewById(R.id.closeRecommendationsButton);
-        closeFavouriteTracksButton.setOnClickListener(v -> startActivity(new Intent(GetRecommendationsActivity.this, HomeActivity.class)));
+        ImageButton closeRecommendations = findViewById(R.id.closeRecommendationsButton);
+        closeRecommendations.setOnClickListener(v -> startActivity(new Intent(RecommendationsActivity.this, HomeActivity.class)));
+
+        Button updateButton = findViewById(R.id.updateButton);
+        updateButton.setOnClickListener(v -> update());
 
         volleyQueue = Volley.newRequestQueue(this);
-        refresh();
+        update();
     }
 
-    private ListView trackList;
     Track[] trackDescriptionList;
 
-    void refresh() {
+    void update() {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
-        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, SiteMap.getUserFavouriteTracks, null,
+
+        final String path = SiteMap.getRecommendations + "?amount=15";
+        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, path, null,
                 response -> {
                     trackDescriptionList = new Track[response.length()];
                     for (int i = 0; i < response.length(); ++i) {
                         try {
-                            trackDescriptionList[i] = new Track();
                             JSONObject track = response.getJSONObject(i);
+                            trackDescriptionList[i] = new Track();
                             if(track.has("name"))
                                 trackDescriptionList[i].name = track.getString("name");
                             if(track.has("artist"))
@@ -70,14 +72,14 @@ public class GetRecommendationsActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    trackList = findViewById(R.id.recommendationsTrackList);
-                    GetRecommendationsActivity.FavouriteTracksAdapter adapter = new GetRecommendationsActivity.FavouriteTracksAdapter(this);
-                    trackList.setAdapter(adapter);
+                    ListView recommendationsListView = findViewById(R.id.recommendationsTrackList);
+                    RecommendationsAdapter adapter = new RecommendationsAdapter(this);
+                    recommendationsListView.setAdapter(adapter);
                 },
                 error -> {
                     switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
                         case 403:
-                            startActivity(new Intent(GetRecommendationsActivity.this, StartActivity.class));
+                            startActivity(new Intent(RecommendationsActivity.this, StartActivity.class));
                         case 503:
                             Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show();
                             break;
@@ -96,11 +98,11 @@ public class GetRecommendationsActivity extends AppCompatActivity {
         volleyQueue.add(jsonObjectRequest);
     }
 
-    class FavouriteTracksAdapter extends ArrayAdapter<Object> {
+    class RecommendationsAdapter extends ArrayAdapter<Object> {
         Activity context;
 
-        public FavouriteTracksAdapter(Activity context) {
-            super(context, R.layout.track_list_item, subscriptionNicknames);
+        public RecommendationsAdapter(Activity context) {
+            super(context, R.layout.track_list_item, trackDescriptionList);
             this.context = context;
         }
 
@@ -108,7 +110,16 @@ public class GetRecommendationsActivity extends AppCompatActivity {
             LayoutInflater inflater = context.getLayoutInflater();
 
             @SuppressLint({"ViewHolder", "InflateParams"})
-            View item = inflater.inflate(R.layout.subscription, null);
+            View item = inflater.inflate(R.layout.track_list_item, null);
+
+            TextView trackName = item.findViewById(R.id.song_title);
+            trackName.setText(trackDescriptionList[position].name);
+
+            TextView artist = item.findViewById(R.id.artist_name);
+            artist.setText(trackDescriptionList[position].artist);
+
+            TextView album = item.findViewById(R.id.album_name);
+            album.setText(trackDescriptionList[position].album);
 
             return item;
         }

@@ -40,7 +40,6 @@ import java.util.Optional;
 
 public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
-    private ListView favouriteTracksListView;
     RequestQueue volleyQueue = null;
 
     TextView toolbar = null;
@@ -65,11 +64,14 @@ public class HomeActivity extends AppCompatActivity {
         listSubscriptionsButton.setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, SubscriptionsActivity.class)));
 
+        Button listRecommendationsButton = findViewById(R.id.homeGetRecommendationsButton);
+        listRecommendationsButton.setOnClickListener(v ->
+                startActivity(new Intent(HomeActivity.this, RecommendationsActivity.class)));
+
         Button logOutButton = findViewById(R.id.homeLogOutButton);
         logOutButton.setOnClickListener(v -> logout());
 
         toolbar = findViewById(R.id.homeActivityToolbar);
-        favouriteTracksListView = findViewById(R.id.favouriteTracks);
 
         volleyQueue = Volley.newRequestQueue(this);
         refresh();
@@ -158,9 +160,8 @@ public class HomeActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    favouriteTracksListView = findViewById(R.id.favouriteTracks);
-                    AdapterElements adapter = new AdapterElements(this);
-                    favouriteTracksListView.setAdapter(adapter);
+                    ListView favouriteTracksListView = findViewById(R.id.favouriteTracks);
+                    favouriteTracksListView.setAdapter(new AdapterElements(this));
                     toolbar.setText(getString(R.string.HomeActivityToolbarPattern, response.length()));
                 },
                 error -> {
@@ -205,7 +206,9 @@ public class HomeActivity extends AppCompatActivity {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = context.getLayoutInflater();
-            @SuppressLint({"ViewHolder", "InflateParams"}) View item = inflater.inflate(R.layout.track_list_item, null);
+
+            @SuppressLint({"ViewHolder", "InflateParams"})
+            View item = inflater.inflate(R.layout.track_list_item, null);
 
             TextView trackName = item.findViewById(R.id.song_title);
             trackName.setText(favouriteTracksDescriptionList[position].name);

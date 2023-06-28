@@ -43,6 +43,10 @@
             android:exported="true"
             android:theme="@style/Theme.Skatert.NoActionBar">
         </activity>
+        <activity android:name=".RecommendationsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Skatert.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

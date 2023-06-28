@@ -22,23 +22,31 @@
             android:contentDescription="@string/RecommendationsActivityDescription" />
 
         <TextView
-            android:id="@+id/homeActivityToolbar"
-            android:layout_width="match_parent"
+            android:id="@+id/recommendationsActivityToolbar"
+            android:layout_marginStart="10sp"
+            android:layout_width="wrap_content"
             android:layout_height="50sp"
             android:layout_toEndOf="@id/closeRecommendationsButton"
             android:gravity="center"
             android:text="@string/RecommendationsActivityToolbar"
             android:textColor="@color/White"
-            android:textSize="25sp"
-            android:textAlignment="center"/>
+            android:textSize="25sp" />
+
+        <Button
+            android:id="@+id/updateButton"
+            android:text="@string/RecommendationsActivityUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5sp"/>
 
     </RelativeLayout>
 
 
     <ListView
         android:id="@+id/recommendationsTrackList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="parent">
     </ListView>

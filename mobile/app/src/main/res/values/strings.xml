@@ -14,6 +14,8 @@
     <string name="Confirm">Confirm</string>
     <string name="VerificationCodeAction">Enter verification code</string>
 
+    <string name="DefaultUsernameExample">Drake</string>
+
     <string name="HomeActivityToolbar">Favourite tracks</string>
     <string name="HomeActivityToolbarPattern">Favourite tracks (%d)</string>
     <string name="HomeActivityDrawerToolbar">Options</string>
@@ -25,7 +27,6 @@
     <string name="HomeActivityLogOut">Log out</string>
     <string name="HomeActivityRefresh">Refresh</string>
     <string name="HomeActivityLastFmNickname">Enter your LastFM nickname</string>
-    <string name="HomeActivityLastFmNicknameExample">Drake</string>
     <string name="HomeActivityListSubscriptions">Subscriptions</string>
     <string name="HomeActivityListMusicRecommendations">Recommendations</string>
 
@@ -33,9 +34,11 @@
     <string name="SubscriptionsActivityToolbar">Subscriptions</string>
     <string name="SubscriptionsActivityTextView">Subscription nickname</string>
     <string name="SubscriptionsActivityUnsubscribe">Unsubscribe</string>
+    <string name="SubscriptionsActivitySubscribe">User you want to subscribe</string>
 
-    <string name="RecommendationsActivityDescription">Close favourite tracks</string>
-    <string name="RecommendationsActivityToolbar">Favourite tracks</string>
+    <string name="RecommendationsActivityDescription">Close recommendations</string>
+    <string name="RecommendationsActivityToolbar">Recommendations</string>
+    <string name="RecommendationsActivityUpdate">Update</string>
 
     <string name="SharedPreferencesList">MainSharedPreferences</string>
     <string name="SharedPreferencesNickname">Preferences-Nickname</string>
@@ -45,5 +48,6 @@
     <string name="LogInActivityCodeVerification">Enter verification code</string>
     <string name="LogInActivityCodeExample">123456</string>
     <string name="LastFmNickname">LastFM nickname</string>
+    <string name="SubscriptionsActivityButton">Subscribe</string>
 
 </resources>

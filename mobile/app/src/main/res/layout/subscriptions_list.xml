@@ -23,14 +23,22 @@
 
         <TextView
             android:id="@+id/homeActivityToolbar"
-            android:layout_width="match_parent"
+            android:layout_marginStart="30sp"
+            android:layout_width="wrap_content"
             android:layout_height="50sp"
             android:layout_toEndOf="@id/closeSubscriptionsButton"
             android:gravity="center"
             android:text="@string/SubscriptionsActivityToolbar"
             android:textColor="@color/White"
-            android:textSize="25sp"
-            android:textAlignment="center"/>
+            android:textSize="25sp" />
+
+        <Button
+            android:id="@+id/subscribeButton"
+            android:text="@string/SubscriptionsActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5sp"/>
 
     </RelativeLayout>
 

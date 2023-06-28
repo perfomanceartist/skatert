@@ -8,16 +8,16 @@
         android:id="@+id/lastfm_text_view_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/HomeActivityLastFmNickname"
+        android:text="@string/SubscriptionsActivitySubscribe"
         android:textSize="18sp"
         android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/lastfm_edit_text_code"
+        android:id="@+id/subscription_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:hint="@string/HomeActivityLastFmNicknameExample"
+        android:hint="@string/DefaultUsernameExample"
         android:textSize="16sp"
         android:autofillHints="Your LastFm nickname" />
 
