@@ -6,15 +6,33 @@
     android:orientation="vertical"
     android:id="@+id/RelativeLayout">
 
-    <TextView
-        android:id="@+id/song_title"
+    <RelativeLayout
+        android:id="@+id/toolbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/White"
-        android:text="Track name"
-        android:layout_margin="10sp"/>
+        android:layout_margin="5sp">
+
+        <TextView
+            android:id="@+id/song_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/White"
+            android:text="@string/TrackMarkupTrackName"
+            android:layout_margin="10sp"
+            android:layout_alignParentStart="true"/>
+
+        <ImageButton
+            android:id="@+id/likeDislikeButton"
+            android:layout_width="50sp"
+            android:layout_height="50sp"
+            android:src="@drawable/heart"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/TrackMarkupTrackManipulationDescription"/>
+
+    </RelativeLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -28,7 +46,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="10sp"
-            android:text="Track artist"/>
+            android:text="@string/TrackMarkupTrackArtist"/>
 
         <TextView
             android:id="@+id/album_name"
@@ -41,7 +59,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginEnd="10sp"
-            android:text="Track album"/>
+            android:text="@string/TrackMarkupTrackAlbum"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -35,6 +35,7 @@
     <string name="SubscriptionsActivityTextView">Subscription nickname</string>
     <string name="SubscriptionsActivityUnsubscribe">Unsubscribe</string>
     <string name="SubscriptionsActivitySubscribe">User you want to subscribe</string>
+    <string name="SubscriptionsActivityButton">Subscribe</string>
 
     <string name="RecommendationsActivityDescription">Close recommendations</string>
     <string name="RecommendationsActivityToolbar">Recommendations</string>
@@ -48,6 +49,10 @@
     <string name="LogInActivityCodeVerification">Enter verification code</string>
     <string name="LogInActivityCodeExample">123456</string>
     <string name="LastFmNickname">LastFM nickname</string>
-    <string name="SubscriptionsActivityButton">Subscribe</string>
+
+    <string name="TrackMarkupTrackName">Track name</string>
+    <string name="TrackMarkupTrackArtist">Track artist</string>
+    <string name="TrackMarkupTrackAlbum">Track album</string>
+    <string name="TrackMarkupTrackManipulationDescription">Like/unlike specified track</string>
 
 </resources>

@@ -3,17 +3,17 @@ package com.example.skatert;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.skatert.utility.SiCookieStore2;
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.Set;
+import java.net.CookieStore;
 
 public class StartActivity extends AppCompatActivity {
     Button loginButton;
@@ -25,6 +25,10 @@ public class StartActivity extends AppCompatActivity {
 
         CookieManager manager = new CookieManager();
         CookieHandler.setDefault(manager);
+
+        SiCookieStore2 siCookieStore = new SiCookieStore2(this);
+        CookieManager cookieManager = new CookieManager((CookieStore) siCookieStore, CookiePolicy.ACCEPT_ALL);
+        CookieHandler.setDefault(cookieManager);
 
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
         if(!sharedPref.getString(getString(R.string.SharedPreferencesNickname), "").equals(""))

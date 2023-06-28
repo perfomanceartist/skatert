@@ -21,8 +21,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Header;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -35,10 +33,6 @@ import com.example.skatert.utility.SiteMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 public class SubscriptionsActivity extends AppCompatActivity {
     RequestQueue volleyQueue = null;
@@ -149,47 +143,10 @@ public class SubscriptionsActivity extends AppCompatActivity {
                     final String userNickname = codeEditText.getText().toString();
                     if(userNickname.isEmpty())
                         throw new IllegalArgumentException("Please enter nickname of the user");
-
-                    JSONObject data = new JSONObject();
-                    try {
-                        data.put("target_nickname", userNickname);
-                        data.put("subscribed", true);
-                    } catch (org.json.JSONException ignored) {}
-
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.subscribe, data,
-                            response -> {
-                                refresh();
-                                Toast.makeText(getApplicationContext(), "Subscribed to user " + userNickname, Toast.LENGTH_SHORT).show();
-                            },
-                            error -> {
-                                switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
-                                    case 403:
-                                        startActivity(new Intent(SubscriptionsActivity.this, StartActivity.class));
-                                    case 404:
-                                        Toast.makeText(getApplicationContext(), "User is not found.", Toast.LENGTH_SHORT).show(); break;
-                                    case 503:
-                                        Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
-                                    default:
-                                        Toast.makeText(getApplicationContext(), "Subscription failed", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                    ) {
-                        @Override
-                        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-                            sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
-
-                            if (response.data.length == 0)
-                                response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
-                            return super.parseNetworkResponse(response);
-                        }
-                    };
-//                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(3000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    volleyQueue.add(jsonObjectRequest);
-
+                    changeSubscription(userNickname, true);
                 } catch (IllegalArgumentException iae) {
                     Toast.makeText(getApplicationContext(), iae.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-                catch (Exception re) {
+                } catch (Exception re) {
                     Log.println(Log.ERROR, "Subscription", re.toString());
                 }
                 dialog.dismiss();

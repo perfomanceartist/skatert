@@ -10,4 +10,6 @@ public class SiteMap {
     public static final String subscribe = host + "users/subscribe";
     public static final String getSubscriptions = host + "users/subscriptions";
     public static final String getRecommendations = host + "music/getRecommendations";
+    public static final String likeTrack = host + "music/clickLike/";
+    public static final String dislikeTrack = host + "music/clickDislike/";
 }

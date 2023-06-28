@@ -36,13 +36,13 @@ import com.example.skatert.utility.SiteMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Optional;
-
 public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     RequestQueue volleyQueue = null;
 
     TextView toolbar = null;
+
+    SharedPreferences sharedPref = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class HomeActivity extends AppCompatActivity {
         imageButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
         Button refreshButton = findViewById(R.id.homeRefreshButton);
-        refreshButton.setOnClickListener(v -> refresh());
+        refreshButton.setOnClickListener(v -> reload());
 
         Button lastFmIntegrateButton = findViewById(R.id.homeLastFmButton);
         lastFmIntegrateButton.setOnClickListener(v -> makeLastFmIntegration());
@@ -73,8 +73,10 @@ public class HomeActivity extends AppCompatActivity {
 
         toolbar = findViewById(R.id.homeActivityToolbar);
 
+        sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+
         volleyQueue = Volley.newRequestQueue(this);
-        refresh();
+        reload();
     }
 
     private void makeLastFmIntegration() {
@@ -100,7 +102,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.lastFmIntegration, data,
                     response -> {
-                        refresh();
+                        reload();
                         Toast.makeText(getApplicationContext(), "Integration completed", Toast.LENGTH_SHORT).show();
                     },
                     error -> {
@@ -139,8 +141,7 @@ public class HomeActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void refresh() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+    private void reload() {
         final String path = SiteMap.getUserFavouriteTracks +"/?nickname=" + sharedPref.getString(getString(R.string.SharedPreferencesNickname), "");
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, path, null,
@@ -149,7 +150,7 @@ public class HomeActivity extends AppCompatActivity {
                     for (int i = 0; i < response.length(); ++i) {
                         try {
                             JSONObject track = response.getJSONObject(i);
-                            favouriteTracksDescriptionList[i] = new Track();
+                            favouriteTracksDescriptionList[i] = new Track(true);
                             if(track.has("name"))
                                 favouriteTracksDescriptionList[i].name = track.getString("name");
                             if(track.has("artist"))
@@ -160,8 +161,7 @@ public class HomeActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    ListView favouriteTracksListView = findViewById(R.id.favouriteTracks);
-                    favouriteTracksListView.setAdapter(new AdapterElements(this));
+                    rewrite();
                     toolbar.setText(getString(R.string.HomeActivityToolbarPattern, response.length()));
                 },
                 error -> {
@@ -188,11 +188,94 @@ public class HomeActivity extends AppCompatActivity {
         volleyQueue.add(jsonArrayRequest);
     }
 
+    private void rewrite() {
+        ListView favouriteTracksListView = findViewById(R.id.favouriteTracks);
+        favouriteTracksListView.setAdapter(new AdapterElements(this));
+    }
+
     private void logout() {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.remove(getString(R.string.SharedPreferencesNickname)).apply();
         startActivity(new Intent(HomeActivity.this, StartActivity.class));
+    }
+
+    private void likeTrack(String nickname, int trackPosition) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("nickname", nickname);
+            data.put("song_name", favouriteTracksDescriptionList[trackPosition].name);
+            data.put("song_artist", favouriteTracksDescriptionList[trackPosition].artist);
+        } catch (org.json.JSONException ignored) {}
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.likeTrack, data,
+                response -> {
+                    favouriteTracksDescriptionList[trackPosition].liked = true;
+                    rewrite();
+                    Toast.makeText(getApplicationContext(), "Track disliked", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                        case 403:
+                            startActivity(new Intent(HomeActivity.this, StartActivity.class));
+                        case 503:
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Operation failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                if (response.statusCode == 200 && response.data.length == 0)
+                    response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                return super.parseNetworkResponse(response);
+            }
+        };
+        volleyQueue.add(jsonObjectRequest);
+    }
+
+    private void dislikeTrack(String nickname, int trackPosition) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("nickname", nickname);
+            data.put("song_name", favouriteTracksDescriptionList[trackPosition].name);
+            data.put("song_artist", favouriteTracksDescriptionList[trackPosition].artist);
+        } catch (org.json.JSONException ignored) {}
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.dislikeTrack, data,
+                response -> {
+                    favouriteTracksDescriptionList[trackPosition].liked = false;
+                    rewrite();
+                    Toast.makeText(getApplicationContext(), "Track disliked", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                        case 403:
+                            startActivity(new Intent(HomeActivity.this, StartActivity.class));
+                        case 503:
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Operation failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                if (response.statusCode == 200 && response.data.length == 0)
+                    response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                return super.parseNetworkResponse(response);
+            }
+        };
+        volleyQueue.add(jsonObjectRequest);
     }
 
     Track[] favouriteTracksDescriptionList;
@@ -219,6 +302,15 @@ public class HomeActivity extends AppCompatActivity {
             TextView album = item.findViewById(R.id.album_name);
             album.setText(favouriteTracksDescriptionList[position].album);
 
+            ImageButton likeDislikeButton = item.findViewById(R.id.likeDislikeButton);
+            if(favouriteTracksDescriptionList[position].liked)
+                likeDislikeButton.setImageResource(R.drawable.heart);
+            else likeDislikeButton.setImageResource(R.drawable.heart_off);
+            likeDislikeButton.setOnClickListener(v -> {
+                if(favouriteTracksDescriptionList[position].liked)
+                    dislikeTrack(sharedPref.getString(getString(R.string.SharedPreferencesNickname), ""), position);
+                else likeTrack(sharedPref.getString(getString(R.string.SharedPreferencesNickname), ""), position);
+            });
             return item;
         }
     }

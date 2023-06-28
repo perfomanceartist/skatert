@@ -23,6 +23,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.SiteMap;
 
@@ -32,7 +33,7 @@ import org.json.JSONObject;
 public class RecommendationsActivity extends AppCompatActivity {
     RequestQueue volleyQueue = null;
 
-    TextView toolbar = null;
+    SharedPreferences sharedPref = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,17 +44,17 @@ public class RecommendationsActivity extends AppCompatActivity {
         closeRecommendations.setOnClickListener(v -> startActivity(new Intent(RecommendationsActivity.this, HomeActivity.class)));
 
         Button updateButton = findViewById(R.id.updateButton);
-        updateButton.setOnClickListener(v -> update());
+        updateButton.setOnClickListener(v -> load());
+
+        sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
 
         volleyQueue = Volley.newRequestQueue(this);
-        update();
+        load();
     }
 
     Track[] trackDescriptionList;
 
-    void update() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
-
+    void load() {
         final String path = SiteMap.getRecommendations + "?amount=15";
         JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, path, null,
                 response -> {
@@ -61,7 +62,7 @@ public class RecommendationsActivity extends AppCompatActivity {
                     for (int i = 0; i < response.length(); ++i) {
                         try {
                             JSONObject track = response.getJSONObject(i);
-                            trackDescriptionList[i] = new Track();
+                            trackDescriptionList[i] = new Track(false);
                             if(track.has("name"))
                                 trackDescriptionList[i].name = track.getString("name");
                             if(track.has("artist"))
@@ -72,9 +73,7 @@ public class RecommendationsActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    ListView recommendationsListView = findViewById(R.id.recommendationsTrackList);
-                    RecommendationsAdapter adapter = new RecommendationsAdapter(this);
-                    recommendationsListView.setAdapter(adapter);
+                    rewrite();
                 },
                 error -> {
                     switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
@@ -90,8 +89,90 @@ public class RecommendationsActivity extends AppCompatActivity {
         ) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+                return super.parseNetworkResponse(response);
+            }
+        };
+        volleyQueue.add(jsonObjectRequest);
+    }
+
+    private void rewrite() {
+        ListView recommendationsListView = findViewById(R.id.recommendationsTrackList);
+        recommendationsListView.setAdapter(new RecommendationsAdapter(this));
+    }
+
+    private void likeTrack(String nickname, int trackPosition) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("nickname", nickname);
+            data.put("song_name", trackDescriptionList[trackPosition].name);
+            data.put("song_artist", trackDescriptionList[trackPosition].artist);
+        } catch (org.json.JSONException ignored) {}
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.likeTrack, data,
+                response -> {
+                    trackDescriptionList[trackPosition].liked = true;
+                    rewrite();
+                    Toast.makeText(getApplicationContext(), "Track liked", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                        case 403:
+                            startActivity(new Intent(RecommendationsActivity.this, StartActivity.class));
+                        case 503:
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Operation failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
                 sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                if (response.statusCode == 200 && response.data.length == 0)
+                    response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                return super.parseNetworkResponse(response);
+            }
+        };
+        volleyQueue.add(jsonObjectRequest);
+    }
+
+    private void dislikeTrack(String nickname, int trackPosition) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("nickname", nickname);
+            data.put("song_name", trackDescriptionList[trackPosition].name);
+            data.put("song_artist", trackDescriptionList[trackPosition].artist);
+        } catch (org.json.JSONException ignored) {}
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.dislikeTrack, data,
+                response -> {
+                    trackDescriptionList[trackPosition].liked = false;
+                    rewrite();
+                    Toast.makeText(getApplicationContext(), "Track disliked", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                        case 403:
+                            startActivity(new Intent(RecommendationsActivity.this, StartActivity.class));
+                        case 503:
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Operation failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        ) {
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                if (response.statusCode == 200 && response.data.length == 0)
+                    response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
                 return super.parseNetworkResponse(response);
             }
         };
@@ -120,6 +201,16 @@ public class RecommendationsActivity extends AppCompatActivity {
 
             TextView album = item.findViewById(R.id.album_name);
             album.setText(trackDescriptionList[position].album);
+
+            ImageButton likeDislikeButton = item.findViewById(R.id.likeDislikeButton);
+            if(trackDescriptionList[position].liked)
+                likeDislikeButton.setImageResource(R.drawable.heart);
+            else likeDislikeButton.setImageResource(R.drawable.heart_off);
+            likeDislikeButton.setOnClickListener(v -> {
+                if(trackDescriptionList[position].liked)
+                    dislikeTrack(sharedPref.getString(getString(R.string.SharedPreferencesNickname), ""), position);
+                else likeTrack(sharedPref.getString(getString(R.string.SharedPreferencesNickname), ""), position);
+            });
 
             return item;
         }
