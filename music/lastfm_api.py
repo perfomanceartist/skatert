@@ -43,11 +43,12 @@ def userGetLovedTracksAmount(username):
     }
 
     try:
-        return int(makeGetRequest(params)["lovedtracks"]["@attr"]["total"])
+        response = makeGetRequest(params)
+        if "error" in response:
+            raise ValueError(response["message"])
+        return int(response["lovedtracks"]["@attr"]["total"])
     except (TimeoutError, json.decoder.JSONDecodeError) as exception:
-        raise RuntimeError(
-            "Failed to get user's favourite tracks' amount: " + str(exception)
-        )
+        raise RuntimeError("Failed to get user's favourite tracks' amount: " + str(exception))
 
 
 def userGetLovedTracks(username):

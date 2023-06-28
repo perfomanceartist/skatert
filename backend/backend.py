@@ -134,7 +134,10 @@ def getRecommendations(currentUser, RECOMMENDED_AMOUNT=20, SIMILAR_PEOPLE_COUNT=
 
 
 def getUserByNickname(nickname) -> Optional[User]:
-    return User.objects.get(nickname=nickname)
+    if User.objects.filter(nickname=nickname).exists():
+        return User.objects.get(nickname=nickname)
+    else:
+        return None
 
 
 def getArtistByName(artist: str) -> Optional[Artist]:

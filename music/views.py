@@ -53,7 +53,6 @@ class MakeLastFmIntegration(APIView):
         try:
             data = json.loads(request.body)
             nickname = request.COOKIES.get("nickname")
-            print(nickname, data["lastFmNickname"])
 
             result = loadUserLastFM(nickname, data["lastFmNickname"])
             if result is False:
@@ -65,9 +64,11 @@ class MakeLastFmIntegration(APIView):
                     )
                 )
             )
+        except ValueError as error:
+            return HttpResponseBadRequest(error)
         except (KeyError, json.JSONDecodeError):
             return HttpResponseBadRequest("Failed to decode json data.")
-        except (RuntimeError, ValueError) as error:
+        except RuntimeError as error:
             return HttpResponseServerError(error)
 
 
