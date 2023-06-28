@@ -26,7 +26,7 @@
                 android:contentDescription="@string/HomeActivityButtonContentDescription" />
 
             <TextView
-                android:id="@+id/text"
+                android:id="@+id/homeActivityToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="50sp"
                 android:layout_toEndOf="@id/button"
@@ -82,6 +82,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/HomeActivityListSubscriptions"
+            android:layout_margin="5sp"/>
+
+        <Button
+            android:id="@+id/homeGetFavouriteTracksButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/HomeActivityListMusicRecommendations"
             android:layout_margin="5sp"/>
 
         <Button

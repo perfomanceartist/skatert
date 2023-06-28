@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,37 +28,23 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.SiteMap;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
-import java.net.CookieStore;
-import java.net.HttpCookie;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
-    private ImageButton imageButton;
-    private Button refreshButton, lastFmIntegrateButton, logOutButton, listSubscriptionsButton;
-
-    private ListView trackList;
-
+    private ListView favouriteTracksListView;
     RequestQueue volleyQueue = null;
+
+    TextView toolbar = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,28 +52,24 @@ public class HomeActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        imageButton = findViewById(R.id.button);
+        ImageButton imageButton = findViewById(R.id.button);
         imageButton.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
-        refreshButton = findViewById(R.id.homeRefreshButton);
+        Button refreshButton = findViewById(R.id.homeRefreshButton);
         refreshButton.setOnClickListener(v -> refresh());
 
-        lastFmIntegrateButton = findViewById(R.id.homeLastFmButton);
+        Button lastFmIntegrateButton = findViewById(R.id.homeLastFmButton);
         lastFmIntegrateButton.setOnClickListener(v -> makeLastFmIntegration());
 
-        listSubscriptionsButton = findViewById(R.id.homeGetSubscriptionsButton);
+        Button listSubscriptionsButton = findViewById(R.id.homeGetSubscriptionsButton);
         listSubscriptionsButton.setOnClickListener(v ->
                 startActivity(new Intent(HomeActivity.this, SubscriptionsActivity.class)));
 
-        logOutButton = findViewById(R.id.homeLogOutButton);
-        logOutButton.setOnClickListener(v -> {
-            SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.remove(getString(R.string.SharedPreferencesNickname)).apply();
-            startActivity(new Intent(HomeActivity.this, StartActivity.class));
-        });
+        Button logOutButton = findViewById(R.id.homeLogOutButton);
+        logOutButton.setOnClickListener(v -> logout());
 
-        trackList = findViewById(R.id.favouriteTracks);
+        toolbar = findViewById(R.id.homeActivityToolbar);
+        favouriteTracksListView = findViewById(R.id.favouriteTracks);
 
         volleyQueue = Volley.newRequestQueue(this);
         refresh();
@@ -162,35 +143,38 @@ public class HomeActivity extends AppCompatActivity {
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, path, null,
                 response -> {
-                    trackDescriptionList = new Track[response.length()];
+                    favouriteTracksDescriptionList = new Track[response.length()];
                     for (int i = 0; i < response.length(); ++i) {
                         try {
-                            trackDescriptionList[i] = new Track();
                             JSONObject track = response.getJSONObject(i);
+                            favouriteTracksDescriptionList[i] = new Track();
                             if(track.has("name"))
-                                trackDescriptionList[i].name = track.getString("name");
+                                favouriteTracksDescriptionList[i].name = track.getString("name");
                             if(track.has("artist"))
-                                trackDescriptionList[i].artist = Optional.of(track.getString("artist"));
+                                favouriteTracksDescriptionList[i].artist = track.getString("artist");
                             if(track.has("album"))
-                                trackDescriptionList[i].album = Optional.of(track.getString("album"));
+                                favouriteTracksDescriptionList[i].album = track.getString("album");
                         } catch (Exception t) {
                             Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    trackList = findViewById(R.id.favouriteTracks);
+                    favouriteTracksListView = findViewById(R.id.favouriteTracks);
                     AdapterElements adapter = new AdapterElements(this);
-                    trackList.setAdapter(adapter);
+                    favouriteTracksListView.setAdapter(adapter);
+                    toolbar.setText(getString(R.string.HomeActivityToolbarPattern, response.length()));
                 },
                 error -> {
-                    final int statusCode = sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1);
-                    switch(statusCode) {
-                        case 403:
-                            startActivity(new Intent(HomeActivity.this, StartActivity.class));
-                        case 503:
-                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
-                        default:
-                            Toast.makeText(getApplicationContext(), "Data loading failed", Toast.LENGTH_SHORT).show();
-                    }
+                    if(!(error instanceof com.android.volley.AuthFailureError)) {
+                        switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                            case 403:
+                                startActivity(new Intent(HomeActivity.this, StartActivity.class));
+                            case 503:
+                                Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show();
+                                break;
+                            default:
+                                Toast.makeText(getApplicationContext(), "Data loading failed", Toast.LENGTH_SHORT).show();
+                        }
+                    } else logout();
                 }
         ) {
             @Override
@@ -203,12 +187,19 @@ public class HomeActivity extends AppCompatActivity {
         volleyQueue.add(jsonArrayRequest);
     }
 
-    Track[] trackDescriptionList;
+    private void logout() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove(getString(R.string.SharedPreferencesNickname)).apply();
+        startActivity(new Intent(HomeActivity.this, StartActivity.class));
+    }
+
+    Track[] favouriteTracksDescriptionList;
     class AdapterElements extends ArrayAdapter<Object> {
         Activity context;
 
         public AdapterElements(Activity context) {
-            super(context, R.layout.track_list_item, trackDescriptionList);
+            super(context, R.layout.track_list_item, favouriteTracksDescriptionList);
             this.context = context;
         }
 
@@ -217,17 +208,13 @@ public class HomeActivity extends AppCompatActivity {
             @SuppressLint({"ViewHolder", "InflateParams"}) View item = inflater.inflate(R.layout.track_list_item, null);
 
             TextView trackName = item.findViewById(R.id.song_title);
-            trackName.setText(trackDescriptionList[position].name);
+            trackName.setText(favouriteTracksDescriptionList[position].name);
 
-            if(trackDescriptionList[position].artist.isPresent()) {
-                TextView artist = item.findViewById(R.id.artist_name);
-                artist.setText(trackDescriptionList[position].artist.get());
-            }
+            TextView artist = item.findViewById(R.id.artist_name);
+            artist.setText(favouriteTracksDescriptionList[position].artist);
 
-            if(trackDescriptionList[position].album.isPresent()) {
-                TextView album = item.findViewById(R.id.album_name);
-                album.setText(trackDescriptionList[position].album.get());
-            }
+            TextView album = item.findViewById(R.id.album_name);
+            album.setText(favouriteTracksDescriptionList[position].album);
 
             return item;
         }

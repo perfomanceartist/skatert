@@ -75,29 +75,51 @@ public class SignInActivity extends AppCompatActivity {
                     throw new IllegalArgumentException("Please enter your password");
 
                 final JSONObject jsonData = prepareData(nickname, email, password);
-                StringRequest jsonObjectRequest = new StringRequest(Request.Method.POST, SiteMap.registration, response -> {
-                    if(!sharedPref.getString(getString(R.string.SharedPreferencesNickname), "").equals(""))
-                        startActivity(new Intent(SignInActivity.this, HomeActivity.class));
-                    else {
-                        switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
-                            case 222:
-                                Toast.makeText(getApplicationContext(), "Nickname is taken", Toast.LENGTH_SHORT).show(); break;
-                            case 223:
-                                Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show(); break;
-                            default:
-                                Toast.makeText(getApplicationContext(), "Registration failed", Toast.LENGTH_SHORT).show(); break;
-                        }
-                    }
-                },  error -> {}) {
+                StringRequest jsonObjectRequest = new StringRequest(Request.Method.POST, SiteMap.registration,
+                        response -> {
+                            if (!sharedPref.getString(getString(R.string.SharedPreferencesNickname), "").equals(""))
+                                startActivity(new Intent(SignInActivity.this, HomeActivity.class));
+                            else {
+                                switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                                    case 222:
+                                        Toast.makeText(getApplicationContext(), "Nickname is taken", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case 223:
+                                        Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    default:
+                                        Toast.makeText(getApplicationContext(), "Registration failed", Toast.LENGTH_SHORT).show();
+                                        break;
+                                }
+                            }
+                        },
+                        error -> {
+                            if (!(error instanceof com.android.volley.NoConnectionError)) {
+                                switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                                    case 222:
+                                        Toast.makeText(getApplicationContext(), "Nickname is taken", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case 223:
+                                        Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    default:
+                                        Toast.makeText(getApplicationContext(), "Registration failed", Toast.LENGTH_SHORT).show();
+                                        break;
+                                }
+                            } else
+                                Toast.makeText(getApplicationContext(), "Server is unreachable", Toast.LENGTH_SHORT).show();
+                        }) {
                     @Override
-                    public byte[] getBody() { return jsonData.toString().getBytes(); }
+                    public byte[] getBody() {
+                        return jsonData.toString().getBytes();
+                    }
 
                     @Override
                     protected Response<String> parseNetworkResponse(NetworkResponse response) {
                         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPref.edit();
 
-                        if(response.statusCode == 200) {
+                        if(response.statusCode == 200 && response.allHeaders != null) {
                             editor.putString(getString(R.string.SharedPreferencesNickname), nickname).apply();
                             for(Header header: response.allHeaders)
                                 if(Objects.equals(header.getName(), "token"))

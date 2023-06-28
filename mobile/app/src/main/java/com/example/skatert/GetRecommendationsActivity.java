@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Header;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,12 +29,10 @@ import com.example.skatert.utility.SiteMap;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
-public class SubscriptionsActivity extends AppCompatActivity {
-    ImageButton closeSubscriptionsButton;
+public class GetRecommendationsActivity extends AppCompatActivity {
+    ImageButton closeFavouriteTracksButton;
     RequestQueue volleyQueue = null;
 
     private ListView subscriptionList;
@@ -45,39 +42,48 @@ public class SubscriptionsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.subscriptions_list);
+        setContentView(R.layout.recommendations);
 
-        closeSubscriptionsButton = findViewById(R.id.closeSubscriptionsButton);
-        closeSubscriptionsButton.setOnClickListener(v -> startActivity(new Intent(SubscriptionsActivity.this, HomeActivity.class)));
+        closeFavouriteTracksButton = findViewById(R.id.closeRecommendationsButton);
+        closeFavouriteTracksButton.setOnClickListener(v -> startActivity(new Intent(GetRecommendationsActivity.this, HomeActivity.class)));
 
         volleyQueue = Volley.newRequestQueue(this);
         refresh();
     }
 
+    private ListView trackList;
+    Track[] trackDescriptionList;
+
     void refresh() {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
-        final String path = SiteMap.getSubscriptions + "?nickname=" + sharedPref.getString(getString(R.string.SharedPreferencesNickname), "");
-
-        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, path, null,
+        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, SiteMap.getUserFavouriteTracks, null,
                 response -> {
-                    try {
-                        subscriptionNicknames = new String[response.length()];
-                        for (int i = 0; i < response.length(); ++i)
-                            subscriptionNicknames[i] = response.getString(i);
-
-                        subscriptionList = findViewById(R.id.subscriptionsList);
-                        SubscriptionsActivity.SubscriptionsAdapter adapter = new SubscriptionsActivity.SubscriptionsAdapter(this);
-                        subscriptionList.setAdapter(adapter);
-                    } catch (org.json.JSONException ignored) {
-                        Toast.makeText(getApplicationContext(), "Sorry", Toast.LENGTH_SHORT).show();
+                    trackDescriptionList = new Track[response.length()];
+                    for (int i = 0; i < response.length(); ++i) {
+                        try {
+                            trackDescriptionList[i] = new Track();
+                            JSONObject track = response.getJSONObject(i);
+                            if(track.has("name"))
+                                trackDescriptionList[i].name = track.getString("name");
+                            if(track.has("artist"))
+                                trackDescriptionList[i].artist = track.getString("artist");
+                            if(track.has("album"))
+                                trackDescriptionList[i].album = track.getString("album");
+                        } catch (Exception t) {
+                            Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
+                    trackList = findViewById(R.id.recommendationsTrackList);
+                    GetRecommendationsActivity.FavouriteTracksAdapter adapter = new GetRecommendationsActivity.FavouriteTracksAdapter(this);
+                    trackList.setAdapter(adapter);
                 },
                 error -> {
-                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                    switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
                         case 403:
-                            startActivity(new Intent(SubscriptionsActivity.this, StartActivity.class));
+                            startActivity(new Intent(GetRecommendationsActivity.this, StartActivity.class));
                         case 503:
-                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show();
+                            break;
                         default:
                             Toast.makeText(getApplicationContext(), "Data loading failed", Toast.LENGTH_SHORT).show();
                     }
@@ -93,11 +99,11 @@ public class SubscriptionsActivity extends AppCompatActivity {
         volleyQueue.add(jsonObjectRequest);
     }
 
-    class SubscriptionsAdapter extends ArrayAdapter<Object> {
+    class FavouriteTracksAdapter extends ArrayAdapter<Object> {
         Activity context;
 
-        public SubscriptionsAdapter(Activity context) {
-            super(context, R.layout.subscription, subscriptionNicknames);
+        public FavouriteTracksAdapter(Activity context) {
+            super(context, R.layout.track_list_item, subscriptionNicknames);
             this.context = context;
         }
 

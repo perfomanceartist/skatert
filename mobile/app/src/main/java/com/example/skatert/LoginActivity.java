@@ -82,17 +82,23 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         },
                         error -> {
-                            switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
-                                case 224:
-                                    Toast.makeText(getApplicationContext(), "Such user is not found", Toast.LENGTH_SHORT).show();
-                                    break;
-                                case 223:
-                                    Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show();
-                                    break;
-                                default:
-                                    Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
-                                    break;
-                            }
+                            if (!(error instanceof com.android.volley.NoConnectionError)) {
+                                switch (sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                                    case 225:
+                                        Toast.makeText(getApplicationContext(), "Password is incorrect", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case 224:
+                                        Toast.makeText(getApplicationContext(), "Such user is not found", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    case 223:
+                                        Toast.makeText(getApplicationContext(), "Bad request", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    default:
+                                        Toast.makeText(getApplicationContext(), "Authorization failed", Toast.LENGTH_SHORT).show();
+                                        break;
+                                }
+                            } else
+                                Toast.makeText(getApplicationContext(), "Server is unreachable", Toast.LENGTH_SHORT).show();
                         }
                 ) {
                     @Override
@@ -100,8 +106,13 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
                         sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
 
+                        JSONObject object = new JSONObject();
+                        try {
+                            object.put("StatusCode", response.statusCode);
+                        } catch (JSONException ignored) {}
+
                         if (response.data.length == 0)
-                            response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                            response = new NetworkResponse(response.statusCode, object.toString().getBytes(), response.headers, response.notModified);
                         return super.parseNetworkResponse(response);
                     }
                 };

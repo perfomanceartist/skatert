@@ -13,21 +13,21 @@
         android:layout_margin="5sp">
 
         <ImageButton
-            android:id="@+id/closeSubscriptionsButton"
+            android:id="@+id/closeRecommendationsButton"
             android:layout_width="50sp"
             android:layout_height="50sp"
             android:src="@drawable/close"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="@string/SubscriptionsActivityDescription" />
+            android:contentDescription="@string/RecommendationsActivityDescription" />
 
         <TextView
             android:id="@+id/homeActivityToolbar"
             android:layout_width="match_parent"
             android:layout_height="50sp"
-            android:layout_toEndOf="@id/closeSubscriptionsButton"
+            android:layout_toEndOf="@id/closeRecommendationsButton"
             android:gravity="center"
-            android:text="@string/SubscriptionsActivityToolbar"
+            android:text="@string/RecommendationsActivityToolbar"
             android:textColor="@color/White"
             android:textSize="25sp"
             android:textAlignment="center"/>
@@ -36,7 +36,7 @@
 
 
     <ListView
-        android:id="@+id/subscriptionsList"
+        android:id="@+id/recommendationsTrackList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"

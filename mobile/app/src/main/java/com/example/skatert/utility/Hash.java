@@ -9,7 +9,7 @@ public class Hash {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             final byte[] hashBytes = digest.digest(password.getBytes());
-            return String.format("%0" + (hashBytes.length * 2) + "X", new BigInteger(1, hashBytes));
+            return String.format("%0" + (hashBytes.length * 2) + "x", new BigInteger(1, hashBytes));
         } catch (NoSuchAlgorithmException e1) {
             throw new RuntimeException("Hash aggregation failed.");
         }
