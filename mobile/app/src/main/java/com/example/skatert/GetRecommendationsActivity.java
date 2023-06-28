@@ -27,15 +27,12 @@ import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.SiteMap;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Optional;
 
 public class GetRecommendationsActivity extends AppCompatActivity {
     ImageButton closeFavouriteTracksButton;
     RequestQueue volleyQueue = null;
-
-    private ListView subscriptionList;
 
     String[] subscriptionNicknames;
 
@@ -112,16 +109,6 @@ public class GetRecommendationsActivity extends AppCompatActivity {
 
             @SuppressLint({"ViewHolder", "InflateParams"})
             View item = inflater.inflate(R.layout.subscription, null);
-
-            TextView tv = item.findViewById(R.id.textView);
-            tv.setText(subscriptionNicknames[position]);
-
-            Button bt = item.findViewById(R.id.unsubscribeButton);
-            bt.setOnClickListener(v -> {
-                //Unsubscribe from user
-                refresh();
-                Toast.makeText(getApplicationContext(), "Unsubscribed from '" + tv.getText(), Toast.LENGTH_SHORT).show();
-            });
 
             return item;
         }

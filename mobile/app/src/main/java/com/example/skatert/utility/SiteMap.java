@@ -5,11 +5,8 @@ public class SiteMap {
     public static final String authStepOne = host + "api/login_pass";
     public static final String authStepTwo = host + "api/login_email";
     public static final String registration = host + "api/register";
-
-
-
-
     public static final String lastFmIntegration = host + "music/lastFM-integration/";
     public static final String getUserFavouriteTracks = host + "music/getUserFavouriteTracks";
+    public static final String subscribe = host + "users/subscribe";
     public static final String getSubscriptions = host + "users/subscriptions";
 }

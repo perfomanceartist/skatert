@@ -24,10 +24,12 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.skatert.utility.SiteMap;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -54,8 +56,9 @@ public class SubscriptionsActivity extends AppCompatActivity {
         refresh();
     }
 
+    SharedPreferences sharedPref;
     void refresh() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+        sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
         final String path = SiteMap.getSubscriptions + "?nickname=" + sharedPref.getString(getString(R.string.SharedPreferencesNickname), "");
 
         JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, path, null,
@@ -93,6 +96,41 @@ public class SubscriptionsActivity extends AppCompatActivity {
         volleyQueue.add(jsonObjectRequest);
     }
 
+    private void changeSubscription(String toUser, boolean makeSubscribed) {
+        JSONObject data = new JSONObject();
+        try {
+            data.put("target_nickname", toUser);
+            data.put("subscribed", makeSubscribed);
+        } catch (JSONException ignored) {}
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, SiteMap.subscribe, data,
+                response -> refresh(),
+                error -> {
+                    switch(sharedPref.getInt(getString(R.string.SharedPreferencesLastStatusCode), -1)) {
+                        case 403:
+                            startActivity(new Intent(SubscriptionsActivity.this, StartActivity.class));
+                        case 404:
+                            Toast.makeText(getApplicationContext(), "User is not found", Toast.LENGTH_SHORT).show(); break;
+                        case 503:
+                            Toast.makeText(getApplicationContext(), "Service Unavailable", Toast.LENGTH_SHORT).show(); break;
+                        default:
+                            Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_SHORT).show(); break;
+                    }
+                }
+        ) {
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.SharedPreferencesList), Context.MODE_PRIVATE);
+                sharedPref.edit().putInt(getString(R.string.SharedPreferencesLastStatusCode), response.statusCode).apply();
+
+                if (response.statusCode == 200 && response.data.length == 0)
+                    response = new NetworkResponse(response.statusCode, new JSONObject().toString().getBytes(), response.headers, response.notModified);
+                return super.parseNetworkResponse(response);
+            }
+        };
+        volleyQueue.add(jsonObjectRequest);
+    }
+
     class SubscriptionsAdapter extends ArrayAdapter<Object> {
         Activity context;
 
@@ -112,8 +150,7 @@ public class SubscriptionsActivity extends AppCompatActivity {
 
             Button bt = item.findViewById(R.id.unsubscribeButton);
             bt.setOnClickListener(v -> {
-                //Unsubscribe from user
-                refresh();
+                changeSubscription(tv.getText().toString(), false);
                 Toast.makeText(getApplicationContext(), "Unsubscribed from '" + tv.getText(), Toast.LENGTH_SHORT).show();
             });
 
