@@ -23,5 +23,6 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("admin/", admin.site.urls),
     path("music/", include("music.urls")),
+    path("movies/", include("movies.urls"))
 ]
 

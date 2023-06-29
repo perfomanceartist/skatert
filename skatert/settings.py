@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "users",
     "home",
     "music",
+    "movies",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -85,6 +86,14 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "Skatert",
+        "USER": CREDS.get("db", {}).get("user") or "skatert",
+        "PASSWORD": CREDS.get("db", {}).get("password") or CREDS.get("DBpassword"),  # введите пароль для своего postgres-сервера
+        "HOST": "localhost",
+        "PORT": "",
+    },
+    "IMDB": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "IMDB",
         "USER": CREDS.get("db", {}).get("user") or "skatert",
         "PASSWORD": CREDS.get("db", {}).get("password") or CREDS.get("DBpassword"),  # введите пароль для своего postgres-сервера
         "HOST": "localhost",
